@@ -1,0 +1,18 @@
+{
+  "db": {
+    "host": "localhost",
+    "dbName": "nodestats",
+    "authDb": null,
+    "user": null,
+    "password": null
+  },
+  "ams": {
+    "appsPath": "/usr/ams/applications",
+    "host": "localhost:1111",
+    "user": null,
+    "password": null
+  },
+  "stats": {
+    "port": 8000
+  }
+}
