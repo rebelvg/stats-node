@@ -44,8 +44,8 @@ schema.virtual('isLive').get(function () {
 
 schema.set('toJSON', {virtuals: true});
 
-schema.methods.getStream = function (cb) {
-    return this.model('Stream').findOne({
+schema.methods.getStreams = function (cb) {
+    return this.model('Stream').find({
         app: this.app,
         channel: this.channel,
         connectUpdated: {$gte: this.connectCreated},

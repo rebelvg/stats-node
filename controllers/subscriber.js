@@ -8,9 +8,9 @@ function findById(req, res, next) {
                 throw new Error('Subscriber not found.');
             }
 
-            let stream = await subscriber.getStream();
+            let streams = await subscriber.getStreams().sort({connectCreated: 1});
 
-            res.json({subscriber: subscriber, stream: stream});
+            res.json({subscriber: subscriber, streams: streams});
         })
         .catch(next);
 }
