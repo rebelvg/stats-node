@@ -13,10 +13,10 @@ function parseFilter(model) {
                     queryObj.channel = new RegExp(channel, 'gi');
                 }
             },
-            timeConnected: {
-                type: 'string', cb: function (timeConnected) {
-                    queryObj.timeConnected = {
-                        $gte: new Date(timeConnected)
+            connectCreated: {
+                type: 'string', cb: function (connectCreated) {
+                    queryObj.connectCreated = {
+                        $gte: new Date(connectCreated)
                     };
                 }
             },

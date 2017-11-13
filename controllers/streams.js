@@ -42,14 +42,14 @@ function graph(req, res, next) {
                 throw new Error('Stream not found.');
             }
 
-            let subscribers = await stream.getSubscribers().sort({timeConnected: 1});
+            let subscribers = await stream.getSubscribers().sort({connectCreated: 1});
 
             function filterSubscribers(time) {
                 return _.filter(subscribers, (subscriber) => {
                     return subscriber.app === stream.app
                         && subscriber.channel === stream.channel
-                        && subscriber.updatedAt > time
-                        && subscriber.timeConnected <= time;
+                        && subscriber.connectUpdated > time
+                        && subscriber.connectCreated <= time;
                 })
             }
 
@@ -57,15 +57,15 @@ function graph(req, res, next) {
 
             graph.push({
                 eventName: 'streamStarted',
-                time: stream.timeConnected,
-                subscribers: filterSubscribers(stream.timeConnected)
+                time: stream.connectCreated,
+                subscribers: filterSubscribers(stream.connectCreated)
             });
 
             _.forEach(subscribers, (subscriber) => {
                 graph.push({
                     eventName: 'subscriberConnected',
-                    time: subscriber.timeConnected,
-                    subscribers: filterSubscribers(subscriber.timeConnected)
+                    time: subscriber.connectCreated,
+                    subscribers: filterSubscribers(subscriber.connectCreated)
                 });
             });
 
@@ -73,8 +73,8 @@ function graph(req, res, next) {
                 if (!subscriber.isLive) {
                     graph.push({
                         eventName: 'subscriberDisconnected',
-                        time: subscriber.updatedAt,
-                        subscribers: filterSubscribers(subscriber.updatedAt)
+                        time: subscriber.connectUpdated,
+                        subscribers: filterSubscribers(subscriber.connectUpdated)
                     });
                 }
             });
@@ -82,8 +82,8 @@ function graph(req, res, next) {
             if (!stream.isLive) {
                 graph.push({
                     eventName: 'streamEnded',
-                    time: stream.updatedAt,
-                    subscribers: filterSubscribers(stream.updatedAt)
+                    time: stream.connectUpdated,
+                    subscribers: filterSubscribers(stream.connectUpdated)
                 });
             }
 

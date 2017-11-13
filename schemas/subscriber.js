@@ -7,8 +7,9 @@ const Schema = mongoose.Schema;
 let schema = new Schema({
     app: {type: String, required: true},
     channel: {type: String, required: true},
-    uniqueId: {type: String, required: true},
-    timeConnected: {type: Date, required: true, index: true},
+    serverId: {type: String, required: true},
+    connectCreated: {type: Date, required: true, index: true},
+    connectUpdated: {type: Date, required: true, index: true},
     bytes: {type: Number, required: true},
     ip: {type: String, required: true},
     duration: {type: Number, required: true},
@@ -22,7 +23,7 @@ let schema = new Schema({
 schema.pre('validate', function (next) {
     let updatedAt = new Date();
 
-    this.duration = Math.ceil((updatedAt - this.timeConnected) / 1000);
+    this.duration = Math.ceil((this.connectUpdated - this.connectCreated) / 1000);
 
     this.bitrate = this.duration > 0 ? Math.ceil(this.bytes * 8 / this.duration / 1024) : 0;
 
@@ -47,8 +48,8 @@ schema.methods.getStream = function (cb) {
     return this.model('Stream').findOne({
         app: this.app,
         channel: this.channel,
-        updatedAt: {$gte: this.timeConnected},
-        timeConnected: {$lte: this.updatedAt}
+        connectUpdated: {$gte: this.connectCreated},
+        connectCreated: {$lte: this.connectUpdated}
     }, cb);
 };
 

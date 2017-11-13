@@ -32,9 +32,22 @@ async function getAmsStats(command, params = []) {
         apiUrl.searchParams.set(param[0], param[1]);
     });
 
-    let res = await request.get(apiUrl.href);
+    let res = await request.get(apiUrl.href, {
+        resolveWithFullResponse: true
+    });
 
-    return await parseString(res, {trim: true, explicitArray: false, explicitRoot: false, emptyTag: null});
+    let parsedXml = await parseString(res.body, {
+        trim: true,
+        explicitArray: false,
+        explicitRoot: false,
+        emptyTag: null
+    });
+
+    if (parsedXml.code !== 'NetConnection.Call.Success') {
+        throw new Error(parsedXml.description);
+    }
+
+    return parsedXml;
 }
 
 async function getApps() {
@@ -150,6 +163,8 @@ async function updateStats() {
 
     let live = {};
 
+    let statsUpdateTime = new Date();
+
     for (let appName of apps) {
         let app = await getAppStats(appName);
 
@@ -177,24 +192,24 @@ async function updateStats() {
                 let id = liveStreamStats.publisher.client;
                 let userStats = await getUserStats(appName, id);
 
-                streamObj = await Stream.findOne({
+                let streamQuery = {
                     app: appName,
                     channel: streamName,
-                    uniqueId: id,
-                    timeConnected: moment.unix(strtotime(userStats.connect_time))
-                });
+                    serverId: id,
+                    connectCreated: moment.unix(strtotime(userStats.connect_time))
+                };
+
+                streamObj = await Stream.findOne(streamQuery);
 
                 if (!streamObj) {
-                    streamObj = new Stream({
-                        app: appName,
-                        channel: streamName,
-                        uniqueId: id,
-                        timeConnected: moment.unix(strtotime(userStats.connect_time)),
-                        bytes: userStats.bytes_in,
-                        ip: IPs[id].ip
-                    });
+                    streamQuery.connectUpdated = statsUpdateTime;
+                    streamQuery.bytes = userStats.bytes_in;
+                    streamQuery.ip = IPs[id].ip;
+
+                    streamObj = new Stream(streamQuery);
                 } else {
                     streamObj.bytes = userStats.bytes_in;
+                    streamObj.connectUpdated = statsUpdateTime;
                 }
 
                 await streamObj.save();
@@ -207,24 +222,24 @@ async function updateStats() {
                     let id = subscriber.client;
                     let userStats = await getUserStats(appName, id);
 
-                    let subscriberObj = await Subscriber.findOne({
+                    let subscriberQuery = {
                         app: appName,
                         channel: streamName,
-                        uniqueId: id,
-                        timeConnected: moment.unix(strtotime(userStats.connect_time))
-                    });
+                        serverId: id,
+                        connectCreated: moment.unix(strtotime(userStats.connect_time))
+                    };
+
+                    let subscriberObj = await Subscriber.findOne(subscriberQuery);
 
                     if (!subscriberObj) {
-                        subscriberObj = new Subscriber({
-                            app: appName,
-                            channel: streamName,
-                            uniqueId: id,
-                            timeConnected: moment.unix(strtotime(userStats.connect_time)),
-                            bytes: userStats.bytes_out,
-                            ip: IPs[id].ip
-                        });
+                        subscriberQuery.connectUpdated = statsUpdateTime;
+                        subscriberQuery.bytes = userStats.bytes_out;
+                        subscriberQuery.ip = IPs[id].ip;
+
+                        subscriberObj = new Subscriber(subscriberQuery);
                     } else {
                         subscriberObj.bytes = userStats.bytes_out;
+                        subscriberObj.connectUpdated = statsUpdateTime;
                     }
 
                     await subscriberObj.save();
