@@ -22,7 +22,7 @@ function parseSort(model) {
         }
 
         if (Object.keys(sortObj).length === 0) {
-            sortObj = {_id: -1};
+            sortObj = {connectCreated: -1};
         }
 
         req.sortObj = sortObj;
