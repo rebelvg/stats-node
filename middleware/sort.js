@@ -6,18 +6,20 @@ function parseSort(model) {
 
         let sortObj = {};
 
-        if (req.query.sort) {
-            _.forEach(model.schema.paths, (value, key) => {
-                switch (req.query.sort) {
-                    case `-${key}`: {
-                        sortObj[key] = -1;
-                        break;
+        if (req.query.sort && typeof req.query.sort === 'object') {
+            _.forEach(req.query.sort, (sort) => {
+                _.forEach(model.schema.paths, (value, key) => {
+                    switch (sort) {
+                        case `-${key}`: {
+                            sortObj[key] = -1;
+                            break;
+                        }
+                        case `${key}`: {
+                            sortObj[key] = 1;
+                            break;
+                        }
                     }
-                    case `${key}`: {
-                        sortObj[key] = 1;
-                        break;
-                    }
-                }
+                });
             });
         }
 

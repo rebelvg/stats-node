@@ -20,6 +20,13 @@ function parseFilter(model) {
                     };
                 }
             },
+            connectUpdated: {
+                type: 'string', cb: function (connectUpdated) {
+                    queryObj.connectUpdated = {
+                        $gte: new Date(connectUpdated)
+                    };
+                }
+            },
             bytes: {
                 type: 'string', cb: function (bytes) {
                     bytes = parseInt(bytes);

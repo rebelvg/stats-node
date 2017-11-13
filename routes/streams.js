@@ -9,7 +9,7 @@ const Stream = require('../models/stream');
 let router = express.Router();
 
 router.get('/:id', streamController.findById);
-router.get('/', expressPaginate.middleware(10, 50), parseFilter(Stream), parseSort(Stream), streamController.find);
+router.get('/', expressPaginate.middleware(10, 100), parseFilter(Stream), parseSort(Stream), streamController.find);
 router.get('/:id/graph', streamController.graph);
 
 module.exports = router;
