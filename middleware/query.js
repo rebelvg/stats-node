@@ -1,4 +1,6 @@
 const _ = require('lodash');
+const moment = require('moment');
+const strtotime = require('locutus/php/datetime/strtotime');
 
 function parseFilter(model) {
     return function (req, res, next) {
@@ -16,14 +18,14 @@ function parseFilter(model) {
             connectCreated: {
                 type: 'string', cb: function (connectCreated) {
                     queryObj.connectCreated = {
-                        $gte: new Date(connectCreated)
+                        $gte: moment.unix(strtotime(connectCreated))
                     };
                 }
             },
             connectUpdated: {
                 type: 'string', cb: function (connectUpdated) {
                     queryObj.connectUpdated = {
-                        $gte: new Date(connectUpdated)
+                        $gte: moment.unix(strtotime(connectUpdated))
                     };
                 }
             },
