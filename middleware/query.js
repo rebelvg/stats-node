@@ -96,7 +96,6 @@ function parseFilter(model) {
                     rules.cb(req.query[fieldName]);
                 }
             }
-
         });
 
         req.queryObj = queryObj;
