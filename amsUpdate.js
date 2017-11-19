@@ -264,6 +264,8 @@ let exportObj = {
 
 global.amsUpdate = exportObj;
 
+if (!amsConfig.enabled) return;
+
 function runUpdate() {
     updateStats()
         .then((live) => {
