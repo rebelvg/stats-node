@@ -9,10 +9,10 @@ const path = require('path');
 const os = require('os');
 const strtotime = require('locutus/php/datetime/strtotime');
 
-const Stream = require('./models/stream');
-const Subscriber = require('./models/subscriber');
+const Stream = require('../models/stream');
+const Subscriber = require('../models/subscriber');
 
-const amsConfig = require('./config.json').ams;
+const amsConfig = require('../config.json').ams;
 
 let parseString = promisify(xml2js.parseString);
 
@@ -78,8 +78,8 @@ async function getLiveStreams(appName) {
     return Object.values(getLiveStreams.data);
 }
 
-async function getLiveStreamStats(appName, streamName) {
-    let getLiveStreamStats = await getAmsStats('getLiveStreamStats', [['appInst', appName], ['stream', streamName]]);
+async function getLiveStreamStats(appName, channelName) {
+    let getLiveStreamStats = await getAmsStats('getLiveStreamStats', [['appInst', appName], ['stream', channelName]]);
 
     return getLiveStreamStats.data;
 }
@@ -178,13 +178,13 @@ async function updateStats() {
 
         let liveStreams = await getLiveStreams(appName);
 
-        for (let streamName of liveStreams) {
-            live[appName][streamName] = {
+        for (let channelName of liveStreams) {
+            live[appName][channelName] = {
                 publisher: null,
                 subscribers: []
             };
 
-            let liveStreamStats = await getLiveStreamStats(appName, streamName);
+            let liveStreamStats = await getLiveStreamStats(appName, channelName);
 
             let streamObj = null;
 
@@ -194,7 +194,8 @@ async function updateStats() {
 
                 let streamQuery = {
                     app: appName,
-                    channel: streamName,
+                    channel: channelName,
+                    serverType: 'ams',
                     serverId: id,
                     connectCreated: moment.unix(strtotime(userStats.connect_time))
                 };
@@ -205,6 +206,7 @@ async function updateStats() {
                     streamQuery.connectUpdated = statsUpdateTime;
                     streamQuery.bytes = userStats.bytes_in;
                     streamQuery.ip = IPs[id].ip;
+                    streamQuery.protocol = 'rtmp';
 
                     streamObj = new Stream(streamQuery);
                 } else {
@@ -214,7 +216,7 @@ async function updateStats() {
 
                 await streamObj.save();
 
-                live[appName][streamName].publisher = streamObj;
+                live[appName][channelName].publisher = streamObj;
             }
 
             if (liveStreamStats.subscribers) {
@@ -224,7 +226,8 @@ async function updateStats() {
 
                     let subscriberQuery = {
                         app: appName,
-                        channel: streamName,
+                        channel: channelName,
+                        serverType: 'ams',
                         serverId: id,
                         connectCreated: moment.unix(strtotime(userStats.connect_time))
                     };
@@ -235,6 +238,7 @@ async function updateStats() {
                         subscriberQuery.connectUpdated = statsUpdateTime;
                         subscriberQuery.bytes = userStats.bytes_out;
                         subscriberQuery.ip = IPs[id].ip;
+                        subscriberQuery.protocol = 'rtmp';
 
                         subscriberObj = new Subscriber(subscriberQuery);
                     } else {
@@ -244,7 +248,7 @@ async function updateStats() {
 
                     await subscriberObj.save();
 
-                    live[appName][streamName].subscribers.push(subscriberObj);
+                    live[appName][channelName].subscribers.push(subscriberObj);
                 }
             }
 

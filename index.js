@@ -21,7 +21,8 @@ mongoose.connect(mongoUrl.href, {useMongoClient: true}, function (error) {
     if (error) throw error;
 });
 
-require('./amsUpdate');
+require('./servers/amsUpdate');
+require('./servers/nmsUpdate');
 
 let channels = require('./routes/channels');
 let streams = require('./routes/streams');

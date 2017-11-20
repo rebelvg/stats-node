@@ -7,11 +7,13 @@ const Schema = mongoose.Schema;
 let schema = new Schema({
     app: {type: String, required: true},
     channel: {type: String, required: true},
+    serverType: {type: String, required: true},
     serverId: {type: String, required: true},
     connectCreated: {type: Date, required: true, index: true},
     connectUpdated: {type: Date, required: true, index: true},
     bytes: {type: Number, required: true},
     ip: {type: String, required: true},
+    protocol: {type: String, required: true},
     duration: {type: Number, required: true},
     bitrate: {type: Number, required: true},
     createdAt: {type: Date, required: true, index: true},
