@@ -62,6 +62,8 @@ function graph(req, res, next) {
             });
 
             _.forEach(subscribers, (subscriber) => {
+                if (stream.connectCreated >= subscriber.connectCreated) return;
+
                 graph.push({
                     eventName: 'subscriberConnected',
                     time: subscriber.connectCreated,
@@ -70,13 +72,14 @@ function graph(req, res, next) {
             });
 
             _.forEach(subscribers, (subscriber) => {
-                if (!subscriber.isLive) {
-                    graph.push({
-                        eventName: 'subscriberDisconnected',
-                        time: subscriber.connectUpdated,
-                        subscribers: filterSubscribers(subscriber.connectUpdated)
-                    });
-                }
+                if (subscriber.connectUpdated >= stream.connectUpdated) return;
+                if (subscriber.isLive) return;
+
+                graph.push({
+                    eventName: 'subscriberDisconnected',
+                    time: subscriber.connectUpdated,
+                    subscribers: filterSubscribers(subscriber.connectUpdated)
+                });
             });
 
             if (!stream.isLive) {
