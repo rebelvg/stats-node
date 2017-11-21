@@ -42,7 +42,7 @@ schema.pre('validate', function (next) {
 });
 
 schema.virtual('isLive').get(function () {
-    let stream = _.get(global.amsUpdate.live, [this.app, this.channel, 'publisher'], null);
+    let stream = _.get(global.liveStats, [this.serverType, this.app, this.channel, 'publisher'], null);
 
     if (!stream) {
         return false;

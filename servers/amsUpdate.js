@@ -174,15 +174,13 @@ async function updateStats() {
 
         let IPs = await getIPs(appName);
 
-        live[appName] = {};
-
         let liveStreams = await getLiveStreams(appName);
 
         for (let channelName of liveStreams) {
-            live[appName][channelName] = {
+            _.set(live, [appName, channelName], {
                 publisher: null,
                 subscribers: []
-            };
+            });
 
             let liveStreamStats = await getLiveStreamStats(appName, channelName);
 
@@ -216,7 +214,7 @@ async function updateStats() {
 
                 await streamObj.save();
 
-                live[appName][channelName].publisher = streamObj;
+                _.set(live, [appName, channelName, 'publisher'], streamObj);
             }
 
             if (liveStreamStats.subscribers) {
@@ -262,18 +260,12 @@ async function updateStats() {
     return live;
 }
 
-let exportObj = {
-    live: {}
-};
-
-global.amsUpdate = exportObj;
-
 if (!amsConfig.enabled) return;
 
 function runUpdate() {
     updateStats()
         .then((live) => {
-            exportObj.live = live;
+            global.liveStats.ams = live;
         })
         .catch(e => {
             console.log(e.stack);

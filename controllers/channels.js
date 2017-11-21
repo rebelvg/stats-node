@@ -7,7 +7,7 @@ function channelStats(req, res, next) {
         bitrate: {}
     };
 
-    _.forEach(global.amsUpdate.live, (channels, appName) => {
+    _.forEach(_.get(global.liveStats, [req.params.server], {}), (channels, appName) => {
         _.forEach(channels, (channelObj, channelName) => {
             if (channelName === req.params.channel) {
                 if (channelObj.publisher) {
@@ -30,15 +30,15 @@ function appChannelStats(req, res, next) {
         bitrate: 0
     };
 
-    channelStats.isLive = _.get(global.amsUpdate.live, [req.params.app, req.params.channel, 'publisher'], null) !== null;
-    channelStats.viewers = _.get(global.amsUpdate.live, [req.params.app, req.params.channel, 'subscribers'], []).length;
-    channelStats.bitrate = _.get(global.amsUpdate.live, [req.params.app, req.params.channel, 'publisher', 'bitrate'], 0);
+    channelStats.isLive = _.get(_.get(global.liveStats, [req.params.server], {}), [req.params.app, req.params.channel, 'publisher'], null) !== null;
+    channelStats.viewers = _.get(_.get(global.liveStats, [req.params.server], {}), [req.params.app, req.params.channel, 'subscribers'], []).length;
+    channelStats.bitrate = _.get(_.get(global.liveStats, [req.params.server], {}), [req.params.app, req.params.channel, 'publisher', 'bitrate'], 0);
 
     res.json(channelStats);
 }
 
 function channels(req, res, next) {
-    res.json(global.amsUpdate.live);
+    res.json(global.liveStats);
 }
 
 exports.channelStats = channelStats;

@@ -39,7 +39,7 @@ schema.pre('validate', function (next) {
 });
 
 schema.virtual('isLive').get(function () {
-    let subscribers = _.get(global.amsUpdate.live, [this.app, this.channel, 'subscribers'], []);
+    let subscribers = _.get(global.liveStats, [this.serverType, this.app, this.channel, 'subscribers'], []);
 
     return !!_.find(subscribers, ['id', this.id]);
 });

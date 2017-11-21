@@ -23,10 +23,21 @@ async function getNodeStats() {
 async function updateStats() {
     let channels = await getNodeStats();
 
+    let live = {};
+
     let statsUpdateTime = new Date();
 
-    for (let appData of Object.values(channels)) {
-        for (let channelData of Object.values(appData)) {
+    for (let appObj of Object.entries(channels)) {
+        const [appName, channelObjs] = appObj;
+
+        for (let channelObj of Object.entries(channelObjs)) {
+            const [channelName, channelData] = channelObj;
+
+            _.set(live, [appName, channelName], {
+                publisher: null,
+                subscribers: []
+            });
+
             let streamObj = null;
 
             if (channelData.publisher) {
@@ -53,6 +64,8 @@ async function updateStats() {
                 }
 
                 await streamObj.save();
+
+                _.set(live, [appName, channelName, 'publisher'], streamObj);
             }
 
             for (let subscriber of channelData.subscribers) {
@@ -79,6 +92,8 @@ async function updateStats() {
                 }
 
                 await subscriberObj.save();
+
+                live[appName][channelName].subscribers.push(subscriberObj);
             }
 
             if (streamObj) {
@@ -87,13 +102,16 @@ async function updateStats() {
             }
         }
     }
+
+    return live;
 }
 
 if (!nmsConfig.enabled) return;
 
 function runUpdate() {
     updateStats()
-        .then(() => {
+        .then((live) => {
+            global.liveStats.nms = live;
         })
         .catch(e => {
             console.log(e.stack);
