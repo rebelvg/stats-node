@@ -44,12 +44,14 @@ function graph(req, res, next) {
 
             let subscribers = await stream.getSubscribers().sort({connectCreated: 1});
 
-            function filterSubscribers(time) {
+            function filterSubscribers(time, include = false) {
+                let compareFnc = include ? _.gte : _.gt;
+
                 return _.filter(subscribers, (subscriber) => {
                     return subscriber.app === stream.app
                         && subscriber.channel === stream.channel
-                        && subscriber.connectUpdated > time
-                        && subscriber.connectCreated <= time;
+                        && compareFnc(subscriber.connectUpdated, time)
+                        && _.gte(time, subscriber.connectCreated);
                 })
             }
 
@@ -87,6 +89,12 @@ function graph(req, res, next) {
                     eventName: 'streamEnded',
                     time: stream.connectUpdated,
                     subscribers: filterSubscribers(stream.connectUpdated)
+                });
+            } else {
+                graph.push({
+                    eventName: 'streamIsLive',
+                    time: stream.connectUpdated,
+                    subscribers: filterSubscribers(stream.connectUpdated, true)
                 });
             }
 
