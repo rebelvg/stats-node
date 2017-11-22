@@ -262,13 +262,17 @@ async function updateStats() {
 
 if (!amsConfig.enabled) return;
 
+console.log(new Date(), 'amsUpdate running.');
+
 function runUpdate() {
     updateStats()
         .then((live) => {
             global.liveStats.ams = live;
         })
         .catch(e => {
-            console.log(e.stack);
+            if (e.error.code === 'ECONNREFUSED') return;
+
+            console.log(new Date(), e.message);
         });
 }
 

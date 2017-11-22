@@ -108,13 +108,17 @@ async function updateStats() {
 
 if (!nmsConfig.enabled) return;
 
+console.log(new Date(), 'nmsUpdate running.');
+
 function runUpdate() {
     updateStats()
         .then((live) => {
             global.liveStats.nms = live;
         })
         .catch(e => {
-            console.log(e.stack);
+            if (e.error.code === 'ECONNREFUSED') return;
+
+            console.log(new Date(), e.message);
         });
 }
 
