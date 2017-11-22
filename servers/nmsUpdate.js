@@ -116,7 +116,7 @@ function runUpdate() {
             global.liveStats.nms = live;
         })
         .catch(e => {
-            if (e.error.code === 'ECONNREFUSED') return;
+            if (e.name === 'RequestError' && e.error.code === 'ECONNREFUSED') return;
 
             console.log(new Date(), e.message);
         });
