@@ -114,8 +114,6 @@ function parseFilter(model) {
             }
         }
 
-        console.log(queryObj);
-
         req.queryObj = queryObj;
 
         next();
