@@ -2,8 +2,10 @@ const _ = require('lodash');
 const moment = require('moment');
 const strtotime = require('locutus/php/datetime/strtotime');
 
+const IP = require('../models/ip');
+
 function parseFilter(model) {
-    return function (req, res, next) {
+    return async function (req, res, next) {
         let querySettings = {
             app: {
                 type: 'string', cb: function (app) {
@@ -43,8 +45,20 @@ function parseFilter(model) {
                 }
             },
             ip: {
-                type: 'string', cb: function (ip) {
-                    queryObj.ip = new RegExp(ip, 'gi');
+                type: 'string', cb: async function (ip) {
+                    let ips = await IP.distinct('ip', {
+                        $or: [
+                            {ip: new RegExp(ip, 'gi')},
+                            {country: new RegExp(ip, 'gi')},
+                            {city: new RegExp(ip, 'gi')},
+                            {usp: new RegExp(ip, 'gi')}
+                        ]
+                    });
+
+                    queryObj.$or = [
+                        {ip: {$in: ips}},
+                        {ip: new RegExp(ip, 'gi')}
+                    ];
                 }
             },
             duration: {
@@ -90,13 +104,17 @@ function parseFilter(model) {
 
         let queryObj = {};
 
-        _.forEach(querySettings, (rules, fieldName) => {
+        for (let querySetting of Object.entries(querySettings)) {
+            const [fieldName, rules] = querySetting;
+
             if (req.query.hasOwnProperty(fieldName) && model.schema.paths.hasOwnProperty(fieldName)) {
                 if (typeof req.query[fieldName] === rules.type) {
-                    rules.cb(req.query[fieldName]);
+                    await rules.cb(req.query[fieldName]);
                 }
             }
-        });
+        }
+
+        console.log(queryObj);
 
         req.queryObj = queryObj;
 
