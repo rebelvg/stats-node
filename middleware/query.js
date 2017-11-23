@@ -51,7 +51,7 @@ function parseFilter(model) {
                             {ip: new RegExp(ip, 'gi')},
                             {country: new RegExp(ip, 'gi')},
                             {city: new RegExp(ip, 'gi')},
-                            {usp: new RegExp(ip, 'gi')}
+                            {isp: new RegExp(ip, 'gi')}
                         ]
                     });
 
