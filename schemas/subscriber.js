@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate');
 const _ = require('lodash');
 
+const IP = require('../models/ip');
+
 const Schema = mongoose.Schema;
 
 let schema = new Schema({
@@ -34,6 +36,20 @@ schema.pre('validate', function (next) {
     }
 
     this.updatedAt = updatedAt;
+
+    next();
+});
+
+schema.pre('save', function (next) {
+    if (this.isNew) {
+        let ip = new IP({
+            ip: this.ip
+        });
+
+        ip.save()
+            .then()
+            .catch();
+    }
 
     next();
 });
