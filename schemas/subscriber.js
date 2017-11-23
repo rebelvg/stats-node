@@ -46,9 +46,8 @@ schema.pre('save', function (next) {
             ip: this.ip
         });
 
-        ip.save()
-            .then()
-            .catch();
+        ip.save(function (err) {
+        });
     }
 
     next();
