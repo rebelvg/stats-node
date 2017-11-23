@@ -38,5 +38,5 @@ app.use('/streams', streams);
 app.use('/subscribers', subscribers);
 
 app.listen(stats.port, () => {
-    console.log(new Date(), 'server is running.');
+    console.log('server is running.');
 });

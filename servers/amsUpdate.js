@@ -262,7 +262,7 @@ async function updateStats() {
 
 if (!amsConfig.enabled) return;
 
-console.log(new Date(), 'amsUpdate running.');
+console.log('amsUpdate running.');
 
 function runUpdate() {
     updateStats()
@@ -272,7 +272,7 @@ function runUpdate() {
         .catch(e => {
             if (e.name === 'RequestError' && e.error.code === 'ECONNREFUSED') return;
 
-            console.log(new Date(), e.message);
+            console.error(e.message);
         });
 }
 

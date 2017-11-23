@@ -108,7 +108,7 @@ async function updateStats() {
 
 if (!nmsConfig.enabled) return;
 
-console.log(new Date(), 'nmsUpdate running.');
+console.log('nmsUpdate running.');
 
 function runUpdate() {
     updateStats()
@@ -118,7 +118,7 @@ function runUpdate() {
         .catch(e => {
             if (e.name === 'RequestError' && e.error.code === 'ECONNREFUSED') return;
 
-            console.log(new Date(), e.message);
+            console.error(e.message);
         });
 }
 
