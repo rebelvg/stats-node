@@ -90,6 +90,7 @@ schema.methods.getSubscribers = function (cb) {
     return this.model('Subscriber').find({
         app: this.app,
         channel: this.channel,
+        serverType: this.serverType,
         connectUpdated: {$gte: this.connectCreated},
         connectCreated: {$lte: this.connectUpdated}
     }, cb);
@@ -99,6 +100,17 @@ schema.methods.countSubscribers = function (cb) {
     return this.model('Subscriber').count({
         app: this.app,
         channel: this.channel,
+        serverType: this.serverType,
+        connectUpdated: {$gte: this.connectCreated},
+        connectCreated: {$lte: this.connectUpdated}
+    }, cb);
+};
+
+schema.methods.getRelatedStreams = function (cb) {
+    return this.model('Stream').find({
+        _id: {$ne: this._id},
+        channel: this.channel,
+        serverType: this.serverType,
         connectUpdated: {$gte: this.connectCreated},
         connectCreated: {$lte: this.connectUpdated}
     }, cb);

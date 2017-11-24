@@ -13,7 +13,9 @@ function findById(req, res, next) {
 
             let subscribers = await stream.getSubscribers().sort({connectCreated: 1});
 
-            res.json({stream: stream, subscribers: subscribers});
+            let relatedStreams = await stream.getRelatedStreams().sort({connectCreated: 1}).populate(['location']);
+
+            res.json({stream: stream, subscribers: subscribers, relatedStreams: relatedStreams});
         })
         .catch(next);
 }
@@ -54,7 +56,9 @@ function graph(req, res, next) {
                         && subscriber.channel === stream.channel
                         && compareFnc(subscriber.connectUpdated, time)
                         && _.gte(time, subscriber.connectCreated);
-                })
+                }).map((subscriber) => {
+                    return subscriber._id;
+                });
             }
 
             let graph = [];
