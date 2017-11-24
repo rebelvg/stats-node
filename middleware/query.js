@@ -49,9 +49,9 @@ function parseFilter(model) {
                     let ips = await IP.distinct('ip', {
                         $or: [
                             {ip: new RegExp(ip, 'gi')},
-                            {country: new RegExp(ip, 'gi')},
-                            {city: new RegExp(ip, 'gi')},
-                            {isp: new RegExp(ip, 'gi')}
+                            {'api.country': new RegExp(ip, 'gi')},
+                            {'api.city': new RegExp(ip, 'gi')},
+                            {'api.isp': new RegExp(ip, 'gi')}
                         ]
                     });
 

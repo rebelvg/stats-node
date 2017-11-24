@@ -5,33 +5,23 @@ const request = require('request-promise-native');
 
 const Schema = mongoose.Schema;
 
-const apiLink = `http://ip-api.com/json`;
+const apiLink = `http://ip-api.com/json/`;
 
 let schema = new Schema({
     ip: {type: String, required: true, unique: true, index: true},
-    country: {type: String},
-    city: {type: String},
-    isp: {type: String},
+    api: {type: Object, required: true},
     createdAt: {type: Date, required: true, index: true},
     updatedAt: {type: Date, required: true, index: true}
 }, {
     retainKeyOrder: true
 });
 
-schema.pre('validate', async function (next) {
-    request.get(`${apiLink}/${this.ip}`, {
+schema.pre('validate', function (next) {
+    request.get(apiLink + this.ip, {
         json: true
     })
         .then(res => {
-            if (res.status === 'success') {
-                this.country = res.country;
-                this.city = res.city;
-                this.isp = res.isp;
-            } else {
-                this.country = null;
-                this.city = null;
-                this.isp = null;
-            }
+            this.api = res;
 
             next();
         })

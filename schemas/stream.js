@@ -52,11 +52,15 @@ schema.pre('validate', function (next) {
 
 schema.pre('save', function (next) {
     if (this.isNew) {
-        let ip = new IP({
-            ip: this.ip
-        });
+        let ip = IP.findOne({ip: this.ip}, (err, ip) => {
+            if (err) return console.log(err.message);
+            if (ip) return;
 
-        ip.save(function (err) {
+            ip = new IP({ip: this.ip});
+
+            ip.save(function (err) {
+                if (err) return console.log(err.message);
+            });
         });
     }
 
