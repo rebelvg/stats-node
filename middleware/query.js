@@ -48,10 +48,12 @@ function parseFilter(model) {
                 type: 'string', cb: async function (ip) {
                     let ips = await IP.distinct('ip', {
                         $or: [
-                            {ip: new RegExp(ip, 'gi')},
+                            {'ip': new RegExp(ip, 'gi')},
                             {'api.country': new RegExp(ip, 'gi')},
                             {'api.city': new RegExp(ip, 'gi')},
-                            {'api.isp': new RegExp(ip, 'gi')}
+                            {'api.isp': new RegExp(ip, 'gi')},
+                            {'api.countryCode': new RegExp(ip, 'gi')},
+                            {'api.message': new RegExp(ip, 'gi')}
                         ]
                     });
 
@@ -59,6 +61,11 @@ function parseFilter(model) {
                         {ip: {$in: ips}},
                         {ip: new RegExp(ip, 'gi')}
                     ];
+                }
+            },
+            protocol: {
+                type: 'string', cb: function (protocol) {
+                    queryObj.protocol = new RegExp(protocol, 'gi');
                 }
             },
             duration: {
