@@ -4,6 +4,7 @@ const channelController = require('../controllers/channels');
 
 let router = express.Router();
 
+router.get('/legacy/:server/:channel', channelController.legacy);
 router.get('/:server/:app/:channel', channelController.appChannelStats);
 router.get('/:server/:channel', channelController.channelStats);
 router.get('/', channelController.channels);
