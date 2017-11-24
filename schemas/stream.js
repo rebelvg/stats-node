@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate');
 const _ = require('lodash');
+const ip6addr = require('ip6addr');
 
 const IP = require('../models/ip');
 
@@ -27,6 +28,12 @@ let schema = new Schema({
 
 schema.pre('validate', function (next) {
     let updatedAt = new Date();
+
+    if (this.isNew) {
+        let addr = ip6addr.parse(this.ip);
+
+        this.ip = addr.kind() === 'ipv6' ? addr.toString({format: 'v6'}) : addr.toString({format: 'v4'});
+    }
 
     this.duration = Math.ceil((this.connectUpdated - this.connectCreated) / 1000);
 

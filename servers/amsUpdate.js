@@ -272,7 +272,7 @@ function runUpdate() {
         .catch(e => {
             if (e.name === 'RequestError' && e.error.code === 'ECONNREFUSED') return;
 
-            console.error(e.message);
+            console.error(e);
         });
 }
 
