@@ -9,7 +9,7 @@ function findById(req, res, next) {
                 throw new Error('Subscriber not found.');
             }
 
-            let streams = await subscriber.getStreams().sort({connectCreated: 1});
+            let streams = await subscriber.getStreams().sort({connectCreated: 1}).populate(['location']);
 
             res.json({subscriber: subscriber, streams: streams});
         })

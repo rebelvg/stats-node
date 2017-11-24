@@ -11,7 +11,7 @@ function findById(req, res, next) {
                 throw new Error('Stream not found.');
             }
 
-            let subscribers = await stream.getSubscribers().sort({connectCreated: 1});
+            let subscribers = await stream.getSubscribers().sort({connectCreated: 1}).populate(['location']);
 
             let relatedStreams = await stream.getRelatedStreams().sort({connectCreated: 1}).populate(['location']);
 
