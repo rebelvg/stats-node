@@ -3,7 +3,7 @@
     {
       "name": "stats-node",
       "script": "index.js",
-      "log_date_format": "YYYY-MM-DD HH:mm Z"
+      "log_date_format": "YYYY-MM-DD HH:mm:ss.SSS Z"
     }
   ]
 }
