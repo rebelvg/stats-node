@@ -73,6 +73,13 @@ schema.virtual('isLive').get(function () {
     return stream.id === this.id;
 });
 
+schema.virtual('location', {
+    ref: 'IP',
+    localField: 'ip',
+    foreignField: 'ip',
+    justOne: true
+});
+
 schema.set('toJSON', {virtuals: true});
 
 schema.methods.getSubscribers = function (cb) {

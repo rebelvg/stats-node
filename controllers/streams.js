@@ -5,6 +5,7 @@ const Subscriber = require('../models/subscriber');
 
 function findById(req, res, next) {
     Stream.findById(req.params.id)
+        .populate(['location'])
         .then(async stream => {
             if (!stream) {
                 throw new Error('Stream not found.');
@@ -21,7 +22,8 @@ function find(req, res, next) {
     Stream.paginate(req.queryObj, {
         sort: req.sortObj,
         page: req.query.page,
-        limit: req.query.limit
+        limit: req.query.limit,
+        populate: ['location']
     })
         .then(ret => {
             res.json({
