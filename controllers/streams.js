@@ -2,6 +2,7 @@ const _ = require('lodash');
 
 const Stream = require('../models/stream');
 const Subscriber = require('../models/subscriber');
+const IP = require('../models/ip');
 
 function findById(req, res, next) {
     Stream.findById(req.params.id)
@@ -27,9 +28,14 @@ function find(req, res, next) {
         limit: req.query.limit,
         populate: ['location']
     })
-        .then(ret => {
+        .then(async ret => {
             res.json({
                 streams: ret.docs,
+                options: {
+                    apps: await Stream.distinct('app'),
+                    channels: await Stream.distinct('channel'),
+                    countries: await IP.distinct('api.country')
+                },
                 total: ret.total,
                 limit: ret.limit,
                 page: ret.page,
