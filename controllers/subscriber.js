@@ -1,5 +1,6 @@
 const Subscriber = require('../models/subscriber');
 const Stream = require('../models/stream');
+const IP = require('../models/ip');
 
 function findById(req, res, next) {
     Subscriber.findById(req.params.id)
@@ -23,9 +24,15 @@ function find(req, res, next) {
         limit: req.query.limit,
         populate: ['location']
     })
-        .then(ret => {
+        .then(async ret => {
             res.json({
                 subscribers: ret.docs,
+                options: {
+                    apps: await Subscriber.distinct('app'),
+                    channels: await Subscriber.distinct('channel'),
+                    countries: await IP.distinct('api.country'),
+                    protocols: await Subscriber.distinct('protocol')
+                },
                 total: ret.total,
                 limit: ret.limit,
                 page: ret.page,

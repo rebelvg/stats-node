@@ -34,7 +34,8 @@ function find(req, res, next) {
                 options: {
                     apps: await Stream.distinct('app'),
                     channels: await Stream.distinct('channel'),
-                    countries: await IP.distinct('api.country')
+                    countries: await IP.distinct('api.country'),
+                    protocols: await Stream.distinct('protocol')
                 },
                 total: ret.total,
                 limit: ret.limit,
