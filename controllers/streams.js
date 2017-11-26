@@ -59,9 +59,7 @@ function graph(req, res, next) {
                 let compareFnc = include ? _.gte : _.gt;
 
                 return _.filter(subscribers, (subscriber) => {
-                    return subscriber.app === stream.app
-                        && subscriber.channel === stream.channel
-                        && compareFnc(subscriber.connectUpdated, time)
+                    return compareFnc(subscriber.connectUpdated, time)
                         && _.gte(time, subscriber.connectCreated);
                 }).map((subscriber) => {
                     return subscriber._id;

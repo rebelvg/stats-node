@@ -19,7 +19,8 @@ let schema = new Schema({
     protocol: {type: String, required: true},
     duration: {type: Number, required: true},
     bitrate: {type: Number, required: true},
-    viewersCount: {type: Number, required: true},
+    totalConnectionsCount: {type: Number, required: true},
+    peakViewersCount: {type: Number, required: true},
     createdAt: {type: Date, required: true, index: true},
     updatedAt: {type: Date, required: true, index: true}
 }, {
@@ -40,7 +41,8 @@ schema.pre('validate', function (next) {
     this.bitrate = this.duration > 0 ? Math.ceil(this.bytes * 8 / this.duration / 1024) : 0;
 
     if (this.isNew) {
-        this.viewersCount = 0;
+        this.totalConnectionsCount = 0;
+        this.peakViewersCount = 0;
 
         this.createdAt = updatedAt;
     }
@@ -114,6 +116,29 @@ schema.methods.getRelatedStreams = function (cb) {
         connectUpdated: {$gte: this.connectCreated},
         connectCreated: {$lte: this.connectUpdated}
     }, cb);
+};
+
+schema.methods.updateInfo = async function () {
+    let subscribers = await this.getSubscribers();
+
+    this.totalConnectionsCount = subscribers.length;
+
+    function filterSubscribers(time, include = false) {
+        let compareFnc = include ? _.gte : _.gt;
+
+        return _.filter(subscribers, (subscriber) => {
+            return compareFnc(subscriber.connectUpdated, time)
+                && _.gte(time, subscriber.connectCreated);
+        }).map((subscriber) => {
+            return subscriber._id;
+        });
+    }
+
+    _.forEach(subscribers, (subscriber) => {
+        let viewersCount = filterSubscribers(subscriber.connectCreated).length;
+
+        if (viewersCount > this.peakViewersCount) this.peakViewersCount = viewersCount;
+    });
 };
 
 schema.plugin(mongoosePaginate);

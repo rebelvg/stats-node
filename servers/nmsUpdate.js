@@ -97,7 +97,7 @@ async function updateStats() {
             }
 
             if (streamObj) {
-                streamObj.viewersCount = await streamObj.countSubscribers();
+                await streamObj.updateInfo();
                 await streamObj.save();
             }
         }

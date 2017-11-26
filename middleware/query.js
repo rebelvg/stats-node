@@ -94,16 +94,29 @@ function parseFilter(model) {
                     };
                 }
             },
-            viewersCount: {
-                type: 'string', cb: function (viewersCount) {
-                    viewersCount = parseInt(viewersCount);
+            totalConnectionsCount: {
+                type: 'string', cb: function (totalConnectionsCount) {
+                    totalConnectionsCount = parseInt(totalConnectionsCount);
 
-                    if (isNaN(viewersCount)) {
+                    if (isNaN(totalConnectionsCount)) {
                         return;
                     }
 
-                    queryObj.viewersCount = {
-                        $gte: viewersCount
+                    queryObj.totalConnectionsCount = {
+                        $gte: totalConnectionsCount
+                    };
+                }
+            },
+            peakViewersCount: {
+                type: 'string', cb: function (peakViewersCount) {
+                    peakViewersCount = parseInt(peakViewersCount);
+
+                    if (isNaN(peakViewersCount)) {
+                        return;
+                    }
+
+                    queryObj.peakViewersCount = {
+                        $gte: peakViewersCount
                     };
                 }
             }
