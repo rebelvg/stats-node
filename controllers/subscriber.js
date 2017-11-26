@@ -28,10 +28,10 @@ function find(req, res, next) {
             res.json({
                 subscribers: ret.docs,
                 options: {
-                    apps: await Subscriber.distinct('app'),
-                    channels: await Subscriber.distinct('channel'),
+                    apps: await Subscriber.distinct('app', req.queryObj),
+                    channels: await Subscriber.distinct('channel', req.queryObj),
                     countries: await IP.distinct('api.country'),
-                    protocols: await Subscriber.distinct('protocol')
+                    protocols: await Subscriber.distinct('protocol', req.queryObj)
                 },
                 total: ret.total,
                 limit: ret.limit,
