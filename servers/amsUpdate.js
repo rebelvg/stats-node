@@ -98,7 +98,9 @@ async function getUsers(appName) {
     });
 }
 
-function parseClientFile(clientFile) {
+function parseClientFile(path) {
+    let clientFile = fs.readFileSync(path, {encoding: 'UTF-8'});
+
     let clientData = clientFile.split(os.EOL);
 
     return {
@@ -120,9 +122,7 @@ async function getIPs(appName) {
     let fileIDs = [];
 
     for (let clientFileName of clientFiles) {
-        let clientFile = fs.readFileSync(path.join(clientsFolder, clientFileName), {encoding: 'UTF-8'});
-
-        fileIDs.push(parseClientFile(clientFile));
+        fileIDs.push(parseClientFile(path.join(clientsFolder, clientFileName)));
     }
 
     fileIDs = _.sortBy(fileIDs, ['connectTime', 'amsId']);
@@ -203,7 +203,7 @@ async function updateStats() {
                 if (!streamObj) {
                     streamQuery.connectUpdated = statsUpdateTime;
                     streamQuery.bytes = userStats.bytes_in;
-                    streamQuery.ip = IPs[id].ip;
+                    streamQuery.ip = parseClientFile(path.join(amsAppsPath, appName, 'streams', channelName)).ip;
                     streamQuery.protocol = 'rtmp';
 
                     streamObj = new Stream(streamQuery);
