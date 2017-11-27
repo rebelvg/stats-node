@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 const Subscriber = require('../models/subscriber');
 const Stream = require('../models/stream');
 const IP = require('../models/ip');
@@ -25,6 +27,23 @@ function find(req, res, next) {
         populate: ['location']
     })
         .then(async ret => {
+            let aggregation = await Subscriber.aggregate([
+                {'$match': req.queryObj},
+                {
+                    '$group': {
+                        _id: null,
+                        'totalBytes': {
+                            '$sum': '$bytes'
+                        },
+                        'totalDuration': {
+                            '$sum': '$duration'
+                        }
+                    }
+                }
+            ]);
+
+            let uniqueIPs = (await Subscriber.distinct('ip', req.queryObj)).length;
+
             res.json({
                 subscribers: ret.docs,
                 options: {
@@ -32,6 +51,11 @@ function find(req, res, next) {
                     channels: await Subscriber.distinct('channel', req.queryObj),
                     countries: await IP.distinct('api.country'),
                     protocols: await Subscriber.distinct('protocol', req.queryObj)
+                },
+                info: {
+                    totalBytes: _.get(aggregation, ['0', 'totalBytes'], 0),
+                    totalDuration: _.get(aggregation, ['0', 'totalDuration'], 0),
+                    totalIPs: uniqueIPs
                 },
                 total: ret.total,
                 limit: ret.limit,

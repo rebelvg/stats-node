@@ -29,6 +29,29 @@ function find(req, res, next) {
         populate: ['location']
     })
         .then(async ret => {
+            let aggregation = await Stream.aggregate([
+                {'$match': req.queryObj},
+                {
+                    '$group': {
+                        _id: null,
+                        'totalBytes': {
+                            '$sum': '$bytes'
+                        },
+                        'totalDuration': {
+                            '$sum': '$duration'
+                        },
+                        'totalConnections': {
+                            '$sum': '$totalConnectionsCount'
+                        },
+                        'totalPeakViewers': {
+                            '$sum': '$peakViewersCount'
+                        }
+                    }
+                }
+            ]);
+
+            let uniqueIPs = (await Stream.distinct('ip', req.queryObj)).length;
+
             res.json({
                 streams: ret.docs,
                 options: {
@@ -36,6 +59,13 @@ function find(req, res, next) {
                     channels: await Stream.distinct('channel', req.queryObj),
                     countries: await IP.distinct('api.country'),
                     protocols: await Stream.distinct('protocol', req.queryObj)
+                },
+                info: {
+                    totalBytes: _.get(aggregation, ['0', 'totalBytes'], 0),
+                    totalDuration: _.get(aggregation, ['0', 'totalDuration'], 0),
+                    totalConnections: _.get(aggregation, ['0', 'totalConnections'], 0),
+                    totalPeakViewers: _.get(aggregation, ['0', 'totalPeakViewers'], 0),
+                    totalIPs: uniqueIPs
                 },
                 total: ret.total,
                 limit: ret.limit,
