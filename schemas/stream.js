@@ -88,34 +88,28 @@ schema.virtual('location', {
 
 schema.set('toJSON', {virtuals: true});
 
-schema.methods.getSubscribers = function (cb) {
-    return this.model('Subscriber').find({
+schema.methods.getSubscribers = function (query = {}) {
+    query = _.merge(query, {
         app: this.app,
         channel: this.channel,
         serverType: this.serverType,
         connectUpdated: {$gte: this.connectCreated},
         connectCreated: {$lte: this.connectUpdated}
-    }, cb);
+    });
+
+    return this.model('Subscriber').find(query);
 };
 
-schema.methods.countSubscribers = function (cb) {
-    return this.model('Subscriber').count({
-        app: this.app,
-        channel: this.channel,
-        serverType: this.serverType,
-        connectUpdated: {$gte: this.connectCreated},
-        connectCreated: {$lte: this.connectUpdated}
-    }, cb);
-};
-
-schema.methods.getRelatedStreams = function (cb) {
-    return this.model('Stream').find({
+schema.methods.getRelatedStreams = function (query) {
+    query = _.merge(query, {
         _id: {$ne: this._id},
         channel: this.channel,
         serverType: this.serverType,
         connectUpdated: {$gte: this.connectCreated},
         connectCreated: {$lte: this.connectUpdated}
-    }, cb);
+    });
+
+    return this.model('Stream').find(query);
 };
 
 schema.methods.updateInfo = async function () {
