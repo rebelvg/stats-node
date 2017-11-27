@@ -57,7 +57,7 @@ function find(req, res, next) {
                 options: {
                     apps: await Stream.distinct('app', req.queryObj),
                     channels: await Stream.distinct('channel', req.queryObj),
-                    countries: await IP.distinct('api.country'),
+                    countries: _.concat(await IP.distinct('api.country'), await IP.distinct('api.message')),
                     protocols: await Stream.distinct('protocol', req.queryObj)
                 },
                 info: {

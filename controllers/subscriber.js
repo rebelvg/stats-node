@@ -49,7 +49,7 @@ function find(req, res, next) {
                 options: {
                     apps: await Subscriber.distinct('app', req.queryObj),
                     channels: await Subscriber.distinct('channel', req.queryObj),
-                    countries: await IP.distinct('api.country'),
+                    countries: _.concat(await IP.distinct('api.country'), await IP.distinct('api.message')),
                     protocols: await Subscriber.distinct('protocol', req.queryObj)
                 },
                 info: {
