@@ -4,6 +4,8 @@ const Stream = require('../models/stream');
 const Subscriber = require('../models/subscriber');
 const IP = require('../models/ip');
 
+const filterSubscribers = require('../helpers/filterSubscribers');
+
 function findById(req, res, next) {
     Stream.findById(req.params.id)
         .populate(['location'])
@@ -24,7 +26,32 @@ function findById(req, res, next) {
                 protocols: _.chain(subscribers).map('protocol').uniq().value()
             };
 
-            res.json({stream: stream, subscribers: subscribers, options: options, relatedStreams: relatedStreams});
+            let totalPeakViewers = 0;
+
+            _.forEach(subscribers, (subscriber) => {
+                let viewersCount = filterSubscribers(subscribers, subscriber.connectCreated).length;
+
+                if (viewersCount > totalPeakViewers) totalPeakViewers = viewersCount;
+            });
+
+            let info = {
+                totalBytes: _.reduce(subscribers, (sum, sub) => {
+                    return sum + sub.bytes;
+                }, 0),
+                totalDuration: _.reduce(subscribers, (sum, sub) => {
+                    return sum + sub.duration;
+                }, 0),
+                totalPeakViewers: totalPeakViewers,
+                totalIPs: _.chain(subscribers).map('ip').uniq().value().length
+            };
+
+            res.json({
+                stream: stream,
+                subscribers: subscribers,
+                options: options,
+                info: info,
+                relatedStreams: relatedStreams
+            });
         })
         .catch(next);
 }
@@ -93,23 +120,12 @@ function graph(req, res, next) {
 
             let subscribers = await stream.getSubscribers(req.queryObj).sort({connectCreated: 1});
 
-            function filterSubscribers(time, include = false) {
-                let compareFnc = include ? _.gte : _.gt;
-
-                return _.filter(subscribers, (subscriber) => {
-                    return compareFnc(subscriber.connectUpdated, time)
-                        && _.gte(time, subscriber.connectCreated);
-                }).map((subscriber) => {
-                    return subscriber._id;
-                });
-            }
-
             let graph = [];
 
             graph.push({
                 eventName: 'streamStarted',
                 time: stream.connectCreated,
-                subscribers: filterSubscribers(stream.connectCreated)
+                subscribers: filterSubscribers(subscribers, stream.connectCreated)
             });
 
             _.forEach(subscribers, (subscriber) => {
@@ -118,7 +134,7 @@ function graph(req, res, next) {
                 graph.push({
                     eventName: 'subscriberConnected',
                     time: subscriber.connectCreated,
-                    subscribers: filterSubscribers(subscriber.connectCreated)
+                    subscribers: filterSubscribers(subscribers, subscriber.connectCreated)
                 });
             });
 
@@ -129,7 +145,7 @@ function graph(req, res, next) {
                 graph.push({
                     eventName: 'subscriberDisconnected',
                     time: subscriber.connectUpdated,
-                    subscribers: filterSubscribers(subscriber.connectUpdated)
+                    subscribers: filterSubscribers(subscribers, subscriber.connectUpdated)
                 });
             });
 
@@ -137,13 +153,13 @@ function graph(req, res, next) {
                 graph.push({
                     eventName: 'streamEnded',
                     time: stream.connectUpdated,
-                    subscribers: filterSubscribers(stream.connectUpdated)
+                    subscribers: filterSubscribers(subscribers, stream.connectUpdated)
                 });
             } else {
                 graph.push({
                     eventName: 'streamIsLive',
                     time: stream.connectUpdated,
-                    subscribers: filterSubscribers(stream.connectUpdated, true)
+                    subscribers: filterSubscribers(subscribers, stream.connectUpdated, true)
                 });
             }
 

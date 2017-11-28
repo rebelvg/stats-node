@@ -3,6 +3,8 @@ const mongoosePaginate = require('mongoose-paginate');
 const _ = require('lodash');
 const ip6addr = require('ip6addr');
 
+const filterSubscribers = require('../helpers/filterSubscribers');
+
 const IP = require('../models/ip');
 
 const Schema = mongoose.Schema;
@@ -127,19 +129,8 @@ schema.methods.updateInfo = async function () {
 
     this.totalConnectionsCount = subscribers.length;
 
-    function filterSubscribers(time, include = false) {
-        let compareFnc = include ? _.gte : _.gt;
-
-        return _.filter(subscribers, (subscriber) => {
-            return compareFnc(subscriber.connectUpdated, time)
-                && _.gte(time, subscriber.connectCreated);
-        }).map((subscriber) => {
-            return subscriber._id;
-        });
-    }
-
     _.forEach(subscribers, (subscriber) => {
-        let viewersCount = filterSubscribers(subscriber.connectCreated).length;
+        let viewersCount = filterSubscribers(subscribers, subscriber.connectCreated).length;
 
         if (viewersCount > this.peakViewersCount) this.peakViewersCount = viewersCount;
     });
