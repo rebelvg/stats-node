@@ -79,14 +79,19 @@ schema.virtual('location', {
 
 schema.set('toJSON', {virtuals: true});
 
-schema.methods.getStreams = function (query) {
-    query = _.merge(query, {
-        app: this.app,
-        channel: this.channel,
-        serverType: this.serverType,
-        connectUpdated: {$gte: this.connectCreated},
-        connectCreated: {$lte: this.connectUpdated}
-    });
+schema.methods.getStreams = function (query = {}) {
+    query = {
+        $and: [
+            {
+                app: this.app,
+                channel: this.channel,
+                serverType: this.serverType,
+                connectUpdated: {$gte: this.connectCreated},
+                connectCreated: {$lte: this.connectUpdated}
+            },
+            query
+        ]
+    };
 
     return this.model('Stream').find(query);
 };

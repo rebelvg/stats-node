@@ -20,14 +20,14 @@ function parseFilter(model) {
             connectCreated: {
                 type: 'string', cb: function (connectCreated) {
                     queryObj.connectCreated = {
-                        $gte: moment.unix(strtotime(connectCreated))
+                        $gte: moment.unix(strtotime(connectCreated)).toDate()
                     };
                 }
             },
             connectUpdated: {
                 type: 'string', cb: function (connectUpdated) {
                     queryObj.connectUpdated = {
-                        $gte: moment.unix(strtotime(connectUpdated))
+                        $gte: moment.unix(strtotime(connectUpdated)).toDate()
                     };
                 }
             },

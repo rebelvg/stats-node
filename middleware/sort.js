@@ -23,10 +23,6 @@ function parseSort(model) {
             });
         }
 
-        if (Object.keys(sortObj).length === 0) {
-            sortObj = {connectCreated: -1};
-        }
-
         req.sortObj = sortObj;
 
         next();

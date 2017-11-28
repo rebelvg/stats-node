@@ -21,7 +21,7 @@ function findById(req, res, next) {
 
 function find(req, res, next) {
     Subscriber.paginate(req.queryObj, {
-        sort: req.sortObj,
+        sort: _.isEmpty(req.sortObj) ? {connectCreated: -1} : req.sortObj,
         page: req.query.page,
         limit: req.query.limit,
         populate: ['location']

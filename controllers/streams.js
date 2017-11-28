@@ -12,18 +12,26 @@ function findById(req, res, next) {
                 throw new Error('Stream not found.');
             }
 
-            let subscribers = await stream.getSubscribers().sort({connectCreated: 1}).populate(['location']);
+            let subscribers = await stream.getSubscribers(req.queryObj).sort(_.isEmpty(req.sortObj) ? {connectCreated: 1} : req.sortObj).populate(['location']);
 
             let relatedStreams = await stream.getRelatedStreams().sort({connectCreated: 1}).populate(['location']);
 
-            res.json({stream: stream, subscribers: subscribers, relatedStreams: relatedStreams});
+            let options = {
+                countries: _.concat(
+                    _.chain(subscribers).map('location.api.country').compact().uniq().value(),
+                    _.chain(subscribers).map('location.api.message').compact().uniq().value()
+                ),
+                protocols: _.chain(subscribers).map('protocol').uniq().value()
+            };
+
+            res.json({stream: stream, subscribers: subscribers, options: options, relatedStreams: relatedStreams});
         })
         .catch(next);
 }
 
 function find(req, res, next) {
     Stream.paginate(req.queryObj, {
-        sort: req.sortObj,
+        sort: _.isEmpty(req.sortObj) ? {connectCreated: -1} : req.sortObj,
         page: req.query.page,
         limit: req.query.limit,
         populate: ['location']
@@ -83,7 +91,7 @@ function graph(req, res, next) {
                 throw new Error('Stream not found.');
             }
 
-            let subscribers = await stream.getSubscribers().sort({connectCreated: 1});
+            let subscribers = await stream.getSubscribers(req.queryObj).sort({connectCreated: 1});
 
             function filterSubscribers(time, include = false) {
                 let compareFnc = include ? _.gte : _.gt;

@@ -89,25 +89,35 @@ schema.virtual('location', {
 schema.set('toJSON', {virtuals: true});
 
 schema.methods.getSubscribers = function (query = {}) {
-    query = _.merge(query, {
-        app: this.app,
-        channel: this.channel,
-        serverType: this.serverType,
-        connectUpdated: {$gte: this.connectCreated},
-        connectCreated: {$lte: this.connectUpdated}
-    });
+    query = {
+        $and: [
+            {
+                app: this.app,
+                channel: this.channel,
+                serverType: this.serverType,
+                connectUpdated: {$gte: this.connectCreated},
+                connectCreated: {$lte: this.connectUpdated}
+            },
+            query
+        ]
+    };
 
     return this.model('Subscriber').find(query);
 };
 
-schema.methods.getRelatedStreams = function (query) {
-    query = _.merge(query, {
-        _id: {$ne: this._id},
-        channel: this.channel,
-        serverType: this.serverType,
-        connectUpdated: {$gte: this.connectCreated},
-        connectCreated: {$lte: this.connectUpdated}
-    });
+schema.methods.getRelatedStreams = function (query = {}) {
+    query = {
+        $and: [
+            {
+                _id: {$ne: this._id},
+                channel: this.channel,
+                serverType: this.serverType,
+                connectUpdated: {$gte: this.connectCreated},
+                connectCreated: {$lte: this.connectUpdated}
+            },
+            query
+        ]
+    };
 
     return this.model('Stream').find(query);
 };
