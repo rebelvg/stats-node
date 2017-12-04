@@ -1,5 +1,17 @@
 const _ = require('lodash');
 
+function isLive(server, app, channel) {
+    return _.get(_.get(global.liveStats, [server], {}), [app, channel, 'publisher'], null) !== null;
+}
+
+function getViewers(server, app, channel) {
+    return _.get(_.get(global.liveStats, [server], {}), [app, channel, 'subscribers'], []).length;
+}
+
+function getBitrate(server, app, channel) {
+    return _.get(_.get(global.liveStats, [server], {}), [app, channel, 'publisher', 'bitrate'], 0);
+}
+
 function channelStats(req, res, next) {
     let channelStats = {
         isLive: false,
@@ -30,9 +42,9 @@ function appChannelStats(req, res, next) {
         bitrate: 0
     };
 
-    channelStats.isLive = _.get(_.get(global.liveStats, [req.params.server], {}), [req.params.app, req.params.channel, 'publisher'], null) !== null;
-    channelStats.viewers = _.get(_.get(global.liveStats, [req.params.server], {}), [req.params.app, req.params.channel, 'subscribers'], []).length;
-    channelStats.bitrate = _.get(_.get(global.liveStats, [req.params.server], {}), [req.params.app, req.params.channel, 'publisher', 'bitrate'], 0);
+    channelStats.isLive = isLive(req.params.server, req, params.app, req.params.channel);
+    channelStats.viewers = getViewers(req.params.server, req.params.app, req.params.channel);
+    channelStats.bitrate = getBitrate(req.params.server, req.params.app, req.params.channel);
 
     res.json(channelStats);
 }
@@ -50,7 +62,7 @@ function legacy(req, res, next) {
         title: null
     };
 
-    channelStats.isLive = _.get(_.get(global.liveStats, [req.params.server], {}), ['live', req.params.channel, 'publisher'], null) !== null;
+    channelStats.isLive = isLive(req.params.server, 'live', req.params.channel);
 
     _.forEach(_.get(global.liveStats, [req.params.server], {}), (channels, appName) => {
         _.forEach(channels, (channelObj, channelName) => {
@@ -60,8 +72,8 @@ function legacy(req, res, next) {
         });
     });
 
-    channelStats.bitrate_live = _.get(_.get(global.liveStats, [req.params.server], {}), ['live', req.params.channel, 'publisher', 'bitrate'], 0);
-    channelStats.bitrate_restream = _.get(_.get(global.liveStats, [req.params.server], {}), ['restream', req.params.channel, 'publisher', 'bitrate'], 0);
+    channelStats.bitrate_live = getBitrate(req.params.server, 'live', req.params.channel);
+    channelStats.bitrate_restream = getBitrate(req.params.server, 'restream', req.params.channel);
 
     res.json(channelStats);
 }
