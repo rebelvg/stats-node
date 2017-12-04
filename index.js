@@ -1,10 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const {URL} = require('url');
+const morgan = require('morgan');
 
 const {db, stats} = require('./config.json');
 
 const app = express();
+
+if (process.env.NODE_ENV === 'dev') app.use(morgan('combined'));
 
 mongoose.Promise = Promise;
 
