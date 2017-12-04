@@ -42,7 +42,7 @@ function appChannelStats(req, res, next) {
         bitrate: 0
     };
 
-    channelStats.isLive = isLive(req.params.server, req, params.app, req.params.channel);
+    channelStats.isLive = isLive(req.params.server, req.params.app, req.params.channel);
     channelStats.viewers = getViewers(req.params.server, req.params.app, req.params.channel);
     channelStats.bitrate = getBitrate(req.params.server, req.params.app, req.params.channel);
 
