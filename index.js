@@ -24,10 +24,7 @@ mongoose.connect(mongoUrl.href, {useMongoClient: true}, function (error) {
     if (error) throw error;
 });
 
-global.liveStats = {
-    ams: {},
-    nms: {}
-};
+global.liveStats = {};
 
 require('./servers/amsUpdate');
 require('./servers/nmsUpdate');

@@ -267,7 +267,7 @@ console.log('amsUpdate running.');
 function runUpdate() {
     updateStats()
         .then((live) => {
-            global.liveStats.ams = live;
+            _.set(global.liveStats, ['ams'], live);
         })
         .catch(e => {
             if (e.name === 'RequestError' && e.error.code === 'ECONNREFUSED') return;

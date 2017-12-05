@@ -113,7 +113,7 @@ console.log('nmsUpdate running.');
 function runUpdate() {
     updateStats()
         .then((live) => {
-            global.liveStats.nms = live;
+            _.set(global.liveStats, ['nms'], live);
         })
         .catch(e => {
             if (e.name === 'RequestError' && e.error.code === 'ECONNREFUSED') return;
