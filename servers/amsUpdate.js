@@ -245,6 +245,9 @@ async function updateStats() {
                     }
 
                     await subscriberObj.save();
+                    await Subscriber.populate(subscriberObj, {
+                        path: 'location'
+                    });
 
                     live[appName][channelName].subscribers.push(subscriberObj);
                 }
@@ -253,6 +256,9 @@ async function updateStats() {
             if (streamObj) {
                 await streamObj.updateInfo();
                 await streamObj.save();
+                await Stream.populate(streamObj, {
+                    path: 'location'
+                });
             }
         }
     }
