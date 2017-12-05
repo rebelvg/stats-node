@@ -53,15 +53,9 @@ function appChannelStats(req, res, next) {
 }
 
 async function channels(req, res, next) {
-    for (let serversObj of Object.entries(global.liveStats)) {
-        const [serverName, serverObj] = serversObj;
-
-        for (let appsObj of Object.entries(serverObj)) {
-            const [appName, appObj] = appsObj;
-
-            for (let channelsObj of Object.entries(appObj)) {
-                const [channelName, channelObj] = channelsObj;
-
+    for (let [serverName, serverObj] of Object.entries(global.liveStats)) {
+        for (let [appName, appObj] of Object.entries(serverObj)) {
+            for (let [channelName, channelObj] of Object.entries(appObj)) {
                 if (channelObj.publisher) await Stream.populate(channelObj.publisher, {
                     path: 'location'
                 });
