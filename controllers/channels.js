@@ -1,5 +1,8 @@
 const _ = require('lodash');
 
+const Stream = require('../models/stream');
+const Subscriber = require('../models/subscriber');
+
 function isLive(server, app, channel) {
     return _.get(_.get(global.liveStats, [server], {}), [app, channel, 'publisher'], null) !== null;
 }
@@ -49,7 +52,29 @@ function appChannelStats(req, res, next) {
     res.json(channelStats);
 }
 
-function channels(req, res, next) {
+async function channels(req, res, next) {
+    for (let serversObj of Object.entries(global.liveStats)) {
+        const [serverName, serverObj] = serversObj;
+
+        for (let appsObj of Object.entries(serverObj)) {
+            const [appName, appObj] = appsObj;
+
+            for (let channelsObj of Object.entries(appObj)) {
+                const [channelName, channelObj] = channelsObj;
+
+                if (channelObj.publisher) await Stream.populate(channelObj.publisher, {
+                    path: 'location'
+                });
+
+                for (let subscriberObj of channelObj.subscribers) {
+                    await Subscriber.populate(subscriberObj, {
+                        path: 'location'
+                    });
+                }
+            }
+        }
+    }
+
     res.json(global.liveStats);
 }
 
