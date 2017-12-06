@@ -130,7 +130,10 @@ const filterRules = {
         do: [],
         test: [_.isString],
         cb: function (queryObj, country) {
-            queryObj['api.country'] = new RegExp(country, 'gi');
+            queryObj.$or = [
+                {'api.country': new RegExp(country, 'gi')},
+                {'api.message': new RegExp(country, 'gi')}
+            ];
         }
     },
     'api.city': {
