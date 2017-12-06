@@ -8,44 +8,50 @@ function parseFilter(model) {
     return async function (req, res, next) {
         let querySettings = {
             app: {
-                type: 'string', cb: function (app) {
+                do: [],
+                test: [_.isString],
+                cb: function (app) {
                     queryObj.app = new RegExp(app, 'gi');
                 }
             },
             channel: {
-                type: 'string', cb: function (channel) {
+                do: [],
+                test: [_.isString],
+                cb: function (channel) {
                     queryObj.channel = new RegExp(channel, 'gi');
                 }
             },
             connectCreated: {
-                type: 'string', cb: function (connectCreated) {
+                do: [strtotime, moment.unix, (value) => value.toDate()],
+                test: [_.isDate],
+                cb: function (connectCreated) {
                     queryObj.connectCreated = {
-                        $gte: moment.unix(strtotime(connectCreated)).toDate()
+                        $gte: connectCreated
                     };
                 }
             },
             connectUpdated: {
-                type: 'string', cb: function (connectUpdated) {
+                do: [strtotime, moment.unix, (value) => value.toDate()],
+                test: [_.isDate],
+                cb: function (connectUpdated) {
                     queryObj.connectUpdated = {
-                        $gte: moment.unix(strtotime(connectUpdated)).toDate()
+                        $gte: connectUpdated
                     };
                 }
             },
             bytes: {
-                type: 'string', cb: function (bytes) {
-                    bytes = parseInt(bytes);
-
-                    if (isNaN(bytes)) {
-                        return;
-                    }
-
+                do: [_.toNumber],
+                test: [_.isFinite],
+                cb: function (bytes) {
                     queryObj.bytes = {
                         $gte: bytes * 1024 * 1024
                     };
                 }
             },
             ip: {
-                type: 'string', cb: async function (ip) {
+                do: [],
+                test: [_.isString],
+                cb: async function (ip) {
                     let ips = await IP.distinct('ip', {
                         $or: [
                             {'ip': new RegExp(ip, 'gi')},
@@ -64,57 +70,43 @@ function parseFilter(model) {
                 }
             },
             protocol: {
-                type: 'string', cb: function (protocol) {
+                do: [],
+                test: [_.isString],
+                cb: function (protocol) {
                     queryObj.protocol = new RegExp(protocol, 'gi');
                 }
             },
             duration: {
-                type: 'string', cb: function (duration) {
-                    duration = parseInt(duration);
-
-                    if (isNaN(duration)) {
-                        return;
-                    }
-
+                do: [_.toNumber],
+                test: [_.isFinite],
+                cb: function (duration) {
                     queryObj.duration = {
                         $gte: duration * 60
                     };
                 }
             },
             bitrate: {
-                type: 'string', cb: function (bitrate) {
-                    bitrate = parseInt(bitrate);
-
-                    if (isNaN(bitrate)) {
-                        return;
-                    }
-
+                do: [_.toNumber],
+                test: [_.isFinite],
+                cb: function (bitrate) {
                     queryObj.bitrate = {
                         $gte: bitrate
                     };
                 }
             },
             totalConnectionsCount: {
-                type: 'string', cb: function (totalConnectionsCount) {
-                    totalConnectionsCount = parseInt(totalConnectionsCount);
-
-                    if (isNaN(totalConnectionsCount)) {
-                        return;
-                    }
-
+                do: [_.toNumber],
+                test: [_.isFinite],
+                cb: function (totalConnectionsCount) {
                     queryObj.totalConnectionsCount = {
                         $gte: totalConnectionsCount
                     };
                 }
             },
             peakViewersCount: {
-                type: 'string', cb: function (peakViewersCount) {
-                    peakViewersCount = parseInt(peakViewersCount);
-
-                    if (isNaN(peakViewersCount)) {
-                        return;
-                    }
-
+                do: [_.toNumber],
+                test: [_.isFinite],
+                cb: function (peakViewersCount) {
                     queryObj.peakViewersCount = {
                         $gte: peakViewersCount
                     };
@@ -124,12 +116,22 @@ function parseFilter(model) {
 
         let queryObj = {};
 
-        for (let querySetting of Object.entries(querySettings)) {
-            const [fieldName, rules] = querySetting;
-
+        loop1: for (let [fieldName, rules] of Object.entries(querySettings)) {
             if (req.query.hasOwnProperty(fieldName) && model.schema.paths.hasOwnProperty(fieldName)) {
-                if (typeof req.query[fieldName] === rules.type) {
-                    await rules.cb(req.query[fieldName]);
+                let value = req.query[fieldName];
+
+                _.forEach(rules.do, (fnc) => {
+                    value = fnc(value);
+                });
+
+                for (let fnc of rules.test) {
+                    if (!fnc(value)) continue loop1;
+                }
+
+                try {
+                    await rules.cb(value);
+                }
+                catch (e) {
                 }
             }
         }

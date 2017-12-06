@@ -32,10 +32,12 @@ require('./servers/nmsUpdate');
 let channels = require('./routes/channels');
 let streams = require('./routes/streams');
 let subscribers = require('./routes/subscribers');
+let ips = require('./routes/ips');
 
 app.use('/channels', channels);
 app.use('/streams', streams);
 app.use('/subscribers', subscribers);
+app.use('/ips', ips);
 
 app.listen(stats.port, () => {
     console.log('server is running.');
