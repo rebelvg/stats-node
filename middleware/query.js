@@ -6,7 +6,7 @@ const IP = require('../models/ip');
 
 function parseFilter(model) {
     return async function (req, res, next) {
-        let querySettings = {
+        let rules = {
             app: {
                 do: [],
                 test: [_.isString],
@@ -116,20 +116,20 @@ function parseFilter(model) {
 
         let queryObj = {};
 
-        loop1: for (let [fieldName, rules] of Object.entries(querySettings)) {
+        loop1: for (let [fieldName, rule] of Object.entries(rules)) {
             if (req.query.hasOwnProperty(fieldName) && model.schema.paths.hasOwnProperty(fieldName)) {
-                let value = req.query[fieldName];
-
-                _.forEach(rules.do, (fnc) => {
-                    value = fnc(value);
-                });
-
-                for (let fnc of rules.test) {
-                    if (!fnc(value)) continue loop1;
-                }
-
                 try {
-                    await rules.cb(value);
+                    let value = req.query[fieldName];
+
+                    _.forEach(rule.do, (fnc) => {
+                        value = fnc(value);
+                    });
+
+                    for (let fnc of rule.test) {
+                        if (!fnc(value)) continue loop1;
+                    }
+
+                    await rule.cb(value);
                 }
                 catch (e) {
                 }
