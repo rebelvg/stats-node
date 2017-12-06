@@ -23,10 +23,22 @@ function find(req, res, next) {
         limit: req.query.limit
     })
         .then(async ret => {
+            let counties = await IP.distinct('api.country', req.queryObj);
+            let cities = await IP.distinct('api.city', req.queryObj);
+            let IPSs = await IP.distinct('api.isp', req.queryObj);
+
             res.json({
                 ips: ret.docs,
-                options: {},
-                info: {},
+                options: {
+                    countries: _.concat(counties, await IP.distinct('api.message', req.queryObj)),
+                    cities: cities,
+                    ISPs: IPSs
+                },
+                info: {
+                    totalCountries: counties.length,
+                    totalCities: cities.length,
+                    totalISPs: IPSs.length
+                },
                 total: ret.total,
                 limit: ret.limit,
                 page: ret.page,

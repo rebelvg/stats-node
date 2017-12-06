@@ -8,8 +8,8 @@ const Stream = require('../models/stream');
 
 let router = express.Router();
 
-router.get('/:id', parseFilter(Stream), parseSort(Stream), streamController.findById);
-router.get('/', expressPaginate.middleware(10, 100), parseFilter(Stream), parseSort(Stream), streamController.find);
-router.get('/:id/graph', parseFilter(Stream), streamController.graph);
+router.get('/:id', parseFilter('stream'), parseSort(Stream), streamController.findById);
+router.get('/', expressPaginate.middleware(10, 100), parseFilter('stream'), parseSort(Stream), streamController.find);
+router.get('/:id/graph', parseFilter('stream'), streamController.graph);
 
 module.exports = router;

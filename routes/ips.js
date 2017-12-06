@@ -8,7 +8,7 @@ const IP = require('../models/ip');
 
 let router = express.Router();
 
-router.get('/:id', parseFilter(IP), parseSort(IP), ipController.findById);
-router.get('/', expressPaginate.middleware(10, 100), parseFilter(IP), parseSort(IP), ipController.find);
+router.get('/:id', parseFilter('ip'), parseSort(IP), ipController.findById);
+router.get('/', expressPaginate.middleware(10, 100), parseFilter('ip'), parseSort(IP), ipController.find);
 
 module.exports = router;
