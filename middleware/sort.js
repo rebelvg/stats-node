@@ -6,7 +6,7 @@ function parseSort(model) {
 
         let sortObj = {};
 
-        if (req.query.sort && typeof req.query.sort === 'object') {
+        if (_.isArray(req.query.sort)) {
             _.forEach(req.query.sort, (sort) => {
                 _.forEach(model.schema.paths, (value, key) => {
                     switch (sort) {
@@ -14,7 +14,7 @@ function parseSort(model) {
                             sortObj[key] = -1;
                             break;
                         }
-                        case `${key}`: {
+                        case key: {
                             sortObj[key] = 1;
                             break;
                         }
