@@ -8,9 +8,14 @@ const Subscriber = require('../models/subscriber');
 const nmsConfig = require('../config.json').nms;
 
 const nodeHost = nmsConfig.host;
+const apiKey = nmsConfig.password;
 
 async function getNodeStats() {
     let apiUrl = new URL(`http://${nodeHost}/channels`);
+
+    if (apiKey) {
+        apiUrl.searchParams.set('apiKey', apiKey);
+    }
 
     let res = await request.get(apiUrl.href, {
         resolveWithFullResponse: true,

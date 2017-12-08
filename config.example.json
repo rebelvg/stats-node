@@ -15,7 +15,8 @@
   },
   "nms": {
     "enabled": false,
-    "host": "localhost:8000"
+    "host": "localhost:8000/api",
+    "password": null
   },
   "stats": {
     "port": 8001
