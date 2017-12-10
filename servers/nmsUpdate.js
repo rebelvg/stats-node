@@ -11,7 +11,7 @@ const nodeHost = nmsConfig.host;
 const apiKey = nmsConfig.password;
 
 async function getNodeStats() {
-    let apiUrl = new URL(`http://${nodeHost}/channels`);
+    let apiUrl = new URL(`http://${nodeHost}/api/streams`);
 
     if (apiKey) {
         apiUrl.searchParams.set('apiKey', apiKey);
@@ -48,9 +48,9 @@ async function updateStats() {
             if (channelData.publisher) {
                 let streamQuery = {
                     app: channelData.publisher.app,
-                    channel: channelData.publisher.channel,
+                    channel: channelData.publisher.stream,
                     serverType: 'nms',
-                    serverId: channelData.publisher.serverId,
+                    serverId: channelData.publisher.clientId,
                     connectCreated: new Date(channelData.publisher.connectCreated)
                 };
 
@@ -76,9 +76,9 @@ async function updateStats() {
             for (let subscriber of channelData.subscribers) {
                 let subscriberQuery = {
                     app: subscriber.app,
-                    channel: subscriber.channel,
+                    channel: subscriber.stream,
                     serverType: 'nms',
-                    serverId: subscriber.serverId,
+                    serverId: subscriber.clientId,
                     connectCreated: new Date(subscriber.connectCreated)
                 };
 
