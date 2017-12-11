@@ -5,6 +5,7 @@ const Schema = mongoose.Schema;
 
 let schema = new Schema({
     googleId: {type: String, required: true, unique: true},
+    emails: {type: Array, required: true},
     name: {type: String, required: true},
     createdAt: {type: Date, required: true, index: true},
     updatedAt: {type: Date, required: true, index: true}

@@ -32,6 +32,7 @@ passport.use(new GoogleStrategy({
 
             User.create({
                 googleId: profile.id,
+                emails: profile.emails,
                 name: profile.displayName
 
             })
