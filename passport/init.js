@@ -27,14 +27,20 @@ passport.use(new GoogleStrategy({
     User.findOne({
         googleId: profile.id
     })
-        .then((user) => {
-            if (user) return done(null, user);
+        .then(async (user) => {
+            if (user) {
+                await user.update({
+                    emails: profile.emails,
+                    name: profile.displayName
+                });
+
+                return done(null, user);
+            }
 
             User.create({
                 googleId: profile.id,
                 emails: profile.emails,
                 name: profile.displayName
-
             })
                 .then((user) => {
                     return done(null, user);
