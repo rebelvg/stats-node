@@ -20,6 +20,7 @@
   },
   "stats": {
     "port": 8001,
-    "googleCallbackHost": "localhost:8001"
+    "googleCallbackHost": "localhost:8001",
+    "googleRedirect": "http://localhost:3000/"
   }
 }

@@ -57,6 +57,14 @@ app.use('/subscribers', subscribers);
 app.use('/ips', ips);
 app.use('/users', users);
 
+app.use(function (req, res, next) {
+    throw new Error('404');
+});
+
+app.use(function (err, req, res, next) {
+    res.status(500).json({error: err.message});
+});
+
 app.listen(stats.port, () => {
     console.log('server is running.');
 });

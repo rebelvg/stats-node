@@ -5,10 +5,11 @@ const ipController = require('../controllers/ips');
 const parseFilter = require('../middleware/query');
 const parseSort = require('../middleware/sort');
 const IP = require('../models/ip');
+const isLoggedIn = require('../middleware/isLoggedIn');
 
 let router = express.Router();
 
-router.get('/:id', parseFilter('ip'), parseSort(IP), ipController.findById);
-router.get('/', expressPaginate.middleware(10, 100), parseFilter('ip'), parseSort(IP), ipController.find);
+router.get('/:id', isLoggedIn, parseFilter('ip'), parseSort(IP), ipController.findById);
+router.get('/', isLoggedIn, expressPaginate.middleware(10, 100), parseFilter('ip'), parseSort(IP), ipController.find);
 
 module.exports = router;

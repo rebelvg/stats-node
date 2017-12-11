@@ -5,10 +5,11 @@ const subscriberController = require('../controllers/subscriber');
 const parseFilter = require('../middleware/query');
 const parseSort = require('../middleware/sort');
 const Subscriber = require('../models/subscriber');
+const isLoggedIn = require('../middleware/isLoggedIn');
 
 let router = express.Router();
 
-router.get('/:id', subscriberController.findById);
-router.get('/', expressPaginate.middleware(10, 100), parseFilter('subscriber'), parseSort(Subscriber), subscriberController.find);
+router.get('/:id', isLoggedIn, subscriberController.findById);
+router.get('/', isLoggedIn, expressPaginate.middleware(10, 100), parseFilter('subscriber'), parseSort(Subscriber), subscriberController.find);
 
 module.exports = router;
