@@ -29,10 +29,10 @@ passport.use(new GoogleStrategy({
     })
         .then(async (user) => {
             if (user) {
-                await user.update({
-                    emails: profile.emails,
-                    name: profile.displayName
-                });
+                user.emails = profile.emails;
+                user.name = profile.displayName;
+
+                await user.save();
 
                 return done(null, user);
             }
