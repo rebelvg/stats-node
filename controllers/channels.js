@@ -11,43 +11,50 @@ function getViewers(server, app, channel) {
     return _.get(_.get(global.liveStats, [server], {}), [app, channel, 'subscribers'], []).length;
 }
 
+function getDuration(server, app, channel) {
+    return _.get(_.get(global.liveStats, [server], {}), [app, channel, 'publisher', 'duration'], 0);
+}
+
 function getBitrate(server, app, channel) {
     return _.get(_.get(global.liveStats, [server], {}), [app, channel, 'publisher', 'bitrate'], 0);
 }
 
-function channelStats(req, res, next) {
+function getStartTime(server, app, channel) {
+    return _.get(_.get(global.liveStats, [server], {}), [app, channel, 'publisher', 'connectCreated'], null);
+}
+
+function appChannelStatsBase(server, app, channel) {
     let channelStats = {
         isLive: false,
         viewers: 0,
-        bitrate: {}
+        duration: 0,
+        bitrate: 0,
+        startTime: null
     };
+
+    channelStats.isLive = isLive(server, app, channel);
+    channelStats.viewers = getViewers(server, app, channel);
+    channelStats.duration = getDuration(server, app, channel);
+    channelStats.bitrate = getBitrate(server, app, channel);
+    channelStats.startTime = getStartTime(server, app, channel);
+
+    return channelStats;
+}
+
+function channelStats(req, res, next) {
+    let channelsStats = {};
 
     _.forEach(_.get(global.liveStats, [req.params.server], {}), (channels, appName) => {
         _.forEach(channels, (channelObj, channelName) => {
-            if (channelName === req.params.channel) {
-                if (channelObj.publisher) {
-                    channelStats.isLive = true;
-                    channelStats.bitrate[appName] = channelObj.publisher.bitrate;
-                }
-
-                channelStats.viewers += channelObj.subscribers.length;
-            }
+            channelsStats[appName] = appChannelStatsBase(req.params.server, appName, channelName);
         });
     });
 
-    res.json(channelStats);
+    res.json(channelsStats);
 }
 
 function appChannelStats(req, res, next) {
-    let channelStats = {
-        isLive: false,
-        viewers: 0,
-        bitrate: 0
-    };
-
-    channelStats.isLive = isLive(req.params.server, req.params.app, req.params.channel);
-    channelStats.viewers = getViewers(req.params.server, req.params.app, req.params.channel);
-    channelStats.bitrate = getBitrate(req.params.server, req.params.app, req.params.channel);
+    let channelStats = appChannelStatsBase(req.params.server, req.params.app, req.params.channel);
 
     res.json(channelStats);
 }
