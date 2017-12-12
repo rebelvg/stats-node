@@ -50,23 +50,25 @@ const filterRules = {
         do: [],
         test: [_.isString],
         cb: async function (queryObj, ip, req) {
+            let ipQuery = [
+                {'api.country': new RegExp(ip, 'gi')},
+                {'api.city': new RegExp(ip, 'gi')},
+                {'api.isp': new RegExp(ip, 'gi')},
+                {'api.countryCode': new RegExp(ip, 'gi')},
+                {'api.message': new RegExp(ip, 'gi')}
+            ];
+
             let ips = await IP.distinct('ip', {
-                $or: [
-                    {'ip': new RegExp(ip, 'gi')},
-                    {'api.country': new RegExp(ip, 'gi')},
-                    {'api.city': new RegExp(ip, 'gi')},
-                    {'api.isp': new RegExp(ip, 'gi')},
-                    {'api.countryCode': new RegExp(ip, 'gi')},
-                    {'api.message': new RegExp(ip, 'gi')}
-                ]
+                $or: ipQuery
             });
 
-            if (!req.user) return;
-
-            queryObj.$or = [
+            let query = [
                 {ip: {$in: ips}},
-                {ip: new RegExp(ip, 'gi')}
             ];
+
+            if (req.user) query.push({ip: new RegExp(ip, 'gi')});
+
+            queryObj.$or = query;
         }
     },
     protocol: {
@@ -124,9 +126,7 @@ const filterRules = {
     'ip.ip': {
         do: [],
         test: [_.isString],
-        cb: function (queryObj, ip, req) {
-            if (!req.user) return;
-
+        cb: function (queryObj, ip) {
             queryObj['ip'] = new RegExp(ip, 'gi');
         }
     },
