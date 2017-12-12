@@ -51,6 +51,12 @@ let subscribers = require('./routes/subscribers');
 let ips = require('./routes/ips');
 let users = require('./routes/users');
 
+app.use(function (req, res, next) {
+    req.isAuthenticated();
+
+    next();
+});
+
 app.use('/channels', channels);
 app.use('/streams', streams);
 app.use('/subscribers', subscribers);

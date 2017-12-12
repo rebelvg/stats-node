@@ -1,5 +1,5 @@
 function isLoggedIn(req, res, next) {
-    if (req.isAuthenticated())
+    if (req.user)
         return next();
 
     throw new Error('Not logged in.');

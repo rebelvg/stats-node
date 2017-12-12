@@ -49,7 +49,7 @@ const filterRules = {
     ip: {
         do: [],
         test: [_.isString],
-        cb: async function (queryObj, ip) {
+        cb: async function (queryObj, ip, req) {
             let ips = await IP.distinct('ip', {
                 $or: [
                     {'ip': new RegExp(ip, 'gi')},
@@ -60,6 +60,8 @@ const filterRules = {
                     {'api.message': new RegExp(ip, 'gi')}
                 ]
             });
+
+            if (!req.user) return;
 
             queryObj.$or = [
                 {ip: {$in: ips}},
@@ -122,7 +124,9 @@ const filterRules = {
     'ip.ip': {
         do: [],
         test: [_.isString],
-        cb: function (queryObj, ip) {
+        cb: function (queryObj, ip, req) {
+            if (!req.user) return;
+
             queryObj['ip'] = new RegExp(ip, 'gi');
         }
     },
@@ -205,7 +209,7 @@ function parseFilter(modelName) {
                         if (!fnc(value)) continue loop1;
                     }
 
-                    await rule.cb(queryObj, value);
+                    await rule.cb(queryObj, value, req);
                 }
                 catch (e) {
                 }
