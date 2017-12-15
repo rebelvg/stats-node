@@ -20,5 +20,10 @@ router.get('/auth/google', passport.authenticate('google', {
 router.get('/auth/google/callback', passport.authenticate('google'), function (req, res, next) {
     res.redirect(stats.googleRedirect);
 });
+router.get('/logout', function (req, res, next) {
+    req.logout();
+
+    res.redirect(stats.googleRedirect);
+});
 
 module.exports = router;
