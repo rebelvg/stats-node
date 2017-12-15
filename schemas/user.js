@@ -7,6 +7,8 @@ let schema = new Schema({
     googleId: {type: String, required: true, unique: true},
     emails: {type: Array, required: true},
     name: {type: String, required: true},
+    ipCreated: {type: String, required: true, default: '0.0.0.0'},
+    ipUpdated: {type: String, required: true},
     createdAt: {type: Date, required: true, index: true},
     updatedAt: {type: Date, required: true, index: true}
 }, {
