@@ -46,23 +46,25 @@ global.liveStats = {};
 require('./servers/amsUpdate');
 require('./servers/nmsUpdate');
 
-let channels = require('./routes/channels');
-let streams = require('./routes/streams');
-let subscribers = require('./routes/subscribers');
-let ips = require('./routes/ips');
-let users = require('./routes/users');
-
 app.use(function (req, res, next) {
     req.isAuthenticated();
 
     next();
 });
 
+const channels = require('./routes/channels');
+const streams = require('./routes/streams');
+const subscribers = require('./routes/subscribers');
+const ips = require('./routes/ips');
+const users = require('./routes/users');
+const admin = require('./routes/admin');
+
 app.use('/channels', channels);
 app.use('/streams', streams);
 app.use('/subscribers', subscribers);
 app.use('/ips', ips);
 app.use('/users', users);
+app.use('/admin', admin);
 
 app.use(function (req, res, next) {
     throw new Error('404');
