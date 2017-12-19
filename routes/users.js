@@ -10,6 +10,7 @@ router.get('/', isLoggedIn, function (req, res, next) {
     res.send({user: req.user});
 });
 router.get('/auth/google', passport.authenticate('google', {
+    session: false,
     scope: [
         'https://www.googleapis.com/auth/plus.login',
         'https://www.googleapis.com/auth/plus.me',
@@ -17,7 +18,7 @@ router.get('/auth/google', passport.authenticate('google', {
         'https://www.googleapis.com/auth/userinfo.profile'
     ]
 }));
-router.get('/auth/google/callback', passport.authenticate('google'), function (req, res, next) {
+router.get('/auth/google/callback', passport.authenticate('google', {session: false}), function (req, res, next) {
     res.redirect(stats.googleRedirect + `?token=${req.user.token}`);
 });
 
