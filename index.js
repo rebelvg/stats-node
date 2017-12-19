@@ -46,11 +46,9 @@ global.liveStats = {};
 require('./servers/amsUpdate');
 require('./servers/nmsUpdate');
 
-app.use(function (req, res, next) {
-    req.isAuthenticated();
+const readToken = require('./middleware/readToken');
 
-    next();
-});
+app.use(readToken);
 
 const channels = require('./routes/channels');
 const streams = require('./routes/streams');
