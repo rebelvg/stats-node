@@ -1,6 +1,5 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
-const uuidv4 = require('uuid/v4');
 
 const User = require('../models/user');
 const googleKeys = require('../google-keys');
@@ -45,8 +44,7 @@ passport.use(new GoogleStrategy({
                 emails: profile.emails,
                 name: profile.displayName,
                 ipCreated: req.ip,
-                ipUpdated: req.ip,
-                token: uuidv4()
+                ipUpdated: req.ip
             })
                 .then((user) => {
                     return done(null, user);
