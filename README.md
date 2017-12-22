@@ -31,5 +31,5 @@ node .
 pm2 start pm2.json
 ```
 
-### Example.
+### Live Example.
 http://stats.klpq.men/streams
