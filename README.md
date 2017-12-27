@@ -1,10 +1,7 @@
 # stats-node
 
 ## Overview
-Statistics server/API for collecting data from various media server, 
-API supports various queries like sorting, filtering, pagination, login with Google and more.
-Can collect data from Adobe Media Server, Node Media Server.
-Cross platform, runs on Win/Mac/Linux.
+Statistics server/API for collecting data from various media server about streams, streamers and stream subscribers.
 
 ## App Features
 - Multiplatform (Win/Mac/Linux)
