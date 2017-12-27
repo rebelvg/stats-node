@@ -3,13 +3,13 @@
 ## Overview
 Statistics server/API for collecting data from various media server about streams, streamers and stream subscribers.
 
-## App Features
+### App Features
 - Multiplatform (Win/Mac/Linux)
 - Servers Support
   - Adobe Media Server
   - Node Media Server
 
-## API Features
+### API Features
 - Sorting
 - Filtering
 - Pagination
