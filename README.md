@@ -18,7 +18,7 @@ Cross platform support, runs on Win/Mac/Linux.
 - [Google Plus API](https://console.developers.google.com/apis/library/plus.googleapis.com)
 
 ### Frontend Counterpart
-https://github.com/rebelvg/stats-react
+> https://github.com/rebelvg/stats-react
 
 ## Usage
 
@@ -34,4 +34,4 @@ pm2 start pm2.json
 ```
 
 ### Live Example
-http://stats.klpq.men/streams
+> http://stats.klpq.men/streams
