@@ -17,7 +17,7 @@ Cross platform support, runs on Win/Mac/Linux.
 - [Node Media Server](https://github.com/illuspas/Node-Media-Server)
 - [Google Plus API](https://console.developers.google.com/apis/library/plus.googleapis.com)
 
-### Frontend Counterpart
+## Frontend Counterpart
 > https://github.com/rebelvg/stats-react
 
 ## Usage
