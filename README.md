@@ -1,7 +1,7 @@
 # stats-node
 
 ## Overview
-Statistics server/API for collecting data from various media server about streams, streamers and stream viewers.
+Statistics server/API for collecting data from various media servers about streams, streamers and stream viewers.
 
 ### App Features
 - Multiplatform (Win/Mac/Linux)
