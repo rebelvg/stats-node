@@ -2,9 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const {URL} = require('url');
 const morgan = require('morgan');
-const session = require('express-session');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
 const passport = require('passport');
 
 const {db, stats} = require('./config.json');
@@ -12,16 +10,9 @@ const {db, stats} = require('./config.json');
 const app = express();
 
 if (process.env.NODE_ENV === 'dev') app.use(morgan('combined'));
-app.use(session({
-    secret: 'stats-node',
-    resave: false,
-    saveUninitialized: false
-}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
-app.use(cookieParser());
 app.use(passport.initialize());
-app.use(passport.session());
 app.set('trust proxy', true);
 
 require('./passport/init');
