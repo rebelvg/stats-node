@@ -12,8 +12,8 @@ let schema = new Schema({
     ipUpdated: {type: String, required: true},
     isAdmin: {type: Boolean, required: true},
     isStreamer: {type: Boolean, required: true},
-    token: {type: String, required: true, unique: true},
-    streamKey: {type: String, required: true, unique: true},
+    token: {type: String, required: true, unique: true, index: true},
+    streamKey: {type: String, required: true, unique: true, index: true},
     createdAt: {type: Date, required: true, index: true},
     updatedAt: {type: Date, required: true, index: true}
 }, {
