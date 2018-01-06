@@ -23,6 +23,7 @@ let schema = new Schema({
     bitrate: {type: Number, required: true},
     totalConnectionsCount: {type: Number, required: true},
     peakViewersCount: {type: Number, required: true},
+    userId: {type: Schema.Types.ObjectId, ref: 'User', index: true, default: null},
     createdAt: {type: Date, required: true, index: true},
     updatedAt: {type: Date, required: true, index: true}
 }, {

@@ -25,8 +25,25 @@ async function getNodeStats() {
     return res.body;
 }
 
+async function getClientsStats() {
+    let apiUrl = new URL(`http://${nodeHost}/api/clients`);
+
+    if (apiKey) {
+        apiUrl.searchParams.set('apiKey', apiKey);
+    }
+
+    let res = await request.get(apiUrl.href, {
+        resolveWithFullResponse: true,
+        json: true
+    });
+
+    return res.body;
+}
+
 async function updateStats() {
-    let channels = await getNodeStats();
+    let data = await Promise.all([getNodeStats(), getClientsStats()]);
+
+    let [channels, clients] = data;
 
     let live = {};
 
@@ -61,6 +78,7 @@ async function updateStats() {
                     streamQuery.bytes = channelData.publisher.bytes;
                     streamQuery.ip = channelData.publisher.ip;
                     streamQuery.protocol = 'rtmp';
+                    streamQuery.userId = _.get(clients, [channelData.publisher.clientId, 'userId'], null);
 
                     streamObj = new Stream(streamQuery);
                 } else {
@@ -89,6 +107,7 @@ async function updateStats() {
                     subscriberQuery.bytes = subscriber.bytes;
                     subscriberQuery.ip = subscriber.ip;
                     subscriberQuery.protocol = subscriber.protocol;
+                    subscriberQuery.userId = _.get(clients, [subscriber.clientId, 'userId'], null);
 
                     subscriberObj = new Subscriber(subscriberQuery);
                 } else {

@@ -19,6 +19,7 @@ let schema = new Schema({
     protocol: {type: String, required: true},
     duration: {type: Number, required: true},
     bitrate: {type: Number, required: true},
+    userId: {type: Schema.Types.ObjectId, ref: 'User', index: true, default: null},
     createdAt: {type: Date, required: true, index: true},
     updatedAt: {type: Date, required: true, index: true}
 }, {
