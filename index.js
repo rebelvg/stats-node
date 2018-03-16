@@ -38,8 +38,10 @@ require('./servers/amsUpdate');
 require('./servers/nmsUpdate');
 
 const readToken = require('./middleware/readToken');
+const hideFields = require('./middleware/hideFields');
 
 app.use(readToken);
+app.use(hideFields);
 
 const channels = require('./routes/channels');
 const streams = require('./routes/streams');

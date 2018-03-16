@@ -5,11 +5,8 @@ const subscriberController = require('../controllers/subscriber');
 const parseFilter = require('../middleware/query');
 const parseSort = require('../middleware/sort');
 const Subscriber = require('../models/subscriber');
-const hideFields = require('../middleware/hideFields');
 
 let router = express.Router();
-
-router.use(hideFields);
 
 router.get('/:id', subscriberController.findById);
 router.get('/', expressPaginate.middleware(10, 100), parseFilter('subscriber'), parseSort(Subscriber), subscriberController.find);
