@@ -3,6 +3,7 @@ const _ = require('lodash');
 const Stream = require('../models/stream');
 const Subscriber = require('../models/subscriber');
 const IP = require('../models/ip');
+const hideFields = require('../helpers/hideFields');
 
 const filterSubscribers = require('../helpers/filterSubscribers');
 
@@ -45,6 +46,14 @@ function findById(req, res, next) {
                 totalIPs: _.chain(subscribers).map('ip').uniq().value().length
             };
 
+            if (!req.user) {
+                hideFields(stream);
+
+                _.forEach(subscribers, subscriber => {
+                    hideFields(subscriber);
+                });
+            }
+
             res.json({
                 stream: stream,
                 subscribers: subscribers,
@@ -86,6 +95,12 @@ function find(req, res, next) {
             ]);
 
             let uniqueIPs = (await Stream.distinct('ip', req.queryObj)).length;
+
+            if (!req.user) {
+                _.forEach(ret.docs, stream => {
+                    hideFields(stream);
+                });
+            }
 
             res.json({
                 streams: ret.docs,
@@ -164,6 +179,10 @@ function graph(req, res, next) {
             }
 
             graph = _.sortBy(graph, ['time']);
+
+            if (!req.user) {
+                hideFields(stream);
+            }
 
             res.json({stream: stream, events: graph});
         })

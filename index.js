@@ -4,6 +4,8 @@ const {URL} = require('url');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const passport = require('passport');
+const fs = require('fs');
+const cors = require('cors');
 
 const {db, stats} = require('./config.json');
 
@@ -38,10 +40,9 @@ require('./servers/amsUpdate');
 require('./servers/nmsUpdate');
 
 const readToken = require('./middleware/readToken');
-const hideFields = require('./middleware/hideFields');
 
+app.use(cors());
 app.use(readToken);
-app.use(hideFields);
 
 const channels = require('./routes/channels');
 const streams = require('./routes/streams');
@@ -58,13 +59,25 @@ app.use('/users', users);
 app.use('/admin', admin);
 
 app.use(function (req, res, next) {
-    throw new Error('404');
+    throw new Error('Not found.');
 });
 
 app.use(function (err, req, res, next) {
     res.status(500).json({error: err.message});
 });
 
+//remove previous unix socket
+if (typeof stats.port === 'string') {
+    if (fs.existsSync(stats.port)) {
+        fs.unlinkSync(stats.port);
+    }
+}
+
 app.listen(stats.port, () => {
     console.log('server is running.');
+
+    //set unix socket rw rights for nginx
+    if (typeof stats.port === 'string') {
+        fs.chmodSync(stats.port, '777');
+    }
 });
