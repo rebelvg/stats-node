@@ -19,7 +19,7 @@ router.get('/auth/google', passport.authenticate('google', {
     ]
 }));
 router.get('/auth/google/callback', passport.authenticate('google', {session: false}), function (req, res, next) {
-    res.redirect(stats.googleRedirect + `?token=${req.user.token}`);
+    res.redirect(stats.googleRedirect + `/?token=${req.user.token}`);
 });
 
 module.exports = router;
