@@ -8,7 +8,7 @@ const stats = require('../config.json').stats;
 passport.use(new GoogleStrategy({
     clientID: googleKeys.web.client_id,
     clientSecret: googleKeys.web.client_secret,
-    callbackURL: `http://${stats.googleCallbackHost}/users/auth/google/callback`,
+    callbackURL: `${stats.googleCallbackHost}/users/auth/google/callback`,
     passReqToCallback: true
 }, function (req, accessToken, refreshToken, profile, done) {
     User.findOne({
