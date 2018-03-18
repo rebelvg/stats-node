@@ -62,7 +62,7 @@ async function updateStats() {
 
             let streamObj = null;
 
-            if (channelData.publisher) {
+            if (channelData.publisher && _.get(clients, [channelData.publisher.clientId])) {
                 let streamQuery = {
                     app: channelData.publisher.app,
                     channel: channelData.publisher.stream,
@@ -92,6 +92,8 @@ async function updateStats() {
             }
 
             for (let subscriber of channelData.subscribers) {
+                if (!_.get(clients, [subscriber.clientId])) continue;
+
                 let subscriberQuery = {
                     app: subscriber.app,
                     channel: subscriber.stream,
