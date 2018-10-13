@@ -32,10 +32,10 @@ mongoose.connect(nodeMongoUrl.href, {useMongoClient: true}, function (error) {
 });
 
 MongoClient.connect(amsMongoUrl.href)
-    .then(async db => {
-        let amsIps = db.collection('ips');
-        let amsStreams = db.collection('streams');
-        let amsSubscribers = db.collection('subscribers');
+    .then(async amsDb => {
+        let amsIps = amsDb.collection('ips');
+        let amsStreams = amsDb.collection('streams');
+        let amsSubscribers = amsDb.collection('subscribers');
 
         let nodeDB = await MongoClient.connect(nodeMongoUrl.href);
 
