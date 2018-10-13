@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "start": "node index.js",
+    "transfer": "node _tools/transfer.js"
+  },
   "dependencies": {
     "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.3",
