@@ -3,37 +3,37 @@ const _ = require('lodash');
 const User = require('../../models/user');
 
 function find(req, res, next) {
-    User.find(null, null, {
-        sort: {
-            createdAt: -1
-        }
+  User.find(null, null, {
+    sort: {
+      createdAt: -1
+    }
+  })
+    .then(users => {
+      res.json({
+        users: users
+      });
     })
-        .then(users => {
-            res.json({
-                users: users
-            });
-        })
-        .catch(next);
+    .catch(next);
 }
 
 function update(req, res, next) {
-    User.findOne({
-        _id: req.params.id
+  User.findOne({
+    _id: req.params.id
+  })
+    .then(async user => {
+      if (!user) throw Error('User not found.');
+
+      _.forEach(req.body, (value, key) => {
+        user[key] = value;
+      });
+
+      await user.save();
+
+      res.json({
+        user: user
+      });
     })
-        .then(async user => {
-            if (!user) throw Error('User not found.');
-
-            _.forEach(req.body, (value, key) => {
-                user[key] = value;
-            });
-
-            await user.save();
-
-            res.json({
-                user: user
-            });
-        })
-        .catch(next);
+    .catch(next);
 }
 
 exports.find = find;

@@ -7,40 +7,44 @@ const Schema = mongoose.Schema;
 
 const apiLink = `http://ip-api.com/json/`;
 
-let schema = new Schema({
-    ip: {type: String, required: true, unique: true, index: true},
-    api: {type: Object, required: true},
-    createdAt: {type: Date, required: true, index: true},
-    updatedAt: {type: Date, required: true, index: true}
-}, {
+let schema = new Schema(
+  {
+    ip: { type: String, required: true, unique: true, index: true },
+    api: { type: Object, required: true },
+    createdAt: { type: Date, required: true, index: true },
+    updatedAt: { type: Date, required: true, index: true }
+  },
+  {
     retainKeyOrder: true
-});
+  }
+);
 
-schema.pre('validate', function (next) {
-    request.get(apiLink + this.ip, {
-        json: true
+schema.pre('validate', function(next) {
+  request
+    .get(apiLink + this.ip, {
+      json: true
     })
-        .then(res => {
-            this.api = res;
+    .then(res => {
+      this.api = res;
 
-            next();
-        })
-        .catch(next);
+      next();
+    })
+    .catch(next);
 });
 
-schema.pre('validate', function (next) {
-    let updatedAt = new Date();
+schema.pre('validate', function(next) {
+  let updatedAt = new Date();
 
-    if (this.isNew) {
-        this.createdAt = updatedAt;
-    }
+  if (this.isNew) {
+    this.createdAt = updatedAt;
+  }
 
-    this.updatedAt = updatedAt;
+  this.updatedAt = updatedAt;
 
-    next();
+  next();
 });
 
-schema.set('toJSON', {virtuals: true});
+schema.set('toJSON', { virtuals: true });
 
 schema.plugin(mongoosePaginate);
 

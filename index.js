@@ -1,19 +1,19 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const {URL} = require('url');
+const { URL } = require('url');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 const fs = require('fs');
 const cors = require('cors');
 
-const {db, stats} = require('./config.json');
+const { db, stats } = require('./config.json');
 
 const app = express();
 
 if (process.env.NODE_ENV === 'dev') app.use(morgan('combined'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
 app.set('trust proxy', true);
 
@@ -24,15 +24,19 @@ mongoose.Promise = Promise;
 let mongoUrl = new URL(`mongodb://${db.host}/${db.dbName}`);
 
 if (db.authDb) {
-    mongoUrl.username = encodeURIComponent(db.user);
-    mongoUrl.password = encodeURIComponent(db.password);
+  mongoUrl.username = encodeURIComponent(db.user);
+  mongoUrl.password = encodeURIComponent(db.password);
 
-    mongoUrl.searchParams.set('authSource', db.authDb);
+  mongoUrl.searchParams.set('authSource', db.authDb);
 }
 
-mongoose.connect(mongoUrl.href, {useMongoClient: true}, function (error) {
+mongoose.connect(
+  mongoUrl.href,
+  { useMongoClient: true },
+  function(error) {
     if (error) throw error;
-});
+  }
+);
 
 global.liveStats = {};
 
@@ -58,26 +62,26 @@ app.use('/ips', ips);
 app.use('/users', users);
 app.use('/admin', admin);
 
-app.use(function (req, res, next) {
-    throw new Error('Not found.');
+app.use(function(req, res, next) {
+  throw new Error('Not found.');
 });
 
-app.use(function (err, req, res, next) {
-    res.status(500).json({error: err.message});
+app.use(function(err, req, res, next) {
+  res.status(500).json({ error: err.message });
 });
 
 //remove previous unix socket
 if (typeof stats.port === 'string') {
-    if (fs.existsSync(stats.port)) {
-        fs.unlinkSync(stats.port);
-    }
+  if (fs.existsSync(stats.port)) {
+    fs.unlinkSync(stats.port);
+  }
 }
 
 app.listen(stats.port, () => {
-    console.log('server is running.');
+  console.log('server is running.');
 
-    //set unix socket rw rights for nginx
-    if (typeof stats.port === 'string') {
-        fs.chmodSync(stats.port, '777');
-    }
+  //set unix socket rw rights for nginx
+  if (typeof stats.port === 'string') {
+    fs.chmodSync(stats.port, '777');
+  }
 });

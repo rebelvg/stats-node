@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "node index.js",
+    "prepush": "prettier --write \"**/*.js\"",
+    "start": "node .",
     "transfer": "node _tools/transfer.js"
   },
   "dependencies": {
@@ -27,5 +28,8 @@
     "request-promise-native": "^1.0.5",
     "uuid": "^3.1.0",
     "xml2js": "^0.4.19"
+  },
+  "devDependencies": {
+    "prettier": "^1.15.3"
   }
 }

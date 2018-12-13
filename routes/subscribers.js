@@ -9,6 +9,12 @@ const Subscriber = require('../models/subscriber');
 let router = express.Router();
 
 router.get('/:id', subscriberController.findById);
-router.get('/', expressPaginate.middleware(10, 100), parseFilter('subscriber'), parseSort(Subscriber), subscriberController.find);
+router.get(
+  '/',
+  expressPaginate.middleware(10, 100),
+  parseFilter('subscriber'),
+  parseSort(Subscriber),
+  subscriberController.find
+);
 
 module.exports = router;

@@ -1,4 +1,5 @@
-node_modules/
+.vscode/
 .idea/
+node_modules/
 config.json
 google-keys.json
