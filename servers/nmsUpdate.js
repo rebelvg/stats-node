@@ -92,7 +92,9 @@ async function updateStats() {
       }
 
       for (const subscriber of channelData.subscribers) {
-        if (!_.get(clients, [subscriber.clientId])) {continue;}
+        if (!_.get(clients, [subscriber.clientId])) {
+          continue;
+        }
 
         const subscriberQuery = {
           app: subscriber.app,
@@ -132,7 +134,9 @@ async function updateStats() {
   return live;
 }
 
-if (!nmsConfig.enabled) {return;}
+if (!nmsConfig.enabled) {
+  return;
+}
 
 console.log('nmsUpdate running.');
 
@@ -142,7 +146,9 @@ function runUpdate() {
       _.set(global.liveStats, ['nms'], live);
     })
     .catch(e => {
-      if (e.name === 'RequestError' && e.error.code === 'ECONNREFUSED') {return;}
+      if (e.name === 'RequestError' && e.error.code === 'ECONNREFUSED') {
+        return;
+      }
 
       console.error(e);
     });

@@ -260,7 +260,9 @@ async function updateStats() {
   return live;
 }
 
-if (!amsConfig.enabled) {return;}
+if (!amsConfig.enabled) {
+  return;
+}
 
 console.log('amsUpdate running.');
 
@@ -270,7 +272,9 @@ function runUpdate() {
       _.set(global.liveStats, ['ams'], live);
     })
     .catch(e => {
-      if (e.name === 'RequestError' && e.error.code === 'ECONNREFUSED') {return;}
+      if (e.name === 'RequestError' && e.error.code === 'ECONNREFUSED') {
+        return;
+      }
 
       console.error(e);
     });
