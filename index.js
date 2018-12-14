@@ -15,7 +15,6 @@ if (process.env.NODE_ENV === 'dev') {
   app.use(morgan('combined'));
 }
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
 app.set('trust proxy', true);
 
