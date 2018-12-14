@@ -1,11 +1,10 @@
-let MongoClient = require('mongodb').MongoClient;
+const MongoClient = require('mongodb').MongoClient;
 const { URL } = require('url');
 const moment = require('moment');
-const fs = require('fs');
 
-const { db, stats } = require('../config.json');
+const { db } = require('../config.json');
 
-let mongoUrl = new URL(`mongodb://${db.host}/ams`);
+const mongoUrl = new URL(`mongodb://${db.host}/ams`);
 
 if (db.authDb) {
   mongoUrl.username = encodeURIComponent(db.user);
@@ -19,21 +18,21 @@ const Subscriber = require('../models/subscriber');
 
 MongoClient.connect(mongoUrl.href)
   .then(async db => {
-    let streams = db.collection('streams');
-    let subscribers = db.collection('subscribers');
+    const streams = db.collection('streams');
+    const subscribers = db.collection('subscribers');
 
     // fs.writeFileSync('streams.json', JSON.stringify(await streams.find().toArray()));
     // fs.writeFileSync('subscribers.json', JSON.stringify(await subscribers.find().toArray()));
     //
     // console.log('done.');
 
-    let cursor = streams
+    const cursor = streams
       .find()
       .sort({ timestamp: 1 })
       .stream();
 
     cursor.on('data', async function(data) {
-      let stream = new Stream({
+      const stream = new Stream({
         app: data.app,
         channel: data.channel,
         serverId: data.id,
@@ -59,13 +58,13 @@ MongoClient.connect(mongoUrl.href)
       console.log('cursor stopped.');
     });
 
-    let subscribersCursor = subscribers
+    const subscribersCursor = subscribers
       .find()
       .sort({ timestamp: 1 })
       .stream();
 
     subscribersCursor.on('data', async function(data) {
-      let subscriber = new Subscriber({
+      const subscriber = new Subscriber({
         app: data.app,
         channel: data.channel,
         serverId: data.id,

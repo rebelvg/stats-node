@@ -9,7 +9,7 @@ const IP = require('../models/ip');
 
 const Schema = mongoose.Schema;
 
-let schema = new Schema(
+const schema = new Schema(
   {
     app: { type: String, required: true },
     channel: { type: String, required: true },
@@ -34,10 +34,10 @@ let schema = new Schema(
 );
 
 schema.pre('validate', function(next) {
-  let updatedAt = new Date();
+  const updatedAt = new Date();
 
   if (this.isNew) {
-    let addr = ip6addr.parse(this.ip);
+    const addr = ip6addr.parse(this.ip);
 
     this.ip = addr.kind() === 'ipv6' ? addr.toString({ format: 'v6' }) : addr.toString({ format: 'v4' });
   }
@@ -60,14 +60,20 @@ schema.pre('validate', function(next) {
 
 schema.pre('save', function(next) {
   if (this.isNew) {
-    let ip = IP.findOne({ ip: this.ip }, (err, ip) => {
-      if (err) return console.error(err.message);
-      if (ip) return;
+    IP.findOne({ ip: this.ip }, (err, ip) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      if (ip) {
+        return;
+      }
 
       ip = new IP({ ip: this.ip });
 
       ip.save(function(err) {
-        if (err) return console.error(err.message);
+        if (err) {
+          return console.error(err.message);
+        }
       });
     });
   }
@@ -76,7 +82,7 @@ schema.pre('save', function(next) {
 });
 
 schema.virtual('isLive').get(function() {
-  let stream = _.get(global.liveStats, [this.serverType, this.app, this.channel, 'publisher'], null);
+  const stream = _.get(global.liveStats, [this.serverType, this.app, this.channel, 'publisher'], null);
 
   if (!stream) {
     return false;
@@ -129,14 +135,16 @@ schema.methods.getRelatedStreams = function(query = {}) {
 };
 
 schema.methods.updateInfo = async function() {
-  let subscribers = await this.getSubscribers();
+  const subscribers = await this.getSubscribers();
 
   this.totalConnectionsCount = subscribers.length;
 
   _.forEach(subscribers, subscriber => {
-    let viewersCount = filterSubscribers(subscribers, subscriber.connectCreated).length;
+    const viewersCount = filterSubscribers(subscribers, subscriber.connectCreated).length;
 
-    if (viewersCount > this.peakViewersCount) this.peakViewersCount = viewersCount;
+    if (viewersCount > this.peakViewersCount) {
+      this.peakViewersCount = viewersCount;
+    }
   });
 };
 

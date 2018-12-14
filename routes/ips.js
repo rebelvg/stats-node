@@ -7,7 +7,7 @@ const parseSort = require('../middleware/sort');
 const IP = require('../models/ip');
 const isLoggedIn = require('../middleware/isLoggedIn');
 
-let router = express.Router();
+const router = express.Router();
 
 router.get('/:id', isLoggedIn, parseFilter('ip'), parseSort(IP), ipController.findById);
 router.get('/', isLoggedIn, expressPaginate.middleware(10, 100), parseFilter('ip'), parseSort(IP), ipController.find);

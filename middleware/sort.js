@@ -4,9 +4,7 @@ const allowedPaths = ['api.country', 'api.city', 'api.isp'];
 
 function parseSort(model) {
   return function(req, res, next) {
-    let sortSettings = {};
-
-    let sortObj = {};
+    const sortObj = {};
 
     if (_.isArray(req.query.sort)) {
       _.forEach(req.query.sort, sort => {

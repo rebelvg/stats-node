@@ -6,7 +6,7 @@ const parseFilter = require('../middleware/query');
 const parseSort = require('../middleware/sort');
 const Stream = require('../models/stream');
 
-let router = express.Router();
+const router = express.Router();
 
 router.get('/:id', parseFilter('stream'), parseSort(Stream), streamController.findById);
 router.get('/', expressPaginate.middleware(10, 100), parseFilter('stream'), parseSort(Stream), streamController.find);

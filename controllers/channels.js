@@ -24,7 +24,7 @@ function getStartTime(server, app, channel) {
 }
 
 function appChannelStatsBase(server, app, channel) {
-  let channelStats = {
+  const channelStats = {
     isLive: false,
     viewers: 0,
     duration: 0,
@@ -42,7 +42,7 @@ function appChannelStatsBase(server, app, channel) {
 }
 
 function channelStats(req, res, next) {
-  let channelsStats = {};
+  const channelsStats = {};
 
   _.forEach(_.get(global.liveStats, [req.params.server], {}), (channels, appName) => {
     _.forEach(channels, (channelObj, channelName) => {
@@ -54,21 +54,22 @@ function channelStats(req, res, next) {
 }
 
 function appChannelStats(req, res, next) {
-  let channelStats = appChannelStatsBase(req.params.server, req.params.app, req.params.channel);
+  const channelStats = appChannelStatsBase(req.params.server, req.params.app, req.params.channel);
 
   res.json(channelStats);
 }
 
 async function channels(req, res, next) {
-  for (let [serverName, serverObj] of Object.entries(global.liveStats)) {
-    for (let [appName, appObj] of Object.entries(serverObj)) {
-      for (let [channelName, channelObj] of Object.entries(appObj)) {
-        if (channelObj.publisher)
+  for (const [_serverName, serverObj] of Object.entries(global.liveStats)) {
+    for (const [_appName, appObj] of Object.entries(serverObj)) {
+      for (const [_channelName, channelObj] of Object.entries(appObj)) {
+        if (channelObj.publisher) {
           await Stream.populate(channelObj.publisher, {
             path: 'location'
           });
+        }
 
-        for (let subscriberObj of channelObj.subscribers) {
+        for (const subscriberObj of channelObj.subscribers) {
           await Subscriber.populate(subscriberObj, {
             path: 'location'
           });
@@ -81,7 +82,7 @@ async function channels(req, res, next) {
 }
 
 function legacy(req, res, next) {
-  let channelStats = {
+  const channelStats = {
     isLive: false,
     viewers: 0,
     bitrate_live: 0,

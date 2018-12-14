@@ -6,7 +6,7 @@ const parseFilter = require('../middleware/query');
 const parseSort = require('../middleware/sort');
 const Subscriber = require('../models/subscriber');
 
-let router = express.Router();
+const router = express.Router();
 
 router.get('/:id', subscriberController.findById);
 router.get(

@@ -23,9 +23,9 @@ function find(req, res, next) {
     limit: req.query.limit
   })
     .then(async ret => {
-      let counties = await IP.distinct('api.country', req.queryObj);
-      let cities = await IP.distinct('api.city', req.queryObj);
-      let IPSs = await IP.distinct('api.isp', req.queryObj);
+      const counties = await IP.distinct('api.country', req.queryObj);
+      const cities = await IP.distinct('api.city', req.queryObj);
+      const IPSs = await IP.distinct('api.isp', req.queryObj);
 
       res.json({
         ips: ret.docs,

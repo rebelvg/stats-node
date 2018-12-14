@@ -21,7 +21,7 @@ function update(req, res, next) {
     _id: req.params.id
   })
     .then(async user => {
-      if (!user) throw Error('User not found.');
+      if (!user) {throw Error('User not found.');}
 
       _.forEach(req.body, (value, key) => {
         user[key] = value;

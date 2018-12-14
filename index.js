@@ -11,7 +11,7 @@ const { db, stats } = require('./config.json');
 
 const app = express();
 
-if (process.env.NODE_ENV === 'dev') app.use(morgan('combined'));
+if (process.env.NODE_ENV === 'dev') {app.use(morgan('combined'));}
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
@@ -21,7 +21,7 @@ require('./passport/init');
 
 mongoose.Promise = Promise;
 
-let mongoUrl = new URL(`mongodb://${db.host}/${db.dbName}`);
+const mongoUrl = new URL(`mongodb://${db.host}/${db.dbName}`);
 
 if (db.authDb) {
   mongoUrl.username = encodeURIComponent(db.user);
@@ -34,7 +34,7 @@ mongoose.connect(
   mongoUrl.href,
   { useMongoClient: true },
   function(error) {
-    if (error) throw error;
+    if (error) {throw error;}
   }
 );
 

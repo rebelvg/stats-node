@@ -14,7 +14,7 @@ const Subscriber = require('../models/subscriber');
 
 const amsConfig = require('../config.json').ams;
 
-let parseString = promisify(xml2js.parseString);
+const parseString = promisify(xml2js.parseString);
 
 const amsAppsPath = amsConfig.appsPath;
 
@@ -23,7 +23,7 @@ const amsLogin = amsConfig.user;
 const amsPassword = amsConfig.password;
 
 async function getAmsStats(command, params = []) {
-  let apiUrl = new URL(`http://${amsHost}/admin/${command}`);
+  const apiUrl = new URL(`http://${amsHost}/admin/${command}`);
 
   apiUrl.searchParams.set('auser', amsLogin);
   apiUrl.searchParams.set('apswd', amsPassword);
@@ -32,11 +32,11 @@ async function getAmsStats(command, params = []) {
     apiUrl.searchParams.set(param[0], param[1]);
   });
 
-  let res = await request.get(apiUrl.href, {
+  const res = await request.get(apiUrl.href, {
     resolveWithFullResponse: true
   });
 
-  let parsedXml = await parseString(res.body, {
+  const parsedXml = await parseString(res.body, {
     trim: true,
     explicitArray: false,
     explicitRoot: false,
@@ -51,7 +51,7 @@ async function getAmsStats(command, params = []) {
 }
 
 async function getApps() {
-  let getApps = await getAmsStats('getApps');
+  const getApps = await getAmsStats('getApps');
 
   return _.filter(getApps.data, (appName, key) => {
     return key !== 'total_apps';
@@ -59,7 +59,7 @@ async function getApps() {
 }
 
 async function getAppStats(appName) {
-  let getAppStats = await getAmsStats('getAppStats', [['app', appName]]);
+  const getAppStats = await getAmsStats('getAppStats', [['app', appName]]);
 
   if (!getAppStats.data.cores) {
     return false;
@@ -69,7 +69,7 @@ async function getAppStats(appName) {
 }
 
 async function getLiveStreams(appName) {
-  let getLiveStreams = await getAmsStats('getLiveStreams', [['appInst', appName]]);
+  const getLiveStreams = await getAmsStats('getLiveStreams', [['appInst', appName]]);
 
   if (!getLiveStreams.data) {
     return [];
@@ -79,19 +79,19 @@ async function getLiveStreams(appName) {
 }
 
 async function getLiveStreamStats(appName, channelName) {
-  let getLiveStreamStats = await getAmsStats('getLiveStreamStats', [['appInst', appName], ['stream', channelName]]);
+  const getLiveStreamStats = await getAmsStats('getLiveStreamStats', [['appInst', appName], ['stream', channelName]]);
 
   return getLiveStreamStats.data;
 }
 
 async function getUserStats(appName, userId) {
-  let getUserStats = await getAmsStats('getUserStats', [['appInst', appName], ['userId', userId]]);
+  const getUserStats = await getAmsStats('getUserStats', [['appInst', appName], ['userId', userId]]);
 
   return getUserStats.data;
 }
 
 async function getUsers(appName) {
-  let getUsers = await getAmsStats('getUsers', [['appInst', appName]]);
+  const getUsers = await getAmsStats('getUsers', [['appInst', appName]]);
 
   return _.filter(getUsers.data, (appName, key) => {
     return key !== 'name';
@@ -99,9 +99,9 @@ async function getUsers(appName) {
 }
 
 function parseClientFile(path) {
-  let clientFile = fs.readFileSync(path, { encoding: 'UTF-8' });
+  const clientFile = fs.readFileSync(path, { encoding: 'UTF-8' });
 
-  let clientData = clientFile.split(os.EOL);
+  const clientData = clientFile.split(os.EOL);
 
   return {
     amsId: clientData[0],
@@ -115,24 +115,24 @@ function parseClientFile(path) {
 }
 
 async function getIPs(appName) {
-  let clientsFolder = path.join(amsAppsPath, appName, 'clients');
+  const clientsFolder = path.join(amsAppsPath, appName, 'clients');
 
-  let clientFiles = fs.readdirSync(clientsFolder);
+  const clientFiles = fs.readdirSync(clientsFolder);
 
   let fileIDs = [];
 
-  for (let clientFileName of clientFiles) {
+  for (const clientFileName of clientFiles) {
     fileIDs.push(parseClientFile(path.join(clientsFolder, clientFileName)));
   }
 
   fileIDs = _.sortBy(fileIDs, ['connectTime', 'amsId']);
 
-  let users = await getUsers(appName);
+  const users = await getUsers(appName);
 
   let apiIDs = [];
 
   apiIDs = _.map(users, async (userId, id) => {
-    let userStats = await getUserStats(appName, userId);
+    const userStats = await getUserStats(appName, userId);
 
     return {
       amsId: userId,
@@ -149,7 +149,7 @@ async function getIPs(appName) {
     throw new Error(`Lengths don't match.`);
   }
 
-  let IPs = {};
+  const IPs = {};
 
   _.forEach(apiIDs, (apiID, key) => {
     IPs[apiID.amsId] = fileIDs[key];
@@ -159,38 +159,38 @@ async function getIPs(appName) {
 }
 
 async function updateStats() {
-  let apps = await getApps();
+  const apps = await getApps();
 
-  let live = {};
+  const live = {};
 
-  let statsUpdateTime = new Date();
+  const statsUpdateTime = new Date();
 
-  for (let appName of apps) {
-    let app = await getAppStats(appName);
+  for (const appName of apps) {
+    const app = await getAppStats(appName);
 
     if (!app) {
       continue;
     }
 
-    let IPs = await getIPs(appName);
+    const IPs = await getIPs(appName);
 
-    let liveStreams = await getLiveStreams(appName);
+    const liveStreams = await getLiveStreams(appName);
 
-    for (let channelName of liveStreams) {
+    for (const channelName of liveStreams) {
       _.set(live, [appName, channelName], {
         publisher: null,
         subscribers: []
       });
 
-      let liveStreamStats = await getLiveStreamStats(appName, channelName);
+      const liveStreamStats = await getLiveStreamStats(appName, channelName);
 
       let streamObj = null;
 
       if (liveStreamStats.publisher) {
-        let id = liveStreamStats.publisher.client;
-        let userStats = await getUserStats(appName, id);
+        const id = liveStreamStats.publisher.client;
+        const userStats = await getUserStats(appName, id);
 
-        let streamQuery = {
+        const streamQuery = {
           app: appName,
           channel: channelName,
           serverType: 'ams',
@@ -218,11 +218,11 @@ async function updateStats() {
       }
 
       if (liveStreamStats.subscribers) {
-        for (let subscriber of Object.values(liveStreamStats.subscribers)) {
-          let id = subscriber.client;
-          let userStats = await getUserStats(appName, id);
+        for (const subscriber of Object.values(liveStreamStats.subscribers)) {
+          const id = subscriber.client;
+          const userStats = await getUserStats(appName, id);
 
-          let subscriberQuery = {
+          const subscriberQuery = {
             app: appName,
             channel: channelName,
             serverType: 'ams',
@@ -260,7 +260,7 @@ async function updateStats() {
   return live;
 }
 
-if (!amsConfig.enabled) return;
+if (!amsConfig.enabled) {return;}
 
 console.log('amsUpdate running.');
 
@@ -270,7 +270,7 @@ function runUpdate() {
       _.set(global.liveStats, ['ams'], live);
     })
     .catch(e => {
-      if (e.name === 'RequestError' && e.error.code === 'ECONNREFUSED') return;
+      if (e.name === 'RequestError' && e.error.code === 'ECONNREFUSED') {return;}
 
       console.error(e);
     });

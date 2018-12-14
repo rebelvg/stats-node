@@ -1,6 +1,6 @@
 const express = require('express');
 
-let router = express.Router();
+const router = express.Router();
 
 const users = require('../routes/admin/users');
 const streamers = require('../routes/admin/streamers');

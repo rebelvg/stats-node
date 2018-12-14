@@ -1,7 +1,6 @@
 const _ = require('lodash');
 
 const Subscriber = require('../models/subscriber');
-const Stream = require('../models/stream');
 const IP = require('../models/ip');
 const hideFields = require('../helpers/hideFields');
 
@@ -13,7 +12,7 @@ function findById(req, res, next) {
         throw new Error('Subscriber not found.');
       }
 
-      let streams = await subscriber
+      const streams = await subscriber
         .getStreams()
         .sort({ connectCreated: 1 })
         .populate(['location']);
@@ -39,7 +38,7 @@ function find(req, res, next) {
     populate: ['location']
   })
     .then(async ret => {
-      let aggregation = await Subscriber.aggregate([
+      const aggregation = await Subscriber.aggregate([
         { $match: req.queryObj },
         {
           $group: {
@@ -54,7 +53,7 @@ function find(req, res, next) {
         }
       ]);
 
-      let uniqueIPs = (await Subscriber.distinct('ip', req.queryObj)).length;
+      const uniqueIPs = (await Subscriber.distinct('ip', req.queryObj)).length;
 
       if (!req.user) {
         _.forEach(ret.docs, subscriber => {

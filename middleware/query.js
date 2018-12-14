@@ -50,7 +50,7 @@ const filterRules = {
     do: [],
     test: [_.isString],
     cb: async function(queryObj, ip, req) {
-      let ipQuery = [
+      const ipQuery = [
         { 'api.country': new RegExp(ip, 'gi') },
         { 'api.city': new RegExp(ip, 'gi') },
         { 'api.isp': new RegExp(ip, 'gi') },
@@ -58,13 +58,15 @@ const filterRules = {
         { 'api.message': new RegExp(ip, 'gi') }
       ];
 
-      let ips = await IP.distinct('ip', {
+      const ips = await IP.distinct('ip', {
         $or: ipQuery
       });
 
-      let query = [{ ip: { $in: ips } }];
+      const query = [{ ip: { $in: ips } }];
 
-      if (req.user) query.push({ ip: new RegExp(ip, 'gi') });
+      if (req.user) {
+        query.push({ ip: new RegExp(ip, 'gi') });
+      }
 
       queryObj.$or = query;
     }
@@ -189,9 +191,9 @@ function parseFilter(modelName) {
   const rules = _.get(rulePresets, [modelName], {});
 
   return async function(req, res, next) {
-    let queryObj = {};
+    const queryObj = {};
 
-    loop1: for (let [fieldName, rule] of Object.entries(rules)) {
+    loop1: for (const [fieldName, rule] of Object.entries(rules)) {
       if (req.query.hasOwnProperty(fieldName)) {
         try {
           let value = req.query[fieldName];
@@ -200,8 +202,10 @@ function parseFilter(modelName) {
             value = fnc(value);
           });
 
-          for (let fnc of rule.test) {
-            if (!fnc(value)) continue loop1;
+          for (const fnc of rule.test) {
+            if (!fnc(value)) {
+              continue loop1;
+            }
           }
 
           await rule.cb(queryObj, value, req);

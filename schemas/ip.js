@@ -1,13 +1,12 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate');
-const _ = require('lodash');
 const request = require('request-promise-native');
 
 const Schema = mongoose.Schema;
 
 const apiLink = `http://ip-api.com/json/`;
 
-let schema = new Schema(
+const schema = new Schema(
   {
     ip: { type: String, required: true, unique: true, index: true },
     api: { type: Object, required: true },
@@ -33,7 +32,7 @@ schema.pre('validate', function(next) {
 });
 
 schema.pre('validate', function(next) {
-  let updatedAt = new Date();
+  const updatedAt = new Date();
 
   if (this.isNew) {
     this.createdAt = updatedAt;

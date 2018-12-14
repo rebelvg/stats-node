@@ -11,13 +11,13 @@ const nodeHost = nmsConfig.host;
 const apiKey = nmsConfig.password;
 
 async function getNodeStats() {
-  let apiUrl = new URL(`http://${nodeHost}/api/streams`);
+  const apiUrl = new URL(`http://${nodeHost}/api/streams`);
 
   if (apiKey) {
     apiUrl.searchParams.set('apiKey', apiKey);
   }
 
-  let res = await request.get(apiUrl.href, {
+  const res = await request.get(apiUrl.href, {
     resolveWithFullResponse: true,
     json: true
   });
@@ -26,13 +26,13 @@ async function getNodeStats() {
 }
 
 async function getClientsStats() {
-  let apiUrl = new URL(`http://${nodeHost}/api/clients`);
+  const apiUrl = new URL(`http://${nodeHost}/api/clients`);
 
   if (apiKey) {
     apiUrl.searchParams.set('apiKey', apiKey);
   }
 
-  let res = await request.get(apiUrl.href, {
+  const res = await request.get(apiUrl.href, {
     resolveWithFullResponse: true,
     json: true
   });
@@ -41,18 +41,18 @@ async function getClientsStats() {
 }
 
 async function updateStats() {
-  let data = await Promise.all([getNodeStats(), getClientsStats()]);
+  const data = await Promise.all([getNodeStats(), getClientsStats()]);
 
-  let [channels, clients] = data;
+  const [channels, clients] = data;
 
-  let live = {};
+  const live = {};
 
-  let statsUpdateTime = new Date();
+  const statsUpdateTime = new Date();
 
-  for (let appObj of Object.entries(channels)) {
+  for (const appObj of Object.entries(channels)) {
     const [appName, channelObjs] = appObj;
 
-    for (let channelObj of Object.entries(channelObjs)) {
+    for (const channelObj of Object.entries(channelObjs)) {
       const [channelName, channelData] = channelObj;
 
       _.set(live, [appName, channelName], {
@@ -63,7 +63,7 @@ async function updateStats() {
       let streamObj = null;
 
       if (channelData.publisher && _.get(clients, [channelData.publisher.clientId])) {
-        let streamQuery = {
+        const streamQuery = {
           app: channelData.publisher.app,
           channel: channelData.publisher.stream,
           serverType: 'nms',
@@ -91,10 +91,10 @@ async function updateStats() {
         _.set(live, [appName, channelName, 'publisher'], streamObj);
       }
 
-      for (let subscriber of channelData.subscribers) {
-        if (!_.get(clients, [subscriber.clientId])) continue;
+      for (const subscriber of channelData.subscribers) {
+        if (!_.get(clients, [subscriber.clientId])) {continue;}
 
-        let subscriberQuery = {
+        const subscriberQuery = {
           app: subscriber.app,
           channel: subscriber.stream,
           serverType: 'nms',
@@ -132,7 +132,7 @@ async function updateStats() {
   return live;
 }
 
-if (!nmsConfig.enabled) return;
+if (!nmsConfig.enabled) {return;}
 
 console.log('nmsUpdate running.');
 
@@ -142,7 +142,7 @@ function runUpdate() {
       _.set(global.liveStats, ['nms'], live);
     })
     .catch(e => {
-      if (e.name === 'RequestError' && e.error.code === 'ECONNREFUSED') return;
+      if (e.name === 'RequestError' && e.error.code === 'ECONNREFUSED') {return;}
 
       console.error(e);
     });

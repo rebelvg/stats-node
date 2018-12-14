@@ -1,7 +1,6 @@
 const _ = require('lodash');
 
 const Stream = require('../models/stream');
-const Subscriber = require('../models/subscriber');
 const IP = require('../models/ip');
 const hideFields = require('../helpers/hideFields');
 
@@ -15,17 +14,17 @@ function findById(req, res, next) {
         throw new Error('Stream not found.');
       }
 
-      let subscribers = await stream
+      const subscribers = await stream
         .getSubscribers(req.queryObj)
         .sort(_.isEmpty(req.sortObj) ? { connectCreated: 1 } : req.sortObj)
         .populate(['location']);
 
-      let relatedStreams = await stream
+      const relatedStreams = await stream
         .getRelatedStreams()
         .sort({ connectCreated: 1 })
         .populate(['location']);
 
-      let options = {
+      const options = {
         countries: _.concat(
           _.chain(subscribers)
             .map('location.api.country')
@@ -47,12 +46,14 @@ function findById(req, res, next) {
       let totalPeakViewers = 0;
 
       _.forEach(subscribers, subscriber => {
-        let viewersCount = filterSubscribers(subscribers, subscriber.connectCreated).length;
+        const viewersCount = filterSubscribers(subscribers, subscriber.connectCreated).length;
 
-        if (viewersCount > totalPeakViewers) totalPeakViewers = viewersCount;
+        if (viewersCount > totalPeakViewers) {
+          totalPeakViewers = viewersCount;
+        }
       });
 
-      let info = {
+      const info = {
         totalBytes: _.reduce(
           subscribers,
           (sum, sub) => {
@@ -101,7 +102,7 @@ function find(req, res, next) {
     populate: ['location']
   })
     .then(async ret => {
-      let aggregation = await Stream.aggregate([
+      const aggregation = await Stream.aggregate([
         { $match: req.queryObj },
         {
           $group: {
@@ -122,7 +123,7 @@ function find(req, res, next) {
         }
       ]);
 
-      let uniqueIPs = (await Stream.distinct('ip', req.queryObj)).length;
+      const uniqueIPs = (await Stream.distinct('ip', req.queryObj)).length;
 
       if (!req.user) {
         _.forEach(ret.docs, stream => {
@@ -161,7 +162,7 @@ function graph(req, res, next) {
         throw new Error('Stream not found.');
       }
 
-      let subscribers = await stream.getSubscribers(req.queryObj).sort({ connectCreated: 1 });
+      const subscribers = await stream.getSubscribers(req.queryObj).sort({ connectCreated: 1 });
 
       let graph = [];
 
@@ -172,7 +173,9 @@ function graph(req, res, next) {
       });
 
       _.forEach(subscribers, subscriber => {
-        if (stream.connectCreated >= subscriber.connectCreated) return;
+        if (stream.connectCreated >= subscriber.connectCreated) {
+          return;
+        }
 
         graph.push({
           eventName: 'subscriberConnected',
@@ -182,8 +185,12 @@ function graph(req, res, next) {
       });
 
       _.forEach(subscribers, subscriber => {
-        if (subscriber.connectUpdated >= stream.connectUpdated) return;
-        if (subscriber.isLive) return;
+        if (subscriber.connectUpdated >= stream.connectUpdated) {
+          return;
+        }
+        if (subscriber.isLive) {
+          return;
+        }
 
         graph.push({
           eventName: 'subscriberDisconnected',

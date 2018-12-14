@@ -3,7 +3,7 @@ const express = require('express');
 const channelController = require('../controllers/channels');
 const isLoggedIn = require('../middleware/isLoggedIn');
 
-let router = express.Router();
+const router = express.Router();
 
 router.get('/legacy/:server/:channel', channelController.legacy);
 router.get('/:server/:app/:channel', channelController.appChannelStats);

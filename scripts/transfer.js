@@ -1,15 +1,13 @@
-let MongoClient = require('mongodb').MongoClient;
+const MongoClient = require('mongodb').MongoClient;
 const { URL } = require('url');
 const moment = require('moment');
-const fs = require('fs');
-const _ = require('lodash');
 const mongoose = require('mongoose');
 
 mongoose.Promise = Promise;
 
-const { db, stats } = require('../config.json');
+const { db } = require('../config.json');
 
-let amsMongoUrl = new URL(`mongodb://${db.host}/ams`);
+const amsMongoUrl = new URL(`mongodb://${db.host}/ams`);
 
 if (db.authDb) {
   amsMongoUrl.username = encodeURIComponent(db.user);
@@ -18,7 +16,7 @@ if (db.authDb) {
   amsMongoUrl.searchParams.set('authSource', db.authDb);
 }
 
-let nodeMongoUrl = new URL(`mongodb://${db.host}/${db.dbName}`);
+const nodeMongoUrl = new URL(`mongodb://${db.host}/${db.dbName}`);
 
 if (db.authDb) {
   nodeMongoUrl.username = encodeURIComponent(db.user);
@@ -31,23 +29,25 @@ mongoose.connect(
   nodeMongoUrl.href,
   { useMongoClient: true },
   function(error) {
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
   }
 );
 
 MongoClient.connect(amsMongoUrl.href)
   .then(async amsDb => {
-    let amsIps = amsDb.collection('ips');
-    let amsStreams = amsDb.collection('streams');
-    let amsSubscribers = amsDb.collection('subscribers');
+    const amsIps = amsDb.collection('ips');
+    const amsStreams = amsDb.collection('streams');
+    const amsSubscribers = amsDb.collection('subscribers');
 
-    let nodeDB = await MongoClient.connect(nodeMongoUrl.href);
+    const nodeDB = await MongoClient.connect(nodeMongoUrl.href);
 
-    let nodeIPsCollection = nodeDB.collection('ips');
+    const nodeIPsCollection = nodeDB.collection('ips');
 
-    let nodeIPs = await amsIps.find().toArray();
+    const nodeIPs = await amsIps.find().toArray();
 
-    for (let ip of nodeIPs) {
+    for (const ip of nodeIPs) {
       try {
         await nodeIPsCollection.insertOne({
           ip: ip.ip,
@@ -60,12 +60,12 @@ MongoClient.connect(amsMongoUrl.href)
       }
     }
 
-    let nodeSubscribers = await amsSubscribers.find().toArray();
+    const nodeSubscribers = await amsSubscribers.find().toArray();
 
     const Subscriber = require('../models/subscriber');
 
-    for (let subscriber of nodeSubscribers) {
-      let subDoc = new Subscriber({
+    for (const subscriber of nodeSubscribers) {
+      const subDoc = new Subscriber({
         app: subscriber.app,
         channel: subscriber.channel,
         serverType: 'ams',
@@ -80,12 +80,12 @@ MongoClient.connect(amsMongoUrl.href)
       await subDoc.save();
     }
 
-    let nodeStreams = await amsStreams.find().toArray();
+    const nodeStreams = await amsStreams.find().toArray();
 
     const Stream = require('../models/stream');
 
-    for (let stream of nodeStreams) {
-      let streamDoc = new Stream({
+    for (const stream of nodeStreams) {
+      const streamDoc = new Stream({
         app: stream.app,
         channel: stream.channel,
         serverType: 'ams',

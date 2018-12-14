@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
-const _ = require('lodash');
 const uuidv4 = require('uuid/v4');
 
 const Schema = mongoose.Schema;
 
-let schema = new Schema(
+const schema = new Schema(
   {
     googleId: { type: String, required: true, unique: true },
     emails: { type: Array, required: true },
@@ -35,7 +34,7 @@ schema.pre('validate', function(next) {
 });
 
 schema.pre('validate', function(next) {
-  let updatedAt = new Date();
+  const updatedAt = new Date();
 
   if (this.isNew) {
     this.createdAt = updatedAt;

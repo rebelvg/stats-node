@@ -4,7 +4,7 @@ const passport = require('passport');
 const isLoggedIn = require('../middleware/isLoggedIn');
 const stats = require('../config.json').stats;
 
-let router = express.Router();
+const router = express.Router();
 
 router.get('/', isLoggedIn, function(req, res, next) {
   res.send({ user: req.user });
