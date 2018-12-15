@@ -1,77 +1,11 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const { URL } = require('url');
-const morgan = require('morgan');
-const bodyParser = require('body-parser');
-const passport = require('passport');
 const fs = require('fs');
-const cors = require('cors');
 
-const { db, stats } = require('./config.json');
+const { stats } = require('./config.json');
 
-const app = express();
-
-if (process.env.NODE_ENV === 'dev') {
-  app.use(morgan('combined'));
-}
-app.use(bodyParser.json());
-app.use(passport.initialize());
-app.set('trust proxy', true);
-
-require('./passport/init');
-
-mongoose.Promise = Promise;
-
-const mongoUrl = new URL(`mongodb://${db.host}/${db.dbName}`);
-
-if (db.authDb) {
-  mongoUrl.username = encodeURIComponent(db.user);
-  mongoUrl.password = encodeURIComponent(db.password);
-
-  mongoUrl.searchParams.set('authSource', db.authDb);
-}
-
-mongoose.connect(
-  mongoUrl.href,
-  { useMongoClient: true },
-  (error) => {
-    if (error) {
-      throw error;
-    }
-  }
-);
-
-global.liveStats = {};
-
-require('./servers/amsUpdate');
-require('./servers/nmsUpdate');
-
-const readToken = require('./middleware/read-token');
-
-app.use(cors());
-app.use(readToken);
-
-const channels = require('./routes/channels');
-const streams = require('./routes/streams');
-const subscribers = require('./routes/subscribers');
-const ips = require('./routes/ips');
-const users = require('./routes/users');
-const admin = require('./routes/admin');
-
-app.use('/channels', channels);
-app.use('/streams', streams);
-app.use('/subscribers', subscribers);
-app.use('/ips', ips);
-app.use('/users', users);
-app.use('/admin', admin);
-
-app.use((req, res, next) => {
-  throw new Error('Not found.');
-});
-
-app.use((err, req, res, next) => {
-  res.status(500).json({ error: err.message });
-});
+const app = require('./app');
+require('./mongo-connect');
+require('./passport');
+require('./servers');
 
 //remove previous unix socket
 if (typeof stats.port === 'string') {

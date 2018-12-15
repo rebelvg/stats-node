@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "prepush": "prettier --write \"**/*.js\"",
+    "prepush": "eslint . && prettier --write \"**/*.js\"",
     "start": "node .",
     "transfer": "node scripts/transfer.js"
   },
@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "eslint": "^5.10.0",
+    "husky": "^1.2.1",
     "prettier": "^1.15.3"
   }
 }
