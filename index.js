@@ -34,7 +34,7 @@ if (db.authDb) {
 mongoose.connect(
   mongoUrl.href,
   { useMongoClient: true },
-  function(error) {
+  (error) => {
     if (error) {
       throw error;
     }
@@ -65,11 +65,11 @@ app.use('/ips', ips);
 app.use('/users', users);
 app.use('/admin', admin);
 
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
   throw new Error('Not found.');
 });
 
-app.use(function(err, req, res, next) {
+app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message });
 });
 

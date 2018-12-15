@@ -6,7 +6,7 @@ const stats = require('../config.json').stats;
 
 const router = express.Router();
 
-router.get('/', isLoggedIn, function(req, res, next) {
+router.get('/', isLoggedIn, (req, res, next) => {
   res.send({ user: req.user });
 });
 router.get(
@@ -21,7 +21,7 @@ router.get(
     ]
   })
 );
-router.get('/auth/google/callback', passport.authenticate('google', { session: false }), function(req, res, next) {
+router.get('/auth/google/callback', passport.authenticate('google', { session: false }), (req, res, next) => {
   res.redirect(stats.googleRedirect + `/?token=${req.user.token}`);
 });
 

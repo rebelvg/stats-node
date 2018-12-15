@@ -31,7 +31,7 @@ MongoClient.connect(mongoUrl.href)
       .sort({ timestamp: 1 })
       .stream();
 
-    cursor.on('data', async function(data) {
+    cursor.on('data', async (data) => {
       const stream = new Stream({
         app: data.app,
         channel: data.channel,
@@ -54,7 +54,7 @@ MongoClient.connect(mongoUrl.href)
       await stream.save();
     });
 
-    cursor.on('end', function() {
+    cursor.on('end', () => {
       console.log('cursor stopped.');
     });
 
@@ -63,7 +63,7 @@ MongoClient.connect(mongoUrl.href)
       .sort({ timestamp: 1 })
       .stream();
 
-    subscribersCursor.on('data', async function(data) {
+    subscribersCursor.on('data', async (data) => {
       const subscriber = new Subscriber({
         app: data.app,
         channel: data.channel,
@@ -77,7 +77,7 @@ MongoClient.connect(mongoUrl.href)
       await subscriber.save();
     });
 
-    subscribersCursor.on('end', function() {
+    subscribersCursor.on('end', () => {
       console.log('subscribersCursor stopped.');
     });
   })

@@ -26,6 +26,7 @@ module.exports = {
         varsIgnorePattern: '^_'
       }
     ],
-    'no-empty': ['error', { allowEmptyCatch: true }]
+    'no-empty': ['error', { allowEmptyCatch: true }],
+    'prefer-arrow-callback': ['error']
   }
 };
