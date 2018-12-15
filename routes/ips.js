@@ -5,7 +5,7 @@ const ipController = require('../controllers/ips');
 const parseFilter = require('../middleware/query');
 const parseSort = require('../middleware/sort');
 const IP = require('../models/ip');
-const isLoggedIn = require('../middleware/isLoggedIn');
+const isLoggedIn = require('../middleware/is-logged-in');
 
 const router = express.Router();
 

@@ -4,8 +4,8 @@ const router = express.Router();
 
 const users = require('../routes/admin/users');
 const streamers = require('../routes/admin/streamers');
-const isLoggedIn = require('../middleware/isLoggedIn');
-const isAdmin = require('../middleware/isAdmin');
+const isLoggedIn = require('../middleware/is-logged-in');
+const isAdmin = require('../middleware/is-admin');
 
 router.use(isLoggedIn);
 router.use(isAdmin);

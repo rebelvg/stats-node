@@ -3,7 +3,7 @@ const mongoosePaginate = require('mongoose-paginate');
 const _ = require('lodash');
 const ip6addr = require('ip6addr');
 
-const filterSubscribers = require('../helpers/filterSubscribers');
+const filterSubscribers = require('../helpers/filter-subscribers');
 
 const IP = require('../models/ip');
 

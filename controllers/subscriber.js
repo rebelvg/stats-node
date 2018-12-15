@@ -2,7 +2,7 @@ const _ = require('lodash');
 
 const Subscriber = require('../models/subscriber');
 const IP = require('../models/ip');
-const hideFields = require('../helpers/hideFields');
+const hideFields = require('../helpers/hide-fields');
 
 function findById(req, res, next) {
   Subscriber.findById(req.params.id)

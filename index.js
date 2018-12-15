@@ -46,7 +46,7 @@ global.liveStats = {};
 require('./servers/amsUpdate');
 require('./servers/nmsUpdate');
 
-const readToken = require('./middleware/readToken');
+const readToken = require('./middleware/read-token');
 
 app.use(cors());
 app.use(readToken);

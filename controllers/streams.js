@@ -2,9 +2,9 @@ const _ = require('lodash');
 
 const Stream = require('../models/stream');
 const IP = require('../models/ip');
-const hideFields = require('../helpers/hideFields');
+const hideFields = require('../helpers/hide-fields');
 
-const filterSubscribers = require('../helpers/filterSubscribers');
+const filterSubscribers = require('../helpers/filter-subscribers');
 
 function findById(req, res, next) {
   Stream.findById(req.params.id)

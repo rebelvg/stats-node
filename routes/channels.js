@@ -1,7 +1,7 @@
 const express = require('express');
 
 const channelController = require('../controllers/channels');
-const isLoggedIn = require('../middleware/isLoggedIn');
+const isLoggedIn = require('../middleware/is-logged-in');
 
 const router = express.Router();
 
