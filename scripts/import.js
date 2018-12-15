@@ -82,5 +82,5 @@ MongoClient.connect(mongoUrl.href)
     });
   })
   .catch(e => {
-    console.log(e.stack);
+    console.error(e.stack);
   });
