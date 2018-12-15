@@ -3,7 +3,7 @@ const fs = require('fs');
 const { stats } = require('./config.json');
 
 const app = require('./app');
-require('./mongo-connect');
+require('./mongo');
 require('./passport');
 require('./servers');
 
