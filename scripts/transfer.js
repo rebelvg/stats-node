@@ -28,7 +28,7 @@ if (db.authDb) {
 mongoose.connect(
   nodeMongoUrl.href,
   { useMongoClient: true },
-  (error) => {
+  error => {
     if (error) {
       throw error;
     }

@@ -31,7 +31,7 @@ MongoClient.connect(mongoUrl.href)
       .sort({ timestamp: 1 })
       .stream();
 
-    cursor.on('data', async (data) => {
+    cursor.on('data', async data => {
       const stream = new Stream({
         app: data.app,
         channel: data.channel,
@@ -63,7 +63,7 @@ MongoClient.connect(mongoUrl.href)
       .sort({ timestamp: 1 })
       .stream();
 
-    subscribersCursor.on('data', async (data) => {
+    subscribersCursor.on('data', async data => {
       const subscriber = new Subscriber({
         app: data.app,
         channel: data.channel,

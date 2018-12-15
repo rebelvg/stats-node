@@ -70,7 +70,7 @@ schema.pre('save', function(next) {
 
       ip = new IP({ ip: this.ip });
 
-      ip.save((err) => {
+      ip.save(err => {
         if (err) {
           return console.error(err.message);
         }

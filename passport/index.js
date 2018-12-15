@@ -13,7 +13,7 @@ passport.use(
       callbackURL: `${stats.googleCallbackHost}/users/auth/google/callback`,
       passReqToCallback: true
     },
-    ((req, accessToken, refreshToken, profile, done) => {
+    (req, accessToken, refreshToken, profile, done) => {
       User.findOne({
         googleId: profile.id
       })
@@ -41,6 +41,6 @@ passport.use(
             .catch(done);
         })
         .catch(done);
-    })
+    }
   )
 );
