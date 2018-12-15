@@ -81,6 +81,6 @@ MongoClient.connect(mongoUrl.href)
       console.log('subscribersCursor stopped.');
     });
   })
-  .catch(e => {
-    console.error(e.stack);
+  .catch(error => {
+    console.error(error);
   });

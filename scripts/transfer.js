@@ -55,8 +55,8 @@ MongoClient.connect(amsMongoUrl.href)
           createdAt: moment.unix(ip.timestamp).toDate(),
           updatedAt: moment.unix(ip.timestamp).toDate()
         });
-      } catch (e) {
-        console.error(e.message);
+      } catch (error) {
+        console.error(error);
       }
     }
 
@@ -105,4 +105,6 @@ MongoClient.connect(amsMongoUrl.href)
 
     console.log('export done.');
   })
-  .catch(console.error);
+  .catch(error => {
+    console.error(error);
+  });
