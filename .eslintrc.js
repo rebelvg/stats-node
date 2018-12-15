@@ -27,6 +27,7 @@ module.exports = {
       }
     ],
     'no-empty': ['error', { allowEmptyCatch: true }],
-    'prefer-arrow-callback': ['error']
+    'prefer-arrow-callback': ['error'],
+    'require-await': 'error'
   }
 };

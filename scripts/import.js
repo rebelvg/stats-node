@@ -17,7 +17,7 @@ const Stream = require('../models/stream');
 const Subscriber = require('../models/subscriber');
 
 MongoClient.connect(mongoUrl.href)
-  .then(async db => {
+  .then(db => {
     const streams = db.collection('streams');
     const subscribers = db.collection('subscribers');
 

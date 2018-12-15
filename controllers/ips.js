@@ -4,7 +4,7 @@ const IP = require('../models/ip');
 
 function findById(req, res, next) {
   IP.findById(req.params.id)
-    .then(async ip => {
+    .then(ip => {
       if (!ip) {
         throw new Error('IP not found.');
       }
