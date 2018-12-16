@@ -7,6 +7,10 @@ require('./mongo');
 require('./passport');
 require('./servers');
 
+process.on('unhandledRejection', (reason, p) => {
+  throw reason;
+});
+
 //remove previous unix socket
 if (typeof stats.port === 'string') {
   if (fs.existsSync(stats.port)) {
