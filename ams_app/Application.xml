@@ -15,7 +15,7 @@
 		<RuntimeSize>20480</RuntimeSize>
 	</ScriptEngine>
 
-	
+
 	<Client>
 		<Bandwidth>
 			<!-- Specified in bytes/sec -->
@@ -42,6 +42,6 @@
 				<!-- than 0.5 of the live buffer.                          -->
 				<BufferRatio>0.5</BufferRatio>
 			</Server>
-		</MsgQueue> 
+		</MsgQueue>
 	</Client>
 </Application>
