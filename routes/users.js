@@ -2,7 +2,7 @@ const express = require('express');
 const passport = require('passport');
 
 const isLoggedIn = require('../middleware/is-logged-in');
-const stats = require('../config.json').stats;
+const { stats } = require('../config.json');
 
 const router = express.Router();
 
@@ -22,7 +22,13 @@ router.get(
   })
 );
 router.get('/auth/google/callback', passport.authenticate('google', { session: false }), (req, res, next) => {
-  res.redirect(stats.googleRedirect + `/?token=${req.user.token}`);
+  const { token } = req.user;
+
+  res.cookie('stats-token', token, {
+    maxAge: 365 * 24 * 60 * 60 * 1000
+  });
+
+  res.redirect(stats.googleRedirect + `/?token=${token}`);
 });
 
 module.exports = router;
