@@ -8,7 +8,7 @@ function readToken(req, res, next) {
   }
 
   User.findOne({
-    token: token
+    token
   })
     .then(user => {
       if (!user) {

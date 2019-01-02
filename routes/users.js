@@ -24,10 +24,6 @@ router.get(
 router.get('/auth/google/callback', passport.authenticate('google', { session: false }), (req, res, next) => {
   const { token } = req.user;
 
-  res.cookie('stats-token', token, {
-    maxAge: 365 * 24 * 60 * 60 * 1000
-  });
-
   res.redirect(stats.googleRedirect + `/?token=${token}`);
 });
 
