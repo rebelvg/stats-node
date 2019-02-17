@@ -1,6 +1,5 @@
-const request = require('request-promise-native');
+const axios = require('axios');
 const _ = require('lodash');
-const { URL } = require('url');
 
 const Stream = require('../models/stream');
 const Subscriber = require('../models/subscriber');
@@ -11,39 +10,17 @@ const nodeHost = nmsConfig.host;
 const apiKey = nmsConfig.password;
 
 async function getNodeStats() {
-  const apiUrl = new URL(`http://${nodeHost}/api/streams`);
-
-  if (apiKey) {
-    apiUrl.searchParams.set('apiKey', apiKey);
-  }
-
-  const res = await request.get(apiUrl.href, {
-    resolveWithFullResponse: true,
-    json: true
+  const { data } = await axios.get(`${nodeHost}/api/streams`, {
+    headers: {
+      token: apiKey
+    }
   });
 
-  return res.body;
-}
-
-async function getClientsStats() {
-  const apiUrl = new URL(`http://${nodeHost}/api/clients`);
-
-  if (apiKey) {
-    apiUrl.searchParams.set('apiKey', apiKey);
-  }
-
-  const res = await request.get(apiUrl.href, {
-    resolveWithFullResponse: true,
-    json: true
-  });
-
-  return res.body;
+  return data;
 }
 
 async function updateStats() {
-  const data = await Promise.all([getNodeStats(), getClientsStats()]);
-
-  const [channels, clients] = data;
+  const channels = await getNodeStats();
 
   const live = {};
 
@@ -62,7 +39,7 @@ async function updateStats() {
 
       let streamObj = null;
 
-      if (channelData.publisher && _.get(clients, [channelData.publisher.clientId])) {
+      if (channelData.publisher) {
         const streamQuery = {
           app: channelData.publisher.app,
           channel: channelData.publisher.stream,
@@ -78,7 +55,7 @@ async function updateStats() {
           streamQuery.bytes = channelData.publisher.bytes;
           streamQuery.ip = channelData.publisher.ip;
           streamQuery.protocol = 'rtmp';
-          streamQuery.userId = _.get(clients, [channelData.publisher.clientId, 'userId'], null);
+          streamQuery.userId = channelData.publisher.userId;
 
           streamObj = new Stream(streamQuery);
         } else {
@@ -92,10 +69,6 @@ async function updateStats() {
       }
 
       for (const subscriber of channelData.subscribers) {
-        if (!_.get(clients, [subscriber.clientId])) {
-          continue;
-        }
-
         const subscriberQuery = {
           app: subscriber.app,
           channel: subscriber.stream,
@@ -111,7 +84,7 @@ async function updateStats() {
           subscriberQuery.bytes = subscriber.bytes;
           subscriberQuery.ip = subscriber.ip;
           subscriberQuery.protocol = subscriber.protocol;
-          subscriberQuery.userId = _.get(clients, [subscriber.clientId, 'userId'], null);
+          subscriberQuery.userId = subscriber.userId;
 
           subscriberObj = new Subscriber(subscriberQuery);
         } else {
@@ -146,7 +119,8 @@ function runUpdate() {
       _.set(global.liveStats, ['nms'], live);
     })
     .catch(e => {
-      if (e.name === 'RequestError' && e.error.code === 'ECONNREFUSED') {
+      if (e.code === 'ECONNREFUSED') {
+        console.error(e.message);
         return;
       }
 

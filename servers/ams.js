@@ -272,7 +272,8 @@ function runUpdate() {
       _.set(global.liveStats, ['ams'], live);
     })
     .catch(e => {
-      if (e.name === 'RequestError' && e.error.code === 'ECONNREFUSED') {
+      if (e.code === 'ECONNREFUSED') {
+        console.error(e.message);
         return;
       }
 

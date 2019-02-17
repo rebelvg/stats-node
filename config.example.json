@@ -15,7 +15,7 @@
   },
   "nms": {
     "enabled": false,
-    "host": "localhost:8000",
+    "host": "http://localhost:8000",
     "password": null
   },
   "stats": {
