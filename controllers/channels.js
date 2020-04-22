@@ -106,7 +106,14 @@ function legacy(req, res, next) {
   res.json(channelStats);
 }
 
+async function list(req, res, next) {
+  const channels = await Stream.distinct('channel', req.queryObj);
+
+  res.json({ channels });
+}
+
 exports.channelStats = channelStats;
 exports.appChannelStats = appChannelStats;
 exports.channels = channels;
 exports.legacy = legacy;
+exports.list = list;
