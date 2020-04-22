@@ -17,13 +17,11 @@ function findById(req, res, next) {
         .sort({ connectCreated: 1 })
         .populate(['location']);
 
-      if (!req.user) {
-        hideFields(subscriber);
+      hideFields(req.user, subscriber);
 
-        _.forEach(streams, stream => {
-          hideFields(stream);
-        });
-      }
+      _.forEach(streams, stream => {
+        hideFields(req.user, stream);
+      });
 
       res.json({ subscriber: subscriber, streams: streams });
     })
@@ -55,11 +53,9 @@ function find(req, res, next) {
 
       const uniqueIPs = (await Subscriber.distinct('ip', req.queryObj)).length;
 
-      if (!req.user) {
-        _.forEach(ret.docs, subscriber => {
-          hideFields(subscriber);
-        });
-      }
+      _.forEach(ret.docs, subscriber => {
+        hideFields(req.user, subscriber);
+      });
 
       res.json({
         subscribers: ret.docs,

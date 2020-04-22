@@ -3,6 +3,7 @@ const moment = require('moment');
 const strtotime = require('locutus/php/datetime/strtotime');
 
 const IP = require('../models/ip');
+const shouldHideFields = require('./should-hide-fields');
 
 const filterRules = {
   app: {
@@ -64,7 +65,7 @@ const filterRules = {
 
       const query = [{ ip: { $in: ips } }];
 
-      if (req.user) {
+      if (!shouldHideFields(req.user)) {
         query.push({ ip: new RegExp(ip, 'gi') });
       }
 

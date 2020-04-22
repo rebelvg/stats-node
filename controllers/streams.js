@@ -75,13 +75,11 @@ function findById(req, res, next) {
           .value().length
       };
 
-      if (!req.user) {
-        hideFields(stream);
+      hideFields(req.user, stream);
 
-        _.forEach(subscribers, subscriber => {
-          hideFields(subscriber);
-        });
-      }
+      _.forEach(subscribers, subscriber => {
+        hideFields(req.user, subscriber);
+      });
 
       res.json({
         stream: stream,
@@ -125,11 +123,9 @@ function find(req, res, next) {
 
       const uniqueIPs = (await Stream.distinct('ip', req.queryObj)).length;
 
-      if (!req.user) {
-        _.forEach(ret.docs, stream => {
-          hideFields(stream);
-        });
-      }
+      _.forEach(ret.docs, stream => {
+        hideFields(req.user, stream);
+      });
 
       res.json({
         streams: ret.docs,
@@ -215,9 +211,7 @@ function graph(req, res, next) {
 
       graph = _.sortBy(graph, ['time']);
 
-      if (!req.user) {
-        hideFields(stream);
-      }
+      hideFields(req.user, stream);
 
       res.json({ stream: stream, events: graph });
     })
