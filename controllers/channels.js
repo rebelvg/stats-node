@@ -119,7 +119,7 @@ async function list(req, res, next) {
     });
   });
 
-  const channels = await Stream.distinct('channel', req.queryObj);
+  const channels = await Stream.distinct('channel');
 
   res.json({ channels, live: liveChannels });
 }
