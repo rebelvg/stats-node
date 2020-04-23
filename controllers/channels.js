@@ -119,8 +119,6 @@ async function list(req, res, next) {
     });
   });
 
-  res.json(global.liveStats);
-
   const channels = await Stream.distinct('channel', req.queryObj);
 
   res.json({ channels, live: liveChannels });
