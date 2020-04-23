@@ -107,9 +107,23 @@ function legacy(req, res, next) {
 }
 
 async function list(req, res, next) {
+  const liveChannels = [];
+
+  _.forEach(global.liveStats, serverObj => {
+    _.forEach(serverObj, appObj => {
+      _.forEach(appObj, channelObj => {
+        if (channelObj.publisher) {
+          liveChannels.push(channelObj.channel);
+        }
+      });
+    });
+  });
+
+  res.json(global.liveStats);
+
   const channels = await Stream.distinct('channel', req.queryObj);
 
-  res.json({ channels });
+  res.json({ channels, live: liveChannels });
 }
 
 exports.channelStats = channelStats;
