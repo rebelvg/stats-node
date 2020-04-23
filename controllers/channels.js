@@ -113,7 +113,7 @@ async function list(req, res, next) {
     _.forEach(serverObj, appObj => {
       _.forEach(appObj, channelObj => {
         if (channelObj.publisher) {
-          liveChannels.push(channelObj.channel);
+          liveChannels.push(channelObj.publisher.channel);
         }
       });
     });
