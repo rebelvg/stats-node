@@ -4,25 +4,24 @@ const _ = require('lodash');
 const Stream = require('../models/stream');
 const Subscriber = require('../models/subscriber');
 
-const nmsConfig = require('../config.json').nms;
+const nmsConfigs = require('../config.json').nms;
 
-const nodeHost = nmsConfig.host;
-const apiKey = nmsConfig.password;
-
-async function getNodeStats() {
-  const { data } = await axios.get(`${nodeHost}/api/streams`, {
+async function getNodeStats(host, token) {
+  const { data } = await axios.get(`${host}/api/streams`, {
     headers: {
-      token: apiKey
+      token
     }
   });
 
   return data;
 }
 
-async function updateStats() {
-  const channels = await getNodeStats();
+async function updateStats(nmsConfig) {
+  const { name, host, token } = nmsConfig;
 
-  const live = {};
+  const channels = await getNodeStats(host, token);
+
+  const stats = {};
 
   const statsUpdateTime = new Date();
 
@@ -32,7 +31,7 @@ async function updateStats() {
     for (const channelObj of Object.entries(channelObjs)) {
       const [channelName, channelData] = channelObj;
 
-      _.set(live, [appName, channelName], {
+      _.set(stats, [appName, channelName], {
         publisher: null,
         subscribers: []
       });
@@ -43,7 +42,7 @@ async function updateStats() {
         const streamQuery = {
           app: channelData.publisher.app,
           channel: channelData.publisher.stream,
-          serverType: 'nms',
+          serverType: name,
           serverId: channelData.publisher.clientId,
           connectCreated: new Date(channelData.publisher.connectCreated)
         };
@@ -65,14 +64,14 @@ async function updateStats() {
 
         await streamObj.save();
 
-        _.set(live, [appName, channelName, 'publisher'], streamObj);
+        _.set(stats, [appName, channelName, 'publisher'], streamObj);
       }
 
       for (const subscriber of channelData.subscribers) {
         const subscriberQuery = {
           app: subscriber.app,
           channel: subscriber.stream,
-          serverType: 'nms',
+          serverType: name,
           serverId: subscriber.clientId,
           connectCreated: new Date(subscriber.connectCreated)
         };
@@ -94,7 +93,7 @@ async function updateStats() {
 
         await subscriberObj.save();
 
-        live[appName][channelName].subscribers.push(subscriberObj);
+        stats[appName][channelName].subscribers.push(subscriberObj);
       }
 
       if (streamObj) {
@@ -104,30 +103,38 @@ async function updateStats() {
     }
   }
 
-  return live;
-}
-
-if (!nmsConfig.enabled) {
-  return;
+  return stats;
 }
 
 console.log('nmsUpdate running.');
 
-function runUpdate() {
-  updateStats()
-    .then(live => {
-      _.set(global.liveStats, ['nms'], live);
-    })
-    .catch(e => {
-      if (e.code === 'ECONNREFUSED') {
-        console.error(e.message);
-        return;
-      }
+async function runUpdate() {
+  await Promise.all(
+    nmsConfigs.map(async nmsConfig => {
+      try {
+        const { name } = nmsConfig;
 
-      console.error(e);
-    });
+        const stats = await updateStats(nmsConfig);
+
+        _.set(global.liveStats, [name], stats);
+      } catch (error) {
+        if (error.code === 'ECONNREFUSED') {
+          console.error(error.message);
+
+          return;
+        }
+
+        console.error(error);
+      }
+    })
+  );
 }
 
-runUpdate();
+(async () => {
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    await runUpdate();
 
-setInterval(runUpdate, 5000);
+    await new Promise(resolve => setTimeout(resolve, 5000));
+  }
+})();

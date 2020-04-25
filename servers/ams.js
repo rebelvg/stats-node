@@ -12,169 +12,180 @@ const strtotime = require('locutus/php/datetime/strtotime');
 const Stream = require('../models/stream');
 const Subscriber = require('../models/subscriber');
 
-const amsConfig = require('../config.json').ams;
+const amsConfigs = require('../config.json').ams;
 
 const parseString = promisify(xml2js.parseString);
 
-const amsAppsPath = amsConfig.appsPath;
-
-const amsHost = amsConfig.host;
-const amsLogin = amsConfig.user;
-const amsPassword = amsConfig.password;
-
-async function getAmsStats(command, params = []) {
-  const apiUrl = new URL(`http://${amsHost}/admin/${command}`);
-
-  apiUrl.searchParams.set('auser', amsLogin);
-  apiUrl.searchParams.set('apswd', amsPassword);
-
-  _.forEach(params, param => {
-    apiUrl.searchParams.set(param[0], param[1]);
-  });
-
-  const res = await request.get(apiUrl.href, {
-    resolveWithFullResponse: true
-  });
-
-  const parsedXml = await parseString(res.body, {
-    trim: true,
-    explicitArray: false,
-    explicitRoot: false,
-    emptyTag: null
-  });
-
-  if (parsedXml.code !== 'NetConnection.Call.Success') {
-    throw new Error(parsedXml.description);
+class AmsClient {
+  constructor(amsConfig) {
+    this.amsConfig = amsConfig;
   }
 
-  return parsedXml;
-}
+  async getAmsStats(command, params = []) {
+    const { host, amsLogin, amsPassword } = this.amsConfig;
 
-async function getApps() {
-  const getApps = await getAmsStats('getApps');
+    const apiUrl = new URL(`${host}/admin/${command}`);
 
-  return _.filter(getApps.data, (appName, key) => {
-    return key !== 'total_apps';
-  });
-}
+    apiUrl.searchParams.set('auser', amsLogin);
+    apiUrl.searchParams.set('apswd', amsPassword);
 
-async function getAppStats(appName) {
-  const getAppStats = await getAmsStats('getAppStats', [['app', appName]]);
+    _.forEach(params, param => {
+      apiUrl.searchParams.set(param[0], param[1]);
+    });
 
-  if (!getAppStats.data.cores) {
-    return false;
+    const res = await request.get(apiUrl.href, {
+      resolveWithFullResponse: true
+    });
+
+    const parsedXml = await parseString(res.body, {
+      trim: true,
+      explicitArray: false,
+      explicitRoot: false,
+      emptyTag: null
+    });
+
+    if (parsedXml.code !== 'NetConnection.Call.Success') {
+      throw new Error(parsedXml.description);
+    }
+
+    return parsedXml;
   }
 
-  return getAppStats.data;
-}
+  async getApps() {
+    const getApps = await this.getAmsStats('getApps');
 
-async function getLiveStreams(appName) {
-  const getLiveStreams = await getAmsStats('getLiveStreams', [['appInst', appName]]);
-
-  if (!getLiveStreams.data) {
-    return [];
+    return _.filter(getApps.data, (appName, key) => {
+      return key !== 'total_apps';
+    });
   }
 
-  return Object.values(getLiveStreams.data);
-}
+  async getAppStats(appName) {
+    const getAppStats = await this.getAmsStats('getAppStats', [['app', appName]]);
 
-async function getLiveStreamStats(appName, channelName) {
-  const getLiveStreamStats = await getAmsStats('getLiveStreamStats', [['appInst', appName], ['stream', channelName]]);
+    if (!getAppStats.data.cores) {
+      return false;
+    }
 
-  return getLiveStreamStats.data;
-}
-
-async function getUserStats(appName, userId) {
-  const getUserStats = await getAmsStats('getUserStats', [['appInst', appName], ['userId', userId]]);
-
-  return getUserStats.data;
-}
-
-async function getUsers(appName) {
-  const getUsers = await getAmsStats('getUsers', [['appInst', appName]]);
-
-  return _.filter(getUsers.data, (appName, key) => {
-    return key !== 'name';
-  });
-}
-
-function parseClientFile(path) {
-  const clientFile = fs.readFileSync(path, { encoding: 'UTF-8' });
-
-  const clientData = clientFile.split(os.EOL);
-
-  return {
-    amsId: clientData[0],
-    connectTime: clientData[1],
-    ip: clientData[2],
-    agent: clientData[3],
-    page: clientData[4],
-    referrer: clientData[5],
-    password: clientData[6]
-  };
-}
-
-async function getIPs(appName) {
-  const clientsFolder = path.join(amsAppsPath, appName, 'clients');
-
-  const clientFiles = fs.readdirSync(clientsFolder);
-
-  let fileIDs = [];
-
-  for (const clientFileName of clientFiles) {
-    fileIDs.push(parseClientFile(path.join(clientsFolder, clientFileName)));
+    return getAppStats.data;
   }
 
-  fileIDs = _.sortBy(fileIDs, ['connectTime', 'amsId']);
+  async getLiveStreams(appName) {
+    const getLiveStreams = await this.getAmsStats('getLiveStreams', [['appInst', appName]]);
 
-  const users = await getUsers(appName);
+    if (!getLiveStreams.data) {
+      return [];
+    }
 
-  let apiIDs = [];
+    return Object.values(getLiveStreams.data);
+  }
 
-  apiIDs = _.map(users, async (userId, id) => {
-    const userStats = await getUserStats(appName, userId);
+  async getLiveStreamStats(appName, channelName) {
+    const getLiveStreamStats = await this.getAmsStats('getLiveStreamStats', [
+      ['appInst', appName],
+      ['stream', channelName]
+    ]);
+
+    return getLiveStreamStats.data;
+  }
+
+  async getUserStats(appName, userId) {
+    const getUserStats = await this.getAmsStats('getUserStats', [['appInst', appName], ['userId', userId]]);
+
+    return getUserStats.data;
+  }
+
+  async getUsers(appName) {
+    const getUsers = await this.getAmsStats('getUsers', [['appInst', appName]]);
+
+    return _.filter(getUsers.data, (appName, key) => {
+      return key !== 'name';
+    });
+  }
+
+  parseClientFile(path) {
+    const clientFile = fs.readFileSync(path, { encoding: 'UTF-8' });
+
+    const clientData = clientFile.split(os.EOL);
 
     return {
-      amsId: userId,
-      connectTime: moment.unix(strtotime(userStats.connect_time)),
-      id: id
+      amsId: clientData[0],
+      connectTime: clientData[1],
+      ip: clientData[2],
+      agent: clientData[3],
+      page: clientData[4],
+      referrer: clientData[5],
+      password: clientData[6]
     };
-  });
-
-  apiIDs = await Promise.all(apiIDs);
-
-  apiIDs = _.sortBy(apiIDs, ['connectTime', 'id']);
-
-  if (fileIDs.length !== apiIDs.length) {
-    throw new Error(`Lengths don't match.`);
   }
 
-  const IPs = {};
+  async getIPs(appName) {
+    const { appsPath } = this.amsConfig;
 
-  _.forEach(apiIDs, (apiID, key) => {
-    IPs[apiID.amsId] = fileIDs[key];
-  });
+    const clientsFolder = path.join(appsPath, appName, 'clients');
 
-  return IPs;
+    const clientFiles = fs.readdirSync(clientsFolder);
+
+    let fileIDs = [];
+
+    for (const clientFileName of clientFiles) {
+      fileIDs.push(this.parseClientFile(path.join(clientsFolder, clientFileName)));
+    }
+
+    fileIDs = _.sortBy(fileIDs, ['connectTime', 'amsId']);
+
+    const users = await this.getUsers(appName);
+
+    let apiIDs = [];
+
+    apiIDs = _.map(users, async (userId, id) => {
+      const userStats = await this.getUserStats(appName, userId);
+
+      return {
+        amsId: userId,
+        connectTime: moment.unix(strtotime(userStats.connect_time)),
+        id: id
+      };
+    });
+
+    apiIDs = await Promise.all(apiIDs);
+
+    apiIDs = _.sortBy(apiIDs, ['connectTime', 'id']);
+
+    if (fileIDs.length !== apiIDs.length) {
+      throw new Error(`Lengths don't match.`);
+    }
+
+    const IPs = {};
+
+    _.forEach(apiIDs, (apiID, key) => {
+      IPs[apiID.amsId] = fileIDs[key];
+    });
+
+    return IPs;
+  }
 }
 
-async function updateStats() {
-  const apps = await getApps();
+async function updateStats(amsConfig) {
+  const { name, appsPath } = amsConfig;
+
+  const amsClient = new AmsClient(amsConfig);
+
+  const apps = await amsClient.getApps();
 
   const live = {};
 
   const statsUpdateTime = new Date();
 
   for (const appName of apps) {
-    const app = await getAppStats(appName);
+    const app = await amsClient.getAppStats(appName);
 
     if (!app) {
       continue;
     }
 
-    const IPs = await getIPs(appName);
+    const IPs = await amsClient.getIPs(appName);
 
-    const liveStreams = await getLiveStreams(appName);
+    const liveStreams = await amsClient.getLiveStreams(appName);
 
     for (const channelName of liveStreams) {
       _.set(live, [appName, channelName], {
@@ -182,18 +193,18 @@ async function updateStats() {
         subscribers: []
       });
 
-      const liveStreamStats = await getLiveStreamStats(appName, channelName);
+      const liveStreamStats = await amsClient.getLiveStreamStats(appName, channelName);
 
       let streamObj = null;
 
       if (liveStreamStats.publisher) {
         const id = liveStreamStats.publisher.client;
-        const userStats = await getUserStats(appName, id);
+        const userStats = await amsClient.getUserStats(appName, id);
 
         const streamQuery = {
           app: appName,
           channel: channelName,
-          serverType: 'ams',
+          serverType: name,
           serverId: id,
           connectCreated: moment.unix(strtotime(userStats.connect_time))
         };
@@ -203,7 +214,7 @@ async function updateStats() {
         if (!streamObj) {
           streamQuery.connectUpdated = statsUpdateTime;
           streamQuery.bytes = userStats.bytes_in;
-          streamQuery.ip = parseClientFile(path.join(amsAppsPath, appName, 'streams', channelName)).ip;
+          streamQuery.ip = amsClient.parseClientFile(path.join(appsPath, appName, 'streams', channelName)).ip;
           streamQuery.protocol = 'rtmp';
 
           streamObj = new Stream(streamQuery);
@@ -220,12 +231,12 @@ async function updateStats() {
       if (liveStreamStats.subscribers) {
         for (const subscriber of Object.values(liveStreamStats.subscribers)) {
           const id = subscriber.client;
-          const userStats = await getUserStats(appName, id);
+          const userStats = await amsClient.getUserStats(appName, id);
 
           const subscriberQuery = {
             app: appName,
             channel: channelName,
-            serverType: 'ams',
+            serverType: name,
             serverId: id,
             connectCreated: moment.unix(strtotime(userStats.connect_time))
           };
@@ -260,27 +271,35 @@ async function updateStats() {
   return live;
 }
 
-if (!amsConfig.enabled) {
-  return;
-}
-
 console.log('amsUpdate running.');
 
-function runUpdate() {
-  updateStats()
-    .then(live => {
-      _.set(global.liveStats, ['ams'], live);
-    })
-    .catch(e => {
-      if (e.code === 'ECONNREFUSED') {
-        console.error(e.message);
-        return;
-      }
+async function runUpdate() {
+  await Promise.all(
+    amsConfigs.map(async amsConfig => {
+      try {
+        const { name } = amsConfig;
 
-      console.error(e);
-    });
+        const stats = await updateStats(amsConfig);
+
+        _.set(global.liveStats, [name], stats);
+      } catch (error) {
+        if (error.code === 'ECONNREFUSED') {
+          console.error(error.message);
+
+          return;
+        }
+
+        console.error(error);
+      }
+    })
+  );
 }
 
-runUpdate();
+(async () => {
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    await runUpdate();
 
-setInterval(runUpdate, 5000);
+    await new Promise(resolve => setTimeout(resolve, 5000));
+  }
+})();
