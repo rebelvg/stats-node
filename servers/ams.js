@@ -12,7 +12,7 @@ const strtotime = require('locutus/php/datetime/strtotime');
 const Stream = require('../models/stream');
 const Subscriber = require('../models/subscriber');
 
-const amsConfigs = require('../config.json').ams;
+const amsConfigs = require('../config').ams;
 
 const parseString = promisify(xml2js.parseString);
 

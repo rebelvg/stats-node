@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { URL } = require('url');
 
-const { db } = require('./config.json');
+const { db } = require('./config');
 
 mongoose.Promise = Promise;
 

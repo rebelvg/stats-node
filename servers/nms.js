@@ -4,7 +4,7 @@ const _ = require('lodash');
 const Stream = require('../models/stream');
 const Subscriber = require('../models/subscriber');
 
-const nmsConfigs = require('../config.json').nms;
+const nmsConfigs = require('../config').nms;
 
 async function getNodeStats(host, token) {
   const { data } = await axios.get(`${host}/api/streams`, {

@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 
 mongoose.Promise = Promise;
 
-const { db } = require('../config.json');
+const { db } = require('../config');
 
 const amsMongoUrl = new URL(`mongodb://${db.host}/ams`);
 

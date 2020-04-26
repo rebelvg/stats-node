@@ -2,7 +2,7 @@ const MongoClient = require('mongodb').MongoClient;
 const { URL } = require('url');
 const moment = require('moment');
 
-const { db } = require('../config.json');
+const { db } = require('../config');
 
 const mongoUrl = new URL(`mongodb://${db.host}/ams`);
 

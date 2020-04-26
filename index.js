@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const { stats } = require('./config.json');
+const { stats } = require('./config');
 
 const app = require('./app');
 

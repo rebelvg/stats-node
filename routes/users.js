@@ -2,7 +2,7 @@ const express = require('express');
 const passport = require('passport');
 
 const isLoggedIn = require('../middleware/is-logged-in');
-const { stats } = require('../config.json');
+const { stats } = require('../config');
 
 const router = express.Router();
 

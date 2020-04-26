@@ -3,7 +3,7 @@ const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
 const User = require('../models/user');
 const googleKeys = require('../google-keys');
-const stats = require('../config.json').stats;
+const stats = require('../config').stats;
 
 passport.use(
   new GoogleStrategy(
