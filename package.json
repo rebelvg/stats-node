@@ -6,9 +6,11 @@
   "scripts": {
     "prepush": "yarn run lint",
     "lint": "eslint . && prettier --list-different \"**/*.{ts,js,json,css,md}\"",
-    "lint:fix": "eslint . --fix && prettier --write \"**/*.{ts,js,json,css,md}\"",
+    "lint-fix": "eslint . --fix && prettier --write \"**/*.{ts,js,json,css,md}\"",
     "start": "node .",
-    "transfer": "node scripts/transfer.js"
+    "transfer": "node scripts/transfer.js",
+    "docker": "docker-compose up -d",
+    "docker-import": "docker exec mongodb mongorestore"
   },
   "dependencies": {
     "axios": "^0.18.0",
