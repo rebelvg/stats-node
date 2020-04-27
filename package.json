@@ -21,7 +21,7 @@
     "express-session": "^1.15.6",
     "ip6addr": "^0.2.2",
     "locutus": "^2.0.9",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.13",
     "moment": "^2.19.1",
     "mongoose": "^4.12.5",
     "mongoose-paginate": "^5.0.3",
