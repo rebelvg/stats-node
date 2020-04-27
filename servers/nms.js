@@ -106,8 +106,6 @@ async function updateStats(nmsConfig) {
   return stats;
 }
 
-console.log('nmsUpdate running.');
-
 async function runUpdate() {
   await Promise.all(
     nmsConfigs.map(async nmsConfig => {

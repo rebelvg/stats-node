@@ -1,264 +1,99 @@
-const request = require('request-promise-native');
-const xml2js = require('xml2js');
-const { promisify } = require('util');
+const axios = require('axios');
 const _ = require('lodash');
-const { URL } = require('url');
-const moment = require('moment');
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-const strtotime = require('locutus/php/datetime/strtotime');
 
 const Stream = require('../models/stream');
 const Subscriber = require('../models/subscriber');
 
 const amsConfigs = require('../config').ams;
 
-const parseString = promisify(xml2js.parseString);
-
-class AmsClient {
-  constructor(amsConfig) {
-    this.amsConfig = amsConfig;
-  }
-
-  async getAmsStats(command, params = []) {
-    const { host, amsLogin, amsPassword } = this.amsConfig;
-
-    const apiUrl = new URL(`${host}/admin/${command}`);
-
-    apiUrl.searchParams.set('auser', amsLogin);
-    apiUrl.searchParams.set('apswd', amsPassword);
-
-    _.forEach(params, param => {
-      apiUrl.searchParams.set(param[0], param[1]);
-    });
-
-    const res = await request.get(apiUrl.href, {
-      resolveWithFullResponse: true
-    });
-
-    const parsedXml = await parseString(res.body, {
-      trim: true,
-      explicitArray: false,
-      explicitRoot: false,
-      emptyTag: null
-    });
-
-    if (parsedXml.code !== 'NetConnection.Call.Success') {
-      throw new Error(parsedXml.description);
+async function getNodeStats(host, token) {
+  const { data } = await axios.get(`${host}/streams`, {
+    headers: {
+      token
     }
+  });
 
-    return parsedXml;
-  }
-
-  async getApps() {
-    const getApps = await this.getAmsStats('getApps');
-
-    return _.filter(getApps.data, (appName, key) => {
-      return key !== 'total_apps';
-    });
-  }
-
-  async getAppStats(appName) {
-    const getAppStats = await this.getAmsStats('getAppStats', [['app', appName]]);
-
-    if (!getAppStats.data.cores) {
-      return false;
-    }
-
-    return getAppStats.data;
-  }
-
-  async getLiveStreams(appName) {
-    const getLiveStreams = await this.getAmsStats('getLiveStreams', [['appInst', appName]]);
-
-    if (!getLiveStreams.data) {
-      return [];
-    }
-
-    return Object.values(getLiveStreams.data);
-  }
-
-  async getLiveStreamStats(appName, channelName) {
-    const getLiveStreamStats = await this.getAmsStats('getLiveStreamStats', [
-      ['appInst', appName],
-      ['stream', channelName]
-    ]);
-
-    return getLiveStreamStats.data;
-  }
-
-  async getUserStats(appName, userId) {
-    const getUserStats = await this.getAmsStats('getUserStats', [['appInst', appName], ['userId', userId]]);
-
-    return getUserStats.data;
-  }
-
-  async getUsers(appName) {
-    const getUsers = await this.getAmsStats('getUsers', [['appInst', appName]]);
-
-    return _.filter(getUsers.data, (appName, key) => {
-      return key !== 'name';
-    });
-  }
-
-  parseClientFile(path) {
-    const clientFile = fs.readFileSync(path, { encoding: 'UTF-8' });
-
-    const clientData = clientFile.split(os.EOL);
-
-    return {
-      amsId: clientData[0],
-      connectTime: clientData[1],
-      ip: clientData[2],
-      agent: clientData[3],
-      page: clientData[4],
-      referrer: clientData[5],
-      password: clientData[6]
-    };
-  }
-
-  async getIPs(appName) {
-    const { appsPath } = this.amsConfig;
-
-    const clientsFolder = path.join(appsPath, appName, 'clients');
-
-    const clientFiles = fs.readdirSync(clientsFolder);
-
-    let fileIDs = [];
-
-    for (const clientFileName of clientFiles) {
-      fileIDs.push(this.parseClientFile(path.join(clientsFolder, clientFileName)));
-    }
-
-    fileIDs = _.sortBy(fileIDs, ['connectTime', 'amsId']);
-
-    const users = await this.getUsers(appName);
-
-    let apiIDs = [];
-
-    apiIDs = _.map(users, async (userId, id) => {
-      const userStats = await this.getUserStats(appName, userId);
-
-      return {
-        amsId: userId,
-        connectTime: moment.unix(strtotime(userStats.connect_time)),
-        id: id
-      };
-    });
-
-    apiIDs = await Promise.all(apiIDs);
-
-    apiIDs = _.sortBy(apiIDs, ['connectTime', 'id']);
-
-    if (fileIDs.length !== apiIDs.length) {
-      throw new Error(`Lengths don't match.`);
-    }
-
-    const IPs = {};
-
-    _.forEach(apiIDs, (apiID, key) => {
-      IPs[apiID.amsId] = fileIDs[key];
-    });
-
-    return IPs;
-  }
+  return data;
 }
 
-async function updateStats(amsConfig) {
-  const { name, appsPath } = amsConfig;
+async function updateStats(amsConfigs) {
+  const { name, host, token } = amsConfigs;
 
-  const amsClient = new AmsClient(amsConfig);
+  const channels = await getNodeStats(host, token);
 
-  const apps = await amsClient.getApps();
-
-  const live = {};
+  const stats = {};
 
   const statsUpdateTime = new Date();
 
-  for (const appName of apps) {
-    const app = await amsClient.getAppStats(appName);
+  for (const appObj of Object.entries(channels)) {
+    const [appName, channelObjs] = appObj;
 
-    if (!app) {
-      continue;
-    }
+    for (const channelObj of Object.entries(channelObjs)) {
+      const [channelName, channelData] = channelObj;
 
-    const IPs = await amsClient.getIPs(appName);
-
-    const liveStreams = await amsClient.getLiveStreams(appName);
-
-    for (const channelName of liveStreams) {
-      _.set(live, [appName, channelName], {
+      _.set(stats, [appName, channelName], {
         publisher: null,
         subscribers: []
       });
 
-      const liveStreamStats = await amsClient.getLiveStreamStats(appName, channelName);
-
       let streamObj = null;
 
-      if (liveStreamStats.publisher) {
-        const id = liveStreamStats.publisher.client;
-        const userStats = await amsClient.getUserStats(appName, id);
-
+      if (channelData.publisher) {
         const streamQuery = {
-          app: appName,
-          channel: channelName,
+          app: channelData.publisher.app,
+          channel: channelData.publisher.stream,
           serverType: name,
-          serverId: id,
-          connectCreated: moment.unix(strtotime(userStats.connect_time))
+          serverId: channelData.publisher.clientId,
+          connectCreated: new Date(channelData.publisher.connectCreated)
         };
 
         streamObj = await Stream.findOne(streamQuery);
 
         if (!streamObj) {
           streamQuery.connectUpdated = statsUpdateTime;
-          streamQuery.bytes = userStats.bytes_in;
-          streamQuery.ip = amsClient.parseClientFile(path.join(appsPath, appName, 'streams', channelName)).ip;
+          streamQuery.bytes = channelData.publisher.bytes;
+          streamQuery.ip = channelData.publisher.ip;
           streamQuery.protocol = 'rtmp';
+          streamQuery.userId = channelData.publisher.userId;
 
           streamObj = new Stream(streamQuery);
         } else {
-          streamObj.bytes = userStats.bytes_in;
+          streamObj.bytes = channelData.publisher.bytes;
           streamObj.connectUpdated = statsUpdateTime;
         }
 
         await streamObj.save();
 
-        _.set(live, [appName, channelName, 'publisher'], streamObj);
+        _.set(stats, [appName, channelName, 'publisher'], streamObj);
       }
 
-      if (liveStreamStats.subscribers) {
-        for (const subscriber of Object.values(liveStreamStats.subscribers)) {
-          const id = subscriber.client;
-          const userStats = await amsClient.getUserStats(appName, id);
+      for (const subscriber of channelData.subscribers) {
+        const subscriberQuery = {
+          app: subscriber.app,
+          channel: subscriber.stream,
+          serverType: name,
+          serverId: subscriber.clientId,
+          connectCreated: new Date(subscriber.connectCreated)
+        };
 
-          const subscriberQuery = {
-            app: appName,
-            channel: channelName,
-            serverType: name,
-            serverId: id,
-            connectCreated: moment.unix(strtotime(userStats.connect_time))
-          };
+        let subscriberObj = await Subscriber.findOne(subscriberQuery);
 
-          let subscriberObj = await Subscriber.findOne(subscriberQuery);
+        if (!subscriberObj) {
+          subscriberQuery.connectUpdated = statsUpdateTime;
+          subscriberQuery.bytes = subscriber.bytes;
+          subscriberQuery.ip = subscriber.ip;
+          subscriberQuery.protocol = subscriber.protocol;
+          subscriberQuery.userId = subscriber.userId;
 
-          if (!subscriberObj) {
-            subscriberQuery.connectUpdated = statsUpdateTime;
-            subscriberQuery.bytes = userStats.bytes_out;
-            subscriberQuery.ip = IPs[id].ip;
-            subscriberQuery.protocol = 'rtmp';
-
-            subscriberObj = new Subscriber(subscriberQuery);
-          } else {
-            subscriberObj.bytes = userStats.bytes_out;
-            subscriberObj.connectUpdated = statsUpdateTime;
-          }
-
-          await subscriberObj.save();
-
-          live[appName][channelName].subscribers.push(subscriberObj);
+          subscriberObj = new Subscriber(subscriberQuery);
+        } else {
+          subscriberObj.bytes = subscriber.bytes;
+          subscriberObj.connectUpdated = statsUpdateTime;
         }
+
+        await subscriberObj.save();
+
+        stats[appName][channelName].subscribers.push(subscriberObj);
       }
 
       if (streamObj) {
@@ -268,10 +103,8 @@ async function updateStats(amsConfig) {
     }
   }
 
-  return live;
+  return stats;
 }
-
-console.log('amsUpdate running.');
 
 async function runUpdate() {
   await Promise.all(

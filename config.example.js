@@ -9,22 +9,20 @@ module.exports = {
   ams: [
     {
       name: 'ams1',
-      appsPath: '/usr/ams/applications',
-      host: 'http://localhost:1111',
-      user: null,
-      password: null
+      host: 'http://localhost:11000',
+      token: null
     }
   ],
   nms: [
     {
       name: 'nms1',
-      host: 'http://localhost:8000',
+      host: 'http://localhost:11000',
       token: null
     }
   ],
   stats: {
-    port: 8001,
-    googleCallbackHost: 'http://localhost:8001',
+    port: 8000,
+    googleCallbackHost: 'http://localhost:8000',
     googleRedirect: 'http://localhost:3000'
   }
 };

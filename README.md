@@ -8,8 +8,8 @@ Statistics server/API for collecting data from various media servers about strea
 
 - Multiplatform (Win/Mac/Linux)
 - Servers Support
-  - Adobe Media Server
-  - KLPQ Media Server (based on NMS)
+  - Adobe Media Server (with stats-node-ams)
+  - KLPQ Media Server (based on node-media-server)
 
 ### API Features
 
@@ -23,12 +23,12 @@ Statistics server/API for collecting data from various media servers about strea
 - Node.js >= 8
 - Yarn
 - MongoDB
-- AMS or NMS installed locally
 - Google Plus API access
 
 ### Links
 
 - [Adobe Media Server](http://www.adobe.com/products/adobe-media-server-family.html)
+- [Stats Node AMS](https://github.com/rebelvg/stats-node-ams)
 - [Node Media Server](https://github.com/rebelvg/klpq-nms)
 - [Google Plus API](https://console.developers.google.com/apis/library/plus.googleapis.com)
 
