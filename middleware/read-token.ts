@@ -1,6 +1,6 @@
-const User = require('../models/user');
+import { User } from '../models/user';
 
-function readToken(req, res, next) {
+export function readToken(req, res, next) {
   const token = req.get('token');
 
   if (!token) {
@@ -23,5 +23,3 @@ function readToken(req, res, next) {
       next();
     });
 }
-
-module.exports = readToken;

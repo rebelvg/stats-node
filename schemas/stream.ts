@@ -3,8 +3,7 @@ import mongoosePaginate from 'mongoose-paginate';
 import _ from 'lodash';
 import ip6addr from 'ip6addr';
 
-import filterSubscribers from '../helpers/filter-subscribers';
-
+import { filterSubscribers } from '../helpers/filter-subscribers';
 import { IP } from '../models/ip';
 
 const Schema = mongoose.Schema;

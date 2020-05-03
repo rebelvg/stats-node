@@ -1,10 +1,10 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
-const Subscriber = require('../models/subscriber');
-const IP = require('../models/ip');
-const hideFields = require('../helpers/hide-fields');
+import { Subscriber } from '../models/subscriber';
+import { IP } from '../models/ip';
+import { hideFields } from '../helpers/hide-fields';
 
-function findById(req, res, next) {
+export function findById(req, res, next) {
   Subscriber.findById(req.params.id)
     .populate(['location'])
     .then(async subscriber => {
@@ -28,7 +28,7 @@ function findById(req, res, next) {
     .catch(next);
 }
 
-function find(req, res, next) {
+export function find(req, res, next) {
   Subscriber.paginate(req.queryObj, {
     sort: _.isEmpty(req.sortObj) ? { connectCreated: -1 } : req.sortObj,
     page: req.query.page,
@@ -78,6 +78,3 @@ function find(req, res, next) {
     })
     .catch(next);
 }
-
-exports.findById = findById;
-exports.find = find;

@@ -1,8 +1,8 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 const allowedPaths = ['api.country', 'api.city', 'api.isp'];
 
-function parseSort(model) {
+export function parseSort(model) {
   return function(req, res, next) {
     const sortObj = {};
 
@@ -28,5 +28,3 @@ function parseSort(model) {
     next();
   };
 }
-
-module.exports = parseSort;

@@ -1,26 +1,26 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
-const Stream = require('../models/stream');
-const Subscriber = require('../models/subscriber');
+import { Stream } from '../models/stream';
+import { Subscriber } from '../models/subscriber';
 
 function isLive(server, app, channel) {
-  return _.get(_.get(global.liveStats, [server], {}), [app, channel, 'publisher'], null) !== null;
+  return _.get(_.get((global as any).liveStats, [server], {}), [app, channel, 'publisher'], null) !== null;
 }
 
 function getViewers(server, app, channel) {
-  return _.get(_.get(global.liveStats, [server], {}), [app, channel, 'subscribers'], []).length;
+  return _.get(_.get((global as any).liveStats, [server], {}), [app, channel, 'subscribers'], []).length;
 }
 
 function getDuration(server, app, channel) {
-  return _.get(_.get(global.liveStats, [server], {}), [app, channel, 'publisher', 'duration'], 0);
+  return _.get(_.get((global as any).liveStats, [server], {}), [app, channel, 'publisher', 'duration'], 0);
 }
 
 function getBitrate(server, app, channel) {
-  return _.get(_.get(global.liveStats, [server], {}), [app, channel, 'publisher', 'bitrate'], 0);
+  return _.get(_.get((global as any).liveStats, [server], {}), [app, channel, 'publisher', 'bitrate'], 0);
 }
 
 function getStartTime(server, app, channel) {
-  return _.get(_.get(global.liveStats, [server], {}), [app, channel, 'publisher', 'connectCreated'], null);
+  return _.get(_.get((global as any).liveStats, [server], {}), [app, channel, 'publisher', 'connectCreated'], null);
 }
 
 function appChannelStatsBase(server, app, channel) {
@@ -41,10 +41,10 @@ function appChannelStatsBase(server, app, channel) {
   return channelStats;
 }
 
-function channelStats(req, res, next) {
+export function channelStats(req, res, next) {
   const channelsStats = {};
 
-  _.forEach(_.get(global.liveStats, [req.params.server], {}), (channels, appName) => {
+  _.forEach(_.get((global as any).liveStats, [req.params.server], {}), (channels, appName) => {
     _.forEach(channels, (channelObj, channelName) => {
       channelsStats[appName] = appChannelStatsBase(req.params.server, appName, channelName);
     });
@@ -53,23 +53,23 @@ function channelStats(req, res, next) {
   res.json(channelsStats);
 }
 
-function appChannelStats(req, res, next) {
+export function appChannelStats(req, res, next) {
   const channelStats = appChannelStatsBase(req.params.server, req.params.app, req.params.channel);
 
   res.json(channelStats);
 }
 
-async function channels(req, res, next) {
-  for (const [_serverName, serverObj] of Object.entries(global.liveStats)) {
+export async function channels(req, res, next) {
+  for (const [_serverName, serverObj] of Object.entries((global as any).liveStats)) {
     for (const [_appName, appObj] of Object.entries(serverObj)) {
       for (const [_channelName, channelObj] of Object.entries(appObj)) {
-        if (channelObj.publisher) {
-          await Stream.populate(channelObj.publisher, {
+        if ((channelObj as any).publisher) {
+          await Stream.populate((channelObj as any).publisher, {
             path: 'location'
           });
         }
 
-        for (const subscriberObj of channelObj.subscribers) {
+        for (const subscriberObj of (channelObj as any).subscribers) {
           await Subscriber.populate(subscriberObj, {
             path: 'location'
           });
@@ -78,10 +78,10 @@ async function channels(req, res, next) {
     }
   }
 
-  res.json(global.liveStats);
+  res.json((global as any).liveStats);
 }
 
-function legacy(req, res, next) {
+export function legacy(req, res, next) {
   const channelStats = {
     isLive: false,
     viewers: 0,
@@ -92,7 +92,7 @@ function legacy(req, res, next) {
 
   channelStats.isLive = isLive(req.params.server, 'live', req.params.channel);
 
-  _.forEach(_.get(global.liveStats, [req.params.server], {}), (channels, appName) => {
+  _.forEach(_.get((global as any).liveStats, [req.params.server], {}), (channels, appName) => {
     _.forEach(channels, (channelObj, channelName) => {
       if (channelName === req.params.channel) {
         channelStats.viewers += channelObj.subscribers.length;
@@ -106,10 +106,10 @@ function legacy(req, res, next) {
   res.json(channelStats);
 }
 
-async function list(req, res, next) {
+export async function list(req, res, next) {
   const liveChannels = [];
 
-  _.forEach(global.liveStats, serverObj => {
+  _.forEach((global as any).liveStats, serverObj => {
     _.forEach(serverObj, appObj => {
       _.forEach(appObj, channelObj => {
         if (channelObj.publisher) {
@@ -123,9 +123,3 @@ async function list(req, res, next) {
 
   res.json({ channels, live: liveChannels });
 }
-
-exports.channelStats = channelStats;
-exports.appChannelStats = appChannelStats;
-exports.channels = channels;
-exports.legacy = legacy;
-exports.list = list;

@@ -1,8 +1,8 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
-const IP = require('../models/ip');
+import { IP } from '../models/ip';
 
-function findById(req, res, next) {
+export function findById(req, res, next) {
   IP.findById(req.params.id)
     .then(ip => {
       if (!ip) {
@@ -16,7 +16,7 @@ function findById(req, res, next) {
     .catch(next);
 }
 
-function find(req, res, next) {
+export function find(req, res, next) {
   IP.paginate(req.queryObj, {
     sort: _.isEmpty(req.sortObj) ? { createdAt: -1 } : req.sortObj,
     page: req.query.page,
@@ -47,6 +47,3 @@ function find(req, res, next) {
     })
     .catch(next);
 }
-
-exports.findById = findById;
-exports.find = find;

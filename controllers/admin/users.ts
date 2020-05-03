@@ -1,8 +1,8 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
-const User = require('../../models/user');
+import { User } from '../../models/user';
 
-function find(req, res, next) {
+export function find(req, res, next) {
   User.find(null, null, {
     sort: {
       createdAt: -1
@@ -16,7 +16,7 @@ function find(req, res, next) {
     .catch(next);
 }
 
-function update(req, res, next) {
+export function update(req, res, next) {
   User.findOne({
     _id: req.params.id
   })
@@ -37,6 +37,3 @@ function update(req, res, next) {
     })
     .catch(next);
 }
-
-exports.find = find;
-exports.update = update;

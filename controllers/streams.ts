@@ -1,12 +1,11 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
-const Stream = require('../models/stream');
-const IP = require('../models/ip');
-const hideFields = require('../helpers/hide-fields');
+import { Stream } from '../models/stream';
+import { IP } from '../models/ip';
+import { hideFields } from '../helpers/hide-fields';
+import { filterSubscribers } from '../helpers/filter-subscribers';
 
-const filterSubscribers = require('../helpers/filter-subscribers');
-
-function findById(req, res, next) {
+export function findById(req, res, next) {
   Stream.findById(req.params.id)
     .populate(['location'])
     .then(async stream => {
@@ -92,7 +91,7 @@ function findById(req, res, next) {
     .catch(next);
 }
 
-function find(req, res, next) {
+export function find(req, res, next) {
   Stream.paginate(req.queryObj, {
     sort: _.isEmpty(req.sortObj) ? { connectCreated: -1 } : req.sortObj,
     page: req.query.page,
@@ -151,7 +150,7 @@ function find(req, res, next) {
     .catch(next);
 }
 
-function graph(req, res, next) {
+export function graph(req, res, next) {
   Stream.findById(req.params.id)
     .then(async stream => {
       if (!stream) {
@@ -217,7 +216,3 @@ function graph(req, res, next) {
     })
     .catch(next);
 }
-
-exports.findById = findById;
-exports.find = find;
-exports.graph = graph;

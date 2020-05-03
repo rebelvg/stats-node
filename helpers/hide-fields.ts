@@ -1,10 +1,10 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
-const shouldHideFields = require('./should-hide-fields');
+import { shouldHideFields } from './should-hide-fields';
 
 const paths = [['ip'], ['location', 'ip'], ['location', 'api', 'query']];
 
-function hideFields(user, obj) {
+export function hideFields(user, obj) {
   if (!shouldHideFields(user)) {
     return;
   }
@@ -15,5 +15,3 @@ function hideFields(user, obj) {
     }
   });
 }
-
-module.exports = hideFields;

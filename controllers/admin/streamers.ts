@@ -1,6 +1,6 @@
-const User = require('../../models/user');
+import { User } from '../../models/user';
 
-function find(req, res, next) {
+export function find(req, res, next) {
   User.find(
     {
       isStreamer: true
@@ -14,5 +14,3 @@ function find(req, res, next) {
     })
     .catch(next);
 }
-
-exports.find = find;

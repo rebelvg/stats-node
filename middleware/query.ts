@@ -1,9 +1,9 @@
-const _ = require('lodash');
-const moment = require('moment');
-const strtotime = require('locutus/php/datetime/strtotime');
+import _ from 'lodash';
+import moment from 'moment';
+import strtotime from 'locutus/php/datetime/strtotime';
 
-const IP = require('../models/ip');
-const shouldHideFields = require('../helpers/should-hide-fields');
+import { IP } from '../models/ip';
+import { shouldHideFields } from '../helpers/should-hide-fields';
 
 const filterRules = {
   app: {
@@ -63,7 +63,7 @@ const filterRules = {
         $or: ipQuery
       });
 
-      const query = [{ ip: { $in: ips } }];
+      const query: any = [{ ip: { $in: ips } }];
 
       if (!shouldHideFields(req.user)) {
         query.push({ ip: new RegExp(ip, 'gi') });
@@ -188,28 +188,28 @@ const rulePresets = {
   }
 };
 
-function parseFilter(modelName) {
+export function parseFilter(modelName) {
   const rules = _.get(rulePresets, [modelName], {});
 
   return async function(req, res, next) {
-    const queryObj = {};
+    const queryObj: any = {};
 
     loop1: for (const [fieldName, rule] of Object.entries(rules)) {
       if (req.query.hasOwnProperty(fieldName)) {
         try {
           let value = req.query[fieldName];
 
-          _.forEach(rule.do, fnc => {
+          _.forEach((rule as any).do, fnc => {
             value = fnc(value);
           });
 
-          for (const fnc of rule.test) {
+          for (const fnc of (rule as any).test) {
             if (!fnc(value)) {
               continue loop1;
             }
           }
 
-          await rule.cb(queryObj, value, req);
+          await (rule as any).cb(queryObj, value, req);
         } catch (e) {}
       }
     }
@@ -219,5 +219,3 @@ function parseFilter(modelName) {
     next();
   };
 }
-
-module.exports = parseFilter;

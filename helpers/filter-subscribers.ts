@@ -1,6 +1,6 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
-function filterSubscribers(subscribers, time, include = false) {
+export function filterSubscribers(subscribers, time, include = false) {
   const compareFnc = include ? _.gte : _.gt;
 
   return _.filter(subscribers, subscriber => {
@@ -9,5 +9,3 @@ function filterSubscribers(subscribers, time, include = false) {
     return subscriber._id;
   });
 }
-
-module.exports = filterSubscribers;

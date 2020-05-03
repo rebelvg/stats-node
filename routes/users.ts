@@ -1,10 +1,10 @@
-const express = require('express');
-const passport = require('passport');
+import express from 'express';
+import passport from 'passport';
 
-const isLoggedIn = require('../middleware/is-logged-in');
-const { stats } = require('../config');
+import { isLoggedIn } from '../middleware/is-logged-in';
+import { stats } from '../config';
 
-const router = express.Router();
+export const router = express.Router();
 
 router.get('/', isLoggedIn, (req, res, next) => {
   res.send({ user: req.user });
@@ -22,9 +22,7 @@ router.get(
   })
 );
 router.get('/auth/google/callback', passport.authenticate('google', { session: false }), (req, res, next) => {
-  const { token } = req.user;
+  const { token } = req.user as any;
 
   res.redirect(stats.googleRedirect + `/?token=${token}`);
 });
-
-module.exports = router;
