@@ -1,6 +1,6 @@
 import { MongoClient } from 'mongodb';
 import { URL } from 'url';
-import moment from 'moment';
+import * as moment from 'moment';
 
 import { db } from '../config';
 

@@ -1,8 +1,8 @@
-import express from 'express';
-import morgan from 'morgan';
-import bodyParser from 'body-parser';
-import passport from 'passport';
-import cors from 'cors';
+import * as express from 'express';
+import * as morgan from 'morgan';
+import * as bodyParser from 'body-parser';
+import * as passport from 'passport';
+import * as cors from 'cors';
 
 export const app = express();
 

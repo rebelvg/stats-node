@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import * as mongoose from 'mongoose';
 import { Document } from 'mongoose';
 
 import { schema } from '../schemas/user';

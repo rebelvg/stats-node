@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import * as _ from 'lodash';
 
 export function filterSubscribers(subscribers, time, include = false) {
   const compareFnc = include ? _.gte : _.gt;

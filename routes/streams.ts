@@ -1,5 +1,5 @@
-import express from 'express';
-import expressPaginate from 'express-paginate';
+import * as express from 'express';
+import * as expressPaginate from 'express-paginate';
 
 import { findById, find, graph } from '../controllers/streams';
 import { parseFilter } from '../middleware/query';

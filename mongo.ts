@@ -1,9 +1,9 @@
-import mongoose from 'mongoose';
+import * as mongoose from 'mongoose';
 import { URL } from 'url';
 
 import { db } from './config';
 
-mongoose.Promise = Promise;
+(mongoose as any).Promise = Promise;
 
 const mongoUrl = new URL(`mongodb://${db.host}/${db.dbName}`);
 

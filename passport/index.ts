@@ -1,8 +1,8 @@
-import passport from 'passport';
+import * as passport from 'passport';
 import { OAuth2Strategy } from 'passport-google-oauth';
 
 import { User } from '../models/user';
-import googleKeys from '../google-keys.json';
+import * as googleKeys from '../google-keys.json';
 import { stats } from '../config';
 
 passport.use(

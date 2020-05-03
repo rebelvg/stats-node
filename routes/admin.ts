@@ -1,4 +1,4 @@
-import express from 'express';
+import * as express from 'express';
 
 import { router as users } from '../routes/admin/users';
 import { router as streamers } from '../routes/admin/streamers';

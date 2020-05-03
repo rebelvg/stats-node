@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import mongoosePaginate from 'mongoose-paginate';
+import * as mongoose from 'mongoose';
+import * as mongoosePaginate from 'mongoose-paginate';
 import axios from 'axios';
 
 const Schema = mongoose.Schema;

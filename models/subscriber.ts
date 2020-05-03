@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import * as mongoose from 'mongoose';
 import { Document } from 'mongoose';
 
 import { schema } from '../schemas/subscriber';
@@ -18,6 +18,7 @@ export interface ISubscriberModel extends Document {
   userId: IUserModel;
   createdAt: Date;
   updatedAt: Date;
+  getStreams: any;
 }
 
 export const Subscriber = mongoose.model<ISubscriberModel>('Subscriber', schema);

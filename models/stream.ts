@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import * as mongoose from 'mongoose';
 import { Document } from 'mongoose';
 
 import { schema } from '../schemas/stream';
@@ -21,6 +21,9 @@ export interface IStreamModel extends Document {
   userId: IUserModel;
   createdAt: Date;
   updatedAt: Date;
+  getSubscribers: any;
+  getRelatedStreams: any;
+  isLive: boolean;
 }
 
 export const Stream = mongoose.model<IStreamModel>('Stream', schema);

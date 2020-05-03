@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
-import mongoosePaginate from 'mongoose-paginate';
-import _ from 'lodash';
+import * as mongoose from 'mongoose';
+import * as mongoosePaginate from 'mongoose-paginate';
+import * as _ from 'lodash';
 import ip6addr from 'ip6addr';
 
 import { IP } from '../models/ip';

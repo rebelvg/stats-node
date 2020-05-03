@@ -1,6 +1,6 @@
-import _ from 'lodash';
-import moment from 'moment';
-import strtotime from 'locutus/php/datetime/strtotime';
+import * as _ from 'lodash';
+import * as moment from 'moment';
+import { strtotime } from 'locutus/php/datetime';
 
 import { IP } from '../models/ip';
 import { shouldHideFields } from '../helpers/should-hide-fields';

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import * as _ from 'lodash';
 
 import { Subscriber } from '../models/subscriber';
 import { IP } from '../models/ip';

@@ -1,9 +1,9 @@
 import { MongoClient } from 'mongodb';
 import { URL } from 'url';
-import moment from 'moment';
-import mongoose from 'mongoose';
+import * as moment from 'moment';
+import * as mongoose from 'mongoose';
 
-mongoose.Promise = Promise;
+(mongoose as any).Promise = Promise;
 
 import { db } from '../config';
 

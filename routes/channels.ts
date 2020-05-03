@@ -1,4 +1,4 @@
-import express from 'express';
+import * as express from 'express';
 
 import { legacy, appChannelStats, channelStats, channels, list } from '../controllers/channels';
 import { isLoggedIn } from '../middleware/is-logged-in';
