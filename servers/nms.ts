@@ -5,6 +5,7 @@ import { Stream } from '../models/stream';
 import { Subscriber } from '../models/subscriber';
 
 import { nms as nmsConfigs } from '../config';
+import { liveStats } from '.';
 
 async function getNodeStats(host, token) {
   const { data } = await axios.get(`${host}/api/streams`, {
@@ -114,7 +115,7 @@ async function runUpdate() {
 
         const stats = await updateStats(nmsConfig);
 
-        _.set((global as any).liveStats, [name], stats);
+        _.set(liveStats, [name], stats);
       } catch (error) {
         if (error.code === 'ECONNREFUSED') {
           console.error(error.message);

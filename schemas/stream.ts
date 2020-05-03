@@ -5,6 +5,7 @@ import ip6addr from 'ip6addr';
 
 import { filterSubscribers } from '../helpers/filter-subscribers';
 import { IP } from '../models/ip';
+import { liveStats } from '../servers';
 
 const Schema = mongoose.Schema;
 
@@ -81,7 +82,7 @@ schema.pre('save', function(next) {
 });
 
 schema.virtual('isLive').get(function() {
-  const stream = _.get((global as any).liveStats, [this.serverType, this.app, this.channel, 'publisher'], null);
+  const stream = _.get(liveStats, [this.serverType, this.app, this.channel, 'publisher'], null);
 
   if (!stream) {
     return false;

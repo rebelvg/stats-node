@@ -4,6 +4,7 @@ import _ from 'lodash';
 import ip6addr from 'ip6addr';
 
 import { IP } from '../models/ip';
+import { liveStats } from '../servers';
 
 const Schema = mongoose.Schema;
 
@@ -75,7 +76,7 @@ schema.pre('save', function(next) {
 });
 
 schema.virtual('isLive').get(function() {
-  const subscribers = _.get((global as any).liveStats, [this.serverType, this.app, this.channel, 'subscribers'], []);
+  const subscribers = _.get(liveStats, [this.serverType, this.app, this.channel, 'subscribers'], []);
 
   return !!_.find(subscribers, ['id', this.id]);
 });
