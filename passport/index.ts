@@ -1,12 +1,12 @@
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+import passport from 'passport';
+import { OAuth2Strategy } from 'passport-google-oauth';
 
-const User = require('../models/user');
-const googleKeys = require('../google-keys');
-const stats = require('../config').stats;
+import { User } from '../models/user';
+import googleKeys from '../google-keys.json';
+import { stats } from '../config';
 
 passport.use(
-  new GoogleStrategy(
+  new OAuth2Strategy(
     {
       clientID: googleKeys.web.client_id,
       clientSecret: googleKeys.web.client_secret,

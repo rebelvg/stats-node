@@ -1,12 +1,12 @@
-const mongoose = require('mongoose');
-const mongoosePaginate = require('mongoose-paginate');
-const request = require('request-promise-native');
+import mongoose from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate';
+import axios from 'axios';
 
 const Schema = mongoose.Schema;
 
-const apiLink = `http://ip-api.com/json/`;
+const apiLink = `http://ip-api.com/json`;
 
-const schema = new Schema(
+export const schema = new Schema(
   {
     ip: { type: String, required: true, unique: true, index: true },
     api: { type: Object, required: true },
@@ -18,17 +18,16 @@ const schema = new Schema(
   }
 );
 
-schema.pre('validate', function(next) {
-  request
-    .get(apiLink + this.ip, {
-      json: true
-    })
-    .then(res => {
-      this.api = res;
+schema.pre('validate', async function(next) {
+  try {
+    const { data } = await axios.get(`${apiLink}/${this.ip}`);
 
-      next();
-    })
-    .catch(next);
+    this.api = data;
+
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 schema.pre('validate', function(next) {
@@ -46,5 +45,3 @@ schema.pre('validate', function(next) {
 schema.set('toJSON', { virtuals: true });
 
 schema.plugin(mongoosePaginate);
-
-module.exports = schema;

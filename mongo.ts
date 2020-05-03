@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const { URL } = require('url');
+import mongoose from 'mongoose';
+import { URL } from 'url';
 
-const { db } = require('./config');
+import { db } from './config';
 
 mongoose.Promise = Promise;
 

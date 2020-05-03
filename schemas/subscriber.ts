@@ -1,15 +1,13 @@
-const mongoose = require('mongoose');
-const mongoosePaginate = require('mongoose-paginate');
-const _ = require('lodash');
-const ip6addr = require('ip6addr');
+import mongoose from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate';
+import _ from 'lodash';
+import ip6addr from 'ip6addr';
 
-const filterSubscribers = require('../helpers/filter-subscribers');
-
-const IP = require('../models/ip');
+import { IP } from '../models/ip';
 
 const Schema = mongoose.Schema;
 
-const schema = new Schema(
+export const schema = new Schema(
   {
     app: { type: String, required: true },
     channel: { type: String, required: true },
@@ -22,8 +20,6 @@ const schema = new Schema(
     protocol: { type: String, required: true },
     duration: { type: Number, required: true },
     bitrate: { type: Number, required: true },
-    totalConnectionsCount: { type: Number, required: true },
-    peakViewersCount: { type: Number, required: true },
     userId: { type: Schema.Types.ObjectId, ref: 'User', index: true, default: null },
     createdAt: { type: Date, required: true, index: true },
     updatedAt: { type: Date, required: true, index: true }
@@ -47,9 +43,6 @@ schema.pre('validate', function(next) {
   this.bitrate = this.duration > 0 ? Math.ceil((this.bytes * 8) / this.duration / 1024) : 0;
 
   if (this.isNew) {
-    this.totalConnectionsCount = 0;
-    this.peakViewersCount = 0;
-
     this.createdAt = updatedAt;
   }
 
@@ -82,13 +75,9 @@ schema.pre('save', function(next) {
 });
 
 schema.virtual('isLive').get(function() {
-  const stream = _.get(global.liveStats, [this.serverType, this.app, this.channel, 'publisher'], null);
+  const subscribers = _.get((global as any).liveStats, [this.serverType, this.app, this.channel, 'subscribers'], []);
 
-  if (!stream) {
-    return false;
-  }
-
-  return stream.id === this.id;
+  return !!_.find(subscribers, ['id', this.id]);
 });
 
 schema.virtual('location', {
@@ -100,7 +89,7 @@ schema.virtual('location', {
 
 schema.set('toJSON', { virtuals: true });
 
-schema.methods.getSubscribers = function(query = {}) {
+schema.methods.getStreams = function(query = {}) {
   query = {
     $and: [
       {
@@ -114,40 +103,7 @@ schema.methods.getSubscribers = function(query = {}) {
     ]
   };
 
-  return this.model('Subscriber').find(query);
-};
-
-schema.methods.getRelatedStreams = function(query = {}) {
-  query = {
-    $and: [
-      {
-        _id: { $ne: this._id },
-        channel: this.channel,
-        serverType: this.serverType,
-        connectUpdated: { $gte: this.connectCreated },
-        connectCreated: { $lte: this.connectUpdated }
-      },
-      query
-    ]
-  };
-
   return this.model('Stream').find(query);
 };
 
-schema.methods.updateInfo = async function() {
-  const subscribers = await this.getSubscribers();
-
-  this.totalConnectionsCount = subscribers.length;
-
-  _.forEach(subscribers, subscriber => {
-    const viewersCount = filterSubscribers(subscribers, subscriber.connectCreated).length;
-
-    if (viewersCount > this.peakViewersCount) {
-      this.peakViewersCount = viewersCount;
-    }
-  });
-};
-
 schema.plugin(mongoosePaginate);
-
-module.exports = schema;

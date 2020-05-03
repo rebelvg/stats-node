@@ -1,13 +1,13 @@
-const axios = require('axios');
-const _ = require('lodash');
+import axios from 'axios';
+import _ from 'lodash';
 
-const Stream = require('../models/stream');
-const Subscriber = require('../models/subscriber');
+import { Stream } from '../models/stream';
+import { Subscriber } from '../models/subscriber';
 
-const amsConfigs = require('../config').ams;
+import { nms as nmsConfigs } from '../config';
 
 async function getNodeStats(host, token) {
-  const { data } = await axios.get(`${host}/streams`, {
+  const { data } = await axios.get(`${host}/api/streams`, {
     headers: {
       token
     }
@@ -16,8 +16,8 @@ async function getNodeStats(host, token) {
   return data;
 }
 
-async function updateStats(amsConfigs) {
-  const { name, host, token } = amsConfigs;
+async function updateStats(nmsConfig) {
+  const { name, host, token } = nmsConfig;
 
   const channels = await getNodeStats(host, token);
 
@@ -39,7 +39,7 @@ async function updateStats(amsConfigs) {
       let streamObj = null;
 
       if (channelData.publisher) {
-        const streamQuery = {
+        const streamQuery: any = {
           app: channelData.publisher.app,
           channel: channelData.publisher.stream,
           serverType: name,
@@ -68,7 +68,7 @@ async function updateStats(amsConfigs) {
       }
 
       for (const subscriber of channelData.subscribers) {
-        const subscriberQuery = {
+        const subscriberQuery: any = {
           app: subscriber.app,
           channel: subscriber.stream,
           serverType: name,
@@ -108,13 +108,13 @@ async function updateStats(amsConfigs) {
 
 async function runUpdate() {
   await Promise.all(
-    amsConfigs.map(async amsConfig => {
+    nmsConfigs.map(async nmsConfig => {
       try {
-        const { name } = amsConfig;
+        const { name } = nmsConfig;
 
-        const stats = await updateStats(amsConfig);
+        const stats = await updateStats(nmsConfig);
 
-        _.set(global.liveStats, [name], stats);
+        _.set((global as any).liveStats, [name], stats);
       } catch (error) {
         if (error.code === 'ECONNREFUSED') {
           console.error(error.message);

@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
-const uuidv4 = require('uuid/v4');
+import mongoose from 'mongoose';
+import uuidv4 from 'uuid/v4';
 
 const Schema = mongoose.Schema;
 
-const schema = new Schema(
+export const schema = new Schema(
   {
     googleId: { type: String, required: true, unique: true },
     emails: { type: Array, required: true },
@@ -44,5 +44,3 @@ schema.pre('validate', function(next) {
 
   next();
 });
-
-module.exports = schema;

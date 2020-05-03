@@ -1,12 +1,11 @@
-const fs = require('fs');
+import * as fs from 'fs';
 
-const { stats } = require('./config');
+import { app } from './app';
+import './mongo';
+import './passport';
+import './servers';
 
-const app = require('./app');
-
-require('./mongo');
-require('./passport');
-require('./servers');
+import { stats } from './config';
 
 process.on('unhandledRejection', (reason, p) => {
   throw reason;
