@@ -1,8 +1,8 @@
-const MongoClient = require('mongodb').MongoClient;
-const { URL } = require('url');
-const moment = require('moment');
+import { MongoClient } from 'mongodb';
+import { URL } from 'url';
+import moment from 'moment';
 
-const { db } = require('../config');
+import { db } from '../config';
 
 const mongoUrl = new URL(`mongodb://${db.host}/ams`);
 
@@ -18,8 +18,8 @@ const Subscriber = require('../models/subscriber');
 
 MongoClient.connect(mongoUrl.href)
   .then(db => {
-    const streams = db.collection('streams');
-    const subscribers = db.collection('subscribers');
+    const streams = (db as any).collection('streams');
+    const subscribers = (db as any).collection('subscribers');
 
     // fs.writeFileSync('streams.json', JSON.stringify(await streams.find().toArray()));
     // fs.writeFileSync('subscribers.json', JSON.stringify(await subscribers.find().toArray()));

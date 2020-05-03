@@ -1,11 +1,11 @@
-const MongoClient = require('mongodb').MongoClient;
-const { URL } = require('url');
-const moment = require('moment');
-const mongoose = require('mongoose');
+import { MongoClient } from 'mongodb';
+import { URL } from 'url';
+import moment from 'moment';
+import mongoose from 'mongoose';
 
 mongoose.Promise = Promise;
 
-const { db } = require('../config');
+import { db } from '../config';
 
 const amsMongoUrl = new URL(`mongodb://${db.host}/ams`);
 
@@ -37,13 +37,13 @@ mongoose.connect(
 
 MongoClient.connect(amsMongoUrl.href)
   .then(async amsDb => {
-    const amsIps = amsDb.collection('ips');
-    const amsStreams = amsDb.collection('streams');
-    const amsSubscribers = amsDb.collection('subscribers');
+    const amsIps = (amsDb as any).collection('ips');
+    const amsStreams = (amsDb as any).collection('streams');
+    const amsSubscribers = (amsDb as any).collection('subscribers');
 
     const nodeDB = await MongoClient.connect(nodeMongoUrl.href);
 
-    const nodeIPsCollection = nodeDB.collection('ips');
+    const nodeIPsCollection = (nodeDB as any).collection('ips');
 
     const nodeIPs = await amsIps.find().toArray();
 
