@@ -1,19 +1,18 @@
 import * as passport from 'koa-passport';
-import { OAuth2Strategy } from 'passport-google-oauth';
+import { Strategy } from 'passport-google-oauth20';
 
 import { User } from '../models/user';
 import * as googleKeys from '../google-keys.json';
 import { stats } from '../config';
 
 passport.use(
-  new OAuth2Strategy(
+  new Strategy(
     {
       clientID: googleKeys.web.client_id,
       clientSecret: googleKeys.web.client_secret,
-      callbackURL: `${stats.googleCallbackHost}/users/auth/google/callback`,
-      passReqToCallback: true
+      callbackURL: `${stats.googleCallbackHost}/users/auth/google/callback`
     },
-    async (req, accessToken, refreshToken, profile, done) => {
+    async (accessToken, refreshToken, profile, done) => {
       try {
         const user = await User.findOne({
           googleId: profile.id
@@ -22,7 +21,6 @@ passport.use(
         if (user) {
           user.emails = profile.emails;
           user.name = profile.displayName;
-          user.ipUpdated = req.ip;
 
           await user.save();
 
@@ -32,9 +30,7 @@ passport.use(
         const newUser = await User.create({
           googleId: profile.id,
           emails: profile.emails,
-          name: profile.displayName,
-          ipCreated: req.ip,
-          ipUpdated: req.ip
+          name: profile.displayName
         });
 
         return done(null, newUser);

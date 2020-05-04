@@ -20,14 +20,14 @@ export const schema = new Schema(
 
 schema.pre('validate', async function(next: mongoose.HookNextFunction) {
   try {
-    const { data } = await axios.get(`${apiLink}/${this.ip}`);
+    if (!this.api) {
+      const { data } = await axios.get(`${apiLink}/${this.ip}`);
 
-    this.api = data;
+      this.api = data;
+    }
+  } catch (error) {}
 
-    next();
-  } catch (error) {
-    next(error);
-  }
+  next();
 });
 
 schema.pre('validate', function(next: mongoose.HookNextFunction) {

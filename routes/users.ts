@@ -4,6 +4,7 @@ import * as passport from 'koa-passport';
 
 import { isLoggedIn } from '../middleware/is-logged-in';
 import { stats } from '../config';
+import { User } from '../models/user';
 
 export const router = new Router();
 
@@ -25,8 +26,18 @@ router.get(
 router.get(
   '/auth/google/callback',
   passport.authenticate('google', { session: false }),
-  (ctx: Router.IRouterContext, next: Next) => {
-    const { token } = ctx.state.user;
+  async (ctx: Router.IRouterContext, next: Next) => {
+    const { _id, token, ipCreated } = ctx.state.user;
+
+    await User.updateOne(
+      {
+        _id
+      },
+      {
+        ipCreated: ipCreated ? ipCreated : ctx.ip,
+        ipUpdated: ctx.ip
+      }
+    );
 
     ctx.redirect(stats.googleRedirect + `/?token=${token}`);
   }

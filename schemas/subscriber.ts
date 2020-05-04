@@ -52,31 +52,24 @@ schema.pre('validate', function(next: mongoose.HookNextFunction) {
   next();
 });
 
-schema.pre('save', function(next: mongoose.HookNextFunction) {
-  if (this.isNew) {
-    IP.findOne({ ip: this.ip }, (err, ip) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      if (ip) {
-        return;
-      }
+schema.pre('save', async function(next: mongoose.HookNextFunction) {
+  let ip = await IP.findOne({ ip: this.ip });
 
-      ip = new IP({ ip: this.ip });
+  if (ip) {
+    await ip.save();
 
-      ip.save(err => {
-        if (err) {
-          return console.error(err.message);
-        }
-      });
-    });
+    return next();
   }
+
+  ip = new IP({ ip: this.ip });
+
+  await ip.save();
 
   next();
 });
 
 schema.virtual('isLive').get(function() {
-  const subscribers = liveStats?.[this.serverType]?.[this.app]?.[this.channel].subscribers || [];
+  const subscribers = liveStats?.[this.serverType]?.[this.app]?.[this.channel]?.subscribers || [];
 
   return !!_.find(subscribers, ['id', this.id]);
 });

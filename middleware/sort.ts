@@ -11,7 +11,7 @@ declare module 'koa-router' {
 }
 
 export function parseSort(model) {
-  return function(ctx: Router.IRouterContext, next: Next) {
+  return async function(ctx: Router.IRouterContext, next: Next) {
     const sortObj = {};
 
     if (_.isArray(ctx.query.sort)) {
@@ -33,6 +33,6 @@ export function parseSort(model) {
 
     ctx.sortObj = sortObj;
 
-    next();
+    await next();
   };
 }

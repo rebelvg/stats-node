@@ -34,5 +34,5 @@ export async function readToken(ctx: Router.IRouterContext, next: Next) {
 
   ctx.state.user = user;
 
-  next();
+  await next();
 }

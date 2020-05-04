@@ -230,6 +230,6 @@ export function parseFilter(modelName) {
 
     ctx.queryObj = queryObj;
 
-    next();
+    await next();
   };
 }
