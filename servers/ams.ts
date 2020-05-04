@@ -26,83 +26,81 @@ async function updateStats(amsConfigs) {
 
   const statsUpdateTime = new Date();
 
-  for (const appObj of Object.entries(channels)) {
-    const [appName, channelObjs] = appObj;
+  await Promise.all(
+    _.map(channels, (channelObjs, appName) => {
+      return _.map(channelObjs, async (channelData, channelName) => {
+        _.set(stats, [appName, channelName], {
+          publisher: null,
+          subscribers: []
+        });
 
-    for (const channelObj of Object.entries(channelObjs)) {
-      const [channelName, channelData] = channelObj;
+        let streamObj = null;
 
-      _.set(stats, [appName, channelName], {
-        publisher: null,
-        subscribers: []
+        if (channelData.publisher) {
+          const streamQuery: Partial<IStreamModel> = {
+            app: channelData.publisher.app,
+            channel: channelData.publisher.stream,
+            serverType: name,
+            serverId: channelData.publisher.clientId,
+            connectCreated: new Date(channelData.publisher.connectCreated)
+          };
+
+          streamObj = await Stream.findOne(streamQuery);
+
+          if (!streamObj) {
+            streamQuery.connectUpdated = statsUpdateTime;
+            streamQuery.bytes = channelData.publisher.bytes;
+            streamQuery.ip = channelData.publisher.ip;
+            streamQuery.protocol = 'rtmp';
+            streamQuery.userId = channelData.publisher.userId;
+
+            streamObj = new Stream(streamQuery);
+          } else {
+            streamObj.bytes = channelData.publisher.bytes;
+            streamObj.connectUpdated = statsUpdateTime;
+          }
+
+          await streamObj.save();
+
+          _.set(stats, [appName, channelName, 'publisher'], streamObj);
+        }
+
+        for (const subscriber of channelData.subscribers) {
+          const subscriberQuery: Partial<ISubscriberModel> = {
+            app: subscriber.app,
+            channel: subscriber.stream,
+            serverType: name,
+            serverId: subscriber.clientId,
+            connectCreated: new Date(subscriber.connectCreated)
+          };
+
+          let subscriberObj = await Subscriber.findOne(subscriberQuery);
+
+          if (!subscriberObj) {
+            subscriberQuery.connectUpdated = statsUpdateTime;
+            subscriberQuery.bytes = subscriber.bytes;
+            subscriberQuery.ip = subscriber.ip;
+            subscriberQuery.protocol = subscriber.protocol;
+            subscriberQuery.userId = subscriber.userId;
+
+            subscriberObj = new Subscriber(subscriberQuery);
+          } else {
+            subscriberObj.bytes = subscriber.bytes;
+            subscriberObj.connectUpdated = statsUpdateTime;
+          }
+
+          await subscriberObj.save();
+
+          stats[appName][channelName].subscribers.push(subscriberObj);
+        }
+
+        if (streamObj) {
+          await streamObj.updateInfo();
+          await streamObj.save();
+        }
       });
-
-      let streamObj = null;
-
-      if (channelData.publisher) {
-        const streamQuery: Partial<IStreamModel> = {
-          app: channelData.publisher.app,
-          channel: channelData.publisher.stream,
-          serverType: name,
-          serverId: channelData.publisher.clientId,
-          connectCreated: new Date(channelData.publisher.connectCreated)
-        };
-
-        streamObj = await Stream.findOne(streamQuery);
-
-        if (!streamObj) {
-          streamQuery.connectUpdated = statsUpdateTime;
-          streamQuery.bytes = channelData.publisher.bytes;
-          streamQuery.ip = channelData.publisher.ip;
-          streamQuery.protocol = 'rtmp';
-          streamQuery.userId = channelData.publisher.userId;
-
-          streamObj = new Stream(streamQuery);
-        } else {
-          streamObj.bytes = channelData.publisher.bytes;
-          streamObj.connectUpdated = statsUpdateTime;
-        }
-
-        await streamObj.save();
-
-        _.set(stats, [appName, channelName, 'publisher'], streamObj);
-      }
-
-      for (const subscriber of channelData.subscribers) {
-        const subscriberQuery: Partial<ISubscriberModel> = {
-          app: subscriber.app,
-          channel: subscriber.stream,
-          serverType: name,
-          serverId: subscriber.clientId,
-          connectCreated: new Date(subscriber.connectCreated)
-        };
-
-        let subscriberObj = await Subscriber.findOne(subscriberQuery);
-
-        if (!subscriberObj) {
-          subscriberQuery.connectUpdated = statsUpdateTime;
-          subscriberQuery.bytes = subscriber.bytes;
-          subscriberQuery.ip = subscriber.ip;
-          subscriberQuery.protocol = subscriber.protocol;
-          subscriberQuery.userId = subscriber.userId;
-
-          subscriberObj = new Subscriber(subscriberQuery);
-        } else {
-          subscriberObj.bytes = subscriber.bytes;
-          subscriberObj.connectUpdated = statsUpdateTime;
-        }
-
-        await subscriberObj.save();
-
-        stats[appName][channelName].subscribers.push(subscriberObj);
-      }
-
-      if (streamObj) {
-        await streamObj.updateInfo();
-        await streamObj.save();
-      }
-    }
-  }
+    })
+  );
 
   return stats;
 }

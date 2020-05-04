@@ -61,23 +61,25 @@ export function appChannelStats(req, res, next) {
 }
 
 export async function channels(req, res, next) {
-  for (const [_serverName, serverObj] of Object.entries(liveStats)) {
-    for (const [_appName, appObj] of Object.entries(serverObj)) {
-      for (const [_channelName, channelObj] of Object.entries(appObj)) {
-        if (channelObj.publisher) {
-          await Stream.populate(channelObj.publisher, {
-            path: 'location'
-          });
-        }
+  await Promise.all(
+    _.map(liveStats, serverObj => {
+      return _.map(serverObj, appObj => {
+        return _.map(appObj, async channelObj => {
+          if (channelObj.publisher) {
+            await Stream.populate(channelObj.publisher, {
+              path: 'location'
+            });
+          }
 
-        for (const subscriberObj of channelObj.subscribers) {
-          await Subscriber.populate(subscriberObj, {
-            path: 'location'
-          });
-        }
-      }
-    }
-  }
+          for (const subscriberObj of channelObj.subscribers) {
+            await Subscriber.populate(subscriberObj, {
+              path: 'location'
+            });
+          }
+        });
+      });
+    })
+  );
 
   res.json(liveStats);
 }

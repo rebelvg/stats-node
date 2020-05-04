@@ -8,7 +8,7 @@ export function parseSort(model) {
 
     if (_.isArray(req.query.sort)) {
       _.forEach(req.query.sort, sort => {
-        _.forEach(_.concat(Object.keys(model.schema.paths), allowedPaths), path => {
+        _.forEach(_.concat(_.keys(model.schema.paths), allowedPaths), path => {
           switch (sort) {
             case `-${path}`: {
               sortObj[path] = -1;
