@@ -18,7 +18,7 @@ export const schema = new Schema(
   }
 );
 
-schema.pre('validate', async function(next) {
+schema.pre('validate', async function(next: mongoose.HookNextFunction) {
   try {
     const { data } = await axios.get(`${apiLink}/${this.ip}`);
 
@@ -30,7 +30,7 @@ schema.pre('validate', async function(next) {
   }
 });
 
-schema.pre('validate', function(next) {
+schema.pre('validate', function(next: mongoose.HookNextFunction) {
   const updatedAt = new Date();
 
   if (this.isNew) {

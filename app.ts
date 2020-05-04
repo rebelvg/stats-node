@@ -32,10 +32,10 @@ app.use('/ips', ips);
 app.use('/users', users);
 app.use('/admin', admin);
 
-app.use((req, res, next) => {
+app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
   throw new Error('Not found.');
 });
 
-app.use((err, req, res, next) => {
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   res.status(500).json({ error: err.message });
 });

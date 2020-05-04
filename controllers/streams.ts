@@ -1,3 +1,4 @@
+import * as express from 'express';
 import * as _ from 'lodash';
 
 import { Stream } from '../models/stream';
@@ -5,7 +6,7 @@ import { IP } from '../models/ip';
 import { hideFields } from '../helpers/hide-fields';
 import { filterSubscribers } from '../helpers/filter-subscribers';
 
-export async function findById(req, res, next) {
+export async function findById(req: express.Request, res: express.Response, next: express.NextFunction) {
   const stream = await Stream.findById(req.params.id).populate(['location']);
 
   if (!stream) {
@@ -88,11 +89,11 @@ export async function findById(req, res, next) {
   });
 }
 
-export async function find(req, res, next) {
+export async function find(req: express.Request, res: express.Response, next: express.NextFunction) {
   const paginatedStreams = await Stream.paginate(req.queryObj, {
     sort: _.isEmpty(req.sortObj) ? { connectCreated: -1 } : req.sortObj,
-    page: req.query.page,
-    limit: req.query.limit,
+    page: parseInt(req.query.page as string),
+    limit: parseInt(req.query.limit as string),
     populate: ['location']
   });
 
@@ -147,7 +148,7 @@ export async function find(req, res, next) {
   });
 }
 
-export async function graph(req, res, next) {
+export async function graph(req: express.Request, res: express.Response, next: express.NextFunction) {
   const stream = await Stream.findById(req.params.id);
 
   if (!stream) {

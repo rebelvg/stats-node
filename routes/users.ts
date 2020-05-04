@@ -7,7 +7,7 @@ import { IUserModel } from '../models/user';
 
 export const router = express.Router();
 
-router.get('/', isLoggedIn, (req, res, next) => {
+router.get('/', isLoggedIn, (req: express.Request, res: express.Response, next: express.NextFunction) => {
   res.send({ user: req.user });
 });
 router.get(
@@ -22,8 +22,12 @@ router.get(
     ]
   })
 );
-router.get('/auth/google/callback', passport.authenticate('google', { session: false }), (req, res, next) => {
-  const { token } = req.user as IUserModel;
+router.get(
+  '/auth/google/callback',
+  passport.authenticate('google', { session: false }),
+  (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const { token } = req.user as IUserModel;
 
-  res.redirect(stats.googleRedirect + `/?token=${token}`);
-});
+    res.redirect(stats.googleRedirect + `/?token=${token}`);
+  }
+);

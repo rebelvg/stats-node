@@ -1,6 +1,14 @@
-import { User } from '../models/user';
+import * as express from 'express';
 
-export async function readToken(req, res, next) {
+import { User, IUserModel } from '../models/user';
+
+declare module 'express' {
+  interface Request {
+    user: IUserModel;
+  }
+}
+
+export async function readToken(req: express.Request, res: express.Response, next: express.NextFunction) {
   const token = req.get('token');
 
   if (!token) {

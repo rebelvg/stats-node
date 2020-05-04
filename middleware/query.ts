@@ -1,9 +1,16 @@
+import * as express from 'express';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import { strtotime } from 'locutus/php/datetime';
 
 import { IP } from '../models/ip';
 import { shouldHideFields } from '../helpers/should-hide-fields';
+
+declare module 'express' {
+  interface Request {
+    queryObj: any;
+  }
+}
 
 const filterRules = {
   app: {
@@ -193,7 +200,7 @@ const rulePresets = {
 export function parseFilter(modelName) {
   const rules = rulePresets?.[modelName];
 
-  return async function(req, res, next) {
+  return async function(req: express.Request, res: express.Response, next: express.NextFunction) {
     const queryObj: any = {};
 
     await Promise.all(

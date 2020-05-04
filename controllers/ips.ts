@@ -1,8 +1,9 @@
+import * as express from 'express';
 import * as _ from 'lodash';
 
 import { IP } from '../models/ip';
 
-export async function findById(req, res, next) {
+export async function findById(req: express.Request, res: express.Response, next: express.NextFunction) {
   const ip = await IP.findById(req.params.id);
 
   if (!ip) {
@@ -14,11 +15,11 @@ export async function findById(req, res, next) {
   });
 }
 
-export async function find(req, res, next) {
+export async function find(req: express.Request, res: express.Response, next: express.NextFunction) {
   const paginatedIps = await IP.paginate(req.queryObj, {
     sort: _.isEmpty(req.sortObj) ? { createdAt: -1 } : req.sortObj,
-    page: req.query.page,
-    limit: req.query.limit
+    page: parseInt(req.query.page as string),
+    limit: parseInt(req.query.limit as string)
   });
 
   const counties = await IP.distinct('api.country', req.queryObj);

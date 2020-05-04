@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate';
 import * as _ from 'lodash';
-import ip6addr from 'ip6addr';
+import * as ip6addr from 'ip6addr';
 
 import { filterSubscribers } from '../helpers/filter-subscribers';
 import { IP } from '../models/ip';
@@ -33,7 +33,7 @@ export const schema = new Schema(
   }
 );
 
-schema.pre('validate', function(next) {
+schema.pre('validate', function(next: mongoose.HookNextFunction) {
   const updatedAt = new Date();
 
   if (this.isNew) {
@@ -58,7 +58,7 @@ schema.pre('validate', function(next) {
   next();
 });
 
-schema.pre('save', function(next) {
+schema.pre('save', function(next: mongoose.HookNextFunction) {
   if (this.isNew) {
     IP.findOne({ ip: this.ip }, (err, ip) => {
       if (err) {

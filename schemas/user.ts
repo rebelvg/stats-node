@@ -22,7 +22,7 @@ export const schema = new Schema(
   }
 );
 
-schema.pre('validate', function(next) {
+schema.pre('validate', function(next: mongoose.HookNextFunction) {
   if (this.isNew) {
     this.isAdmin = false;
     this.isStreamer = false;
@@ -33,7 +33,7 @@ schema.pre('validate', function(next) {
   next();
 });
 
-schema.pre('validate', function(next) {
+schema.pre('validate', function(next: mongoose.HookNextFunction) {
   const updatedAt = new Date();
 
   if (this.isNew) {

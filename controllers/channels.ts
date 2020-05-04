@@ -1,3 +1,4 @@
+import * as express from 'express';
 import * as _ from 'lodash';
 
 import { Stream } from '../models/stream';
@@ -25,7 +26,7 @@ function getStartTime(server: string, app: string, channel: string): Date {
 }
 
 function appChannelStatsBase(server: string, app: string, channel: string) {
-  const channelStats = {
+  const channelStats: any = {
     isLive: false,
     viewers: 0,
     duration: 0,
@@ -42,8 +43,8 @@ function appChannelStatsBase(server: string, app: string, channel: string) {
   return channelStats;
 }
 
-export function channelStats(req, res, next) {
-  const channelsStats = {};
+export function channelStats(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const channelsStats: any = {};
 
   _.forEach(liveStats?.[req.params.server], (channels, appName) => {
     _.forEach(channels, (channelObj, channelName) => {
@@ -54,13 +55,13 @@ export function channelStats(req, res, next) {
   res.json(channelsStats);
 }
 
-export function appChannelStats(req, res, next) {
+export function appChannelStats(req: express.Request, res: express.Response, next: express.NextFunction) {
   const channelStats = appChannelStatsBase(req.params.server, req.params.app, req.params.channel);
 
   res.json(channelStats);
 }
 
-export async function channels(req, res, next) {
+export async function channels(req: express.Request, res: express.Response, next: express.NextFunction) {
   await Promise.all(
     _.map(liveStats, serverObj => {
       return _.map(serverObj, appObj => {
@@ -84,8 +85,8 @@ export async function channels(req, res, next) {
   res.json(liveStats);
 }
 
-export function legacy(req, res, next) {
-  const channelStats = {
+export function legacy(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const channelStats: any = {
     isLive: false,
     viewers: 0,
     bitrate_live: 0,
@@ -109,8 +110,8 @@ export function legacy(req, res, next) {
   res.json(channelStats);
 }
 
-export async function list(req, res, next) {
-  const liveChannels = [];
+export async function list(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const liveChannels: any[] = [];
 
   _.forEach(liveStats, serverObj => {
     _.forEach(serverObj, appObj => {

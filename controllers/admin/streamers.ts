@@ -1,6 +1,8 @@
+import * as express from 'express';
+
 import { User } from '../../models/user';
 
-export async function find(req, res, next) {
+export async function find(req: express.Request, res: express.Response, next: express.NextFunction) {
   const streamers = await User.find(
     {
       isStreamer: true

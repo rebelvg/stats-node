@@ -1,9 +1,16 @@
+import * as express from 'express';
 import * as _ from 'lodash';
+
+declare module 'express' {
+  interface Request {
+    sortObj: any;
+  }
+}
 
 const allowedPaths = ['api.country', 'api.city', 'api.isp'];
 
 export function parseSort(model) {
-  return function(req, res, next) {
+  return function(req: express.Request, res: express.Response, next: express.NextFunction) {
     const sortObj = {};
 
     if (_.isArray(req.query.sort)) {

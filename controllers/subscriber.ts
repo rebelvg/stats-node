@@ -1,10 +1,11 @@
+import * as express from 'express';
 import * as _ from 'lodash';
 
 import { Subscriber } from '../models/subscriber';
 import { IP } from '../models/ip';
 import { hideFields } from '../helpers/hide-fields';
 
-export async function findById(req, res, next) {
+export async function findById(req: express.Request, res: express.Response, next: express.NextFunction) {
   const subscriber = await Subscriber.findById(req.params.id).populate(['location']);
 
   if (!subscriber) {
@@ -25,11 +26,11 @@ export async function findById(req, res, next) {
   res.json({ subscriber: subscriber, streams: streams });
 }
 
-export async function find(req, res, next) {
+export async function find(req: express.Request, res: express.Response, next: express.NextFunction) {
   const paginatedSubscribers = await Subscriber.paginate(req.queryObj, {
     sort: _.isEmpty(req.sortObj) ? { connectCreated: -1 } : req.sortObj,
-    page: req.query.page,
-    limit: req.query.limit,
+    page: parseInt(req.query.page as string),
+    limit: parseInt(req.query.limit as string),
     populate: ['location']
   });
 
