@@ -1,4 +1,4 @@
-import * as passport from 'passport';
+import * as passport from 'koa-passport';
 import { OAuth2Strategy } from 'passport-google-oauth';
 
 import { User } from '../models/user';

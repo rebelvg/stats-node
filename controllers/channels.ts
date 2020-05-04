@@ -1,4 +1,5 @@
-import * as express from 'express';
+import { Next } from 'koa';
+import * as Router from 'koa-router';
 import * as _ from 'lodash';
 
 import { Stream } from '../models/stream';
@@ -43,25 +44,25 @@ function appChannelStatsBase(server: string, app: string, channel: string) {
   return channelStats;
 }
 
-export function channelStats(req: express.Request, res: express.Response, next: express.NextFunction) {
+export function channelStats(ctx: Router.IRouterContext, next: Next) {
   const channelsStats = {};
 
-  _.forEach(liveStats?.[req.params.server], (channels, appName) => {
+  _.forEach(liveStats?.[ctx.params.server], (channels, appName) => {
     _.forEach(channels, (channelObj, channelName) => {
-      channelsStats[appName] = appChannelStatsBase(req.params.server, appName, channelName);
+      channelsStats[appName] = appChannelStatsBase(ctx.params.server, appName, channelName);
     });
   });
 
-  res.json(channelsStats);
+  ctx.body = channelsStats;
 }
 
-export function appChannelStats(req: express.Request, res: express.Response, next: express.NextFunction) {
-  const channelStats = appChannelStatsBase(req.params.server, req.params.app, req.params.channel);
+export function appChannelStats(ctx: Router.IRouterContext, next: Next) {
+  const channelStats = appChannelStatsBase(ctx.params.server, ctx.params.app, ctx.params.channel);
 
-  res.json(channelStats);
+  ctx.body = channelStats;
 }
 
-export async function channels(req: express.Request, res: express.Response, next: express.NextFunction) {
+export async function channels(ctx: Router.IRouterContext, next: Next) {
   await Promise.all(
     _.map(liveStats, serverObj => {
       return _.map(serverObj, appObj => {
@@ -82,10 +83,10 @@ export async function channels(req: express.Request, res: express.Response, next
     })
   );
 
-  res.json(liveStats);
+  ctx.body = liveStats;
 }
 
-export function legacy(req: express.Request, res: express.Response, next: express.NextFunction) {
+export function legacy(ctx: Router.IRouterContext, next: Next) {
   const channelStats = {
     isLive: false,
     viewers: 0,
@@ -94,23 +95,23 @@ export function legacy(req: express.Request, res: express.Response, next: expres
     title: null
   };
 
-  channelStats.isLive = isLive(req.params.server, 'live', req.params.channel);
+  channelStats.isLive = isLive(ctx.params.server, 'live', ctx.params.channel);
 
-  _.forEach(liveStats?.[req.params.server], (channels, appName) => {
+  _.forEach(liveStats?.[ctx.params.server], (channels, appName) => {
     _.forEach(channels, (channelObj, channelName) => {
-      if (channelName === req.params.channel) {
+      if (channelName === ctx.params.channel) {
         channelStats.viewers += channelObj.subscribers.length;
       }
     });
   });
 
-  channelStats.bitrate_live = getBitrate(req.params.server, 'live', req.params.channel);
-  channelStats.bitrate_restream = getBitrate(req.params.server, 'restream', req.params.channel);
+  channelStats.bitrate_live = getBitrate(ctx.params.server, 'live', ctx.params.channel);
+  channelStats.bitrate_restream = getBitrate(ctx.params.server, 'restream', ctx.params.channel);
 
-  res.json(channelStats);
+  ctx.body = channelStats;
 }
 
-export async function list(req: express.Request, res: express.Response, next: express.NextFunction) {
+export async function list(ctx: Router.IRouterContext, next: Next) {
   const liveChannels = [];
 
   _.forEach(liveStats, serverObj => {
@@ -125,5 +126,5 @@ export async function list(req: express.Request, res: express.Response, next: ex
 
   const channels = await Stream.distinct('channel');
 
-  res.json({ channels, live: liveChannels });
+  ctx.body = { channels, live: liveChannels };
 }

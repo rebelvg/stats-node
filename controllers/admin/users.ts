@@ -1,36 +1,37 @@
-import * as express from 'express';
+import { Next } from 'koa';
+import * as Router from 'koa-router';
 import * as _ from 'lodash';
 
 import { User } from '../../models/user';
 
-export async function find(req: express.Request, res: express.Response, next: express.NextFunction) {
+export async function find(ctx: Router.IRouterContext, next: Next) {
   const users = await User.find(null, null, {
     sort: {
       createdAt: -1
     }
   });
 
-  res.json({
+  ctx.body = {
     users
-  });
+  };
 }
 
-export async function update(req: express.Request, res: express.Response, next: express.NextFunction) {
+export async function update(ctx: Router.IRouterContext, next: Next) {
   const user = await User.findOne({
-    _id: req.params.id
+    _id: ctx.params.id
   });
 
   if (!user) {
     throw Error('User not found.');
   }
 
-  _.forEach(req.body, (value, key) => {
+  _.forEach(ctx.request.body, (value, key) => {
     user[key] = value;
   });
 
   await user.save();
 
-  res.json({
+  ctx.body = {
     user
-  });
+  };
 }

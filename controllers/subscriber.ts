@@ -1,12 +1,13 @@
-import * as express from 'express';
+import { Next } from 'koa';
+import * as Router from 'koa-router';
 import * as _ from 'lodash';
 
 import { Subscriber } from '../models/subscriber';
 import { IP } from '../models/ip';
 import { hideFields } from '../helpers/hide-fields';
 
-export async function findById(req: express.Request, res: express.Response, next: express.NextFunction) {
-  const subscriber = await Subscriber.findById(req.params.id).populate(['location']);
+export async function findById(ctx: Router.IRouterContext, next: Next) {
+  const subscriber = await Subscriber.findById(ctx.params.id).populate(['location']);
 
   if (!subscriber) {
     throw new Error('Subscriber not found.');
@@ -17,25 +18,25 @@ export async function findById(req: express.Request, res: express.Response, next
     .sort({ connectCreated: 1 })
     .populate(['location']);
 
-  hideFields(req.user, subscriber);
+  hideFields(ctx.state.user, subscriber);
 
   _.forEach(streams, stream => {
-    hideFields(req.user, stream);
+    hideFields(ctx.state.user, stream);
   });
 
-  res.json({ subscriber: subscriber, streams: streams });
+  ctx.body = { subscriber: subscriber, streams: streams };
 }
 
-export async function find(req: express.Request, res: express.Response, next: express.NextFunction) {
-  const paginatedSubscribers = await Subscriber.paginate(req.queryObj, {
-    sort: _.isEmpty(req.sortObj) ? { connectCreated: -1 } : req.sortObj,
-    page: parseInt(req.query.page as string),
-    limit: parseInt(req.query.limit as string),
+export async function find(ctx: Router.IRouterContext, next: Next) {
+  const paginatedSubscribers = await Subscriber.paginate(ctx.queryObj, {
+    sort: _.isEmpty(ctx.sortObj) ? { connectCreated: -1 } : ctx.sortObj,
+    page: parseInt(ctx.query.page as string),
+    limit: parseInt(ctx.query.limit as string),
     populate: ['location']
   });
 
   const aggregation = await Subscriber.aggregate([
-    { $match: req.queryObj },
+    { $match: ctx.queryObj },
     {
       $group: {
         _id: null,
@@ -49,21 +50,21 @@ export async function find(req: express.Request, res: express.Response, next: ex
     }
   ]);
 
-  const uniqueIPs = await Subscriber.distinct('ip', req.queryObj);
+  const uniqueIPs = await Subscriber.distinct('ip', ctx.queryObj);
   const uniqueCountries = await IP.distinct('api.country');
   const uniqueApiMessages = await IP.distinct('api.message');
 
   _.forEach(paginatedSubscribers.docs, subscriber => {
-    hideFields(req.user, subscriber);
+    hideFields(ctx.state.user, subscriber);
   });
 
-  res.json({
+  ctx.body = {
     subscribers: paginatedSubscribers.docs,
     options: {
-      apps: await Subscriber.distinct('app', req.queryObj),
-      channels: await Subscriber.distinct('channel', req.queryObj),
+      apps: await Subscriber.distinct('app', ctx.queryObj),
+      channels: await Subscriber.distinct('channel', ctx.queryObj),
       countries: _.concat(uniqueCountries, uniqueApiMessages),
-      protocols: await Subscriber.distinct('protocol', req.queryObj)
+      protocols: await Subscriber.distinct('protocol', ctx.queryObj)
     },
     info: {
       totalBytes: _.get(aggregation, ['0', 'totalBytes'], 0),
@@ -74,5 +75,5 @@ export async function find(req: express.Request, res: express.Response, next: ex
     limit: paginatedSubscribers.limit,
     page: paginatedSubscribers.page,
     pages: paginatedSubscribers.pages
-  });
+  };
 }

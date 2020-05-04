@@ -1,20 +1,21 @@
-import * as express from 'express';
+import { Next } from 'koa';
+import * as Router from 'koa-router';
 import * as _ from 'lodash';
 
-declare module 'express' {
-  interface Request {
+const allowedPaths = ['api.country', 'api.city', 'api.isp'];
+
+declare module 'koa-router' {
+  interface IRouterContext {
     sortObj: any;
   }
 }
 
-const allowedPaths = ['api.country', 'api.city', 'api.isp'];
-
 export function parseSort(model) {
-  return function(req: express.Request, res: express.Response, next: express.NextFunction) {
+  return function(ctx: Router.IRouterContext, next: Next) {
     const sortObj = {};
 
-    if (_.isArray(req.query.sort)) {
-      _.forEach(req.query.sort, sort => {
+    if (_.isArray(ctx.query.sort)) {
+      _.forEach(ctx.query.sort, sort => {
         _.forEach(_.concat(_.keys(model.schema.paths), allowedPaths), path => {
           switch (sort) {
             case `-${path}`: {
@@ -30,7 +31,7 @@ export function parseSort(model) {
       });
     }
 
-    req.sortObj = sortObj;
+    ctx.sortObj = sortObj;
 
     next();
   };

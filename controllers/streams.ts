@@ -1,4 +1,5 @@
-import * as express from 'express';
+import { Next } from 'koa';
+import * as Router from 'koa-router';
 import * as _ from 'lodash';
 
 import { Stream } from '../models/stream';
@@ -6,16 +7,16 @@ import { IP } from '../models/ip';
 import { hideFields } from '../helpers/hide-fields';
 import { filterSubscribers } from '../helpers/filter-subscribers';
 
-export async function findById(req: express.Request, res: express.Response, next: express.NextFunction) {
-  const stream = await Stream.findById(req.params.id).populate(['location']);
+export async function findById(ctx: Router.IRouterContext, next: Next) {
+  const stream = await Stream.findById(ctx.params.id).populate(['location']);
 
   if (!stream) {
     throw new Error('Stream not found.');
   }
 
   const subscribers = await stream
-    .getSubscribers(req.queryObj)
-    .sort(_.isEmpty(req.sortObj) ? { connectCreated: 1 } : req.sortObj)
+    .getSubscribers(ctx.queryObj)
+    .sort(_.isEmpty(ctx.sortObj) ? { connectCreated: 1 } : ctx.sortObj)
     .populate(['location']);
 
   const relatedStreams = await stream
@@ -74,31 +75,25 @@ export async function findById(req: express.Request, res: express.Response, next
       .value().length
   };
 
-  hideFields(req.user, stream);
+  hideFields(ctx.state.user, stream);
 
   _.forEach(subscribers, subscriber => {
-    hideFields(req.user, subscriber);
+    hideFields(ctx.state.user, subscriber);
   });
 
-  res.json({
-    stream: stream,
-    subscribers: subscribers,
-    options: options,
-    info: info,
-    relatedStreams: relatedStreams
-  });
+  ctx.body = { stream: stream, subscribers: subscribers, options: options, info: info, relatedStreams: relatedStreams };
 }
 
-export async function find(req: express.Request, res: express.Response, next: express.NextFunction) {
-  const paginatedStreams = await Stream.paginate(req.queryObj, {
-    sort: _.isEmpty(req.sortObj) ? { connectCreated: -1 } : req.sortObj,
-    page: parseInt(req.query.page as string),
-    limit: parseInt(req.query.limit as string),
+export async function find(ctx: Router.IRouterContext, next: Next) {
+  const paginatedStreams = await Stream.paginate(ctx.queryObj, {
+    sort: _.isEmpty(ctx.sortObj) ? { connectCreated: -1 } : ctx.sortObj,
+    page: parseInt(ctx.query.page as string),
+    limit: parseInt(ctx.query.limit as string),
     populate: ['location']
   });
 
   const aggregation = await Stream.aggregate([
-    { $match: req.queryObj },
+    { $match: ctx.queryObj },
     {
       $group: {
         _id: null,
@@ -118,21 +113,21 @@ export async function find(req: express.Request, res: express.Response, next: ex
     }
   ]);
 
-  const uniqueIPs = await Stream.distinct('ip', req.queryObj);
+  const uniqueIPs = await Stream.distinct('ip', ctx.queryObj);
   const uniqueCountries = await IP.distinct('api.country');
   const uniqueApiMessages = await IP.distinct('api.message');
 
   _.forEach(paginatedStreams.docs, stream => {
-    hideFields(req.user, stream);
+    hideFields(ctx.state.user, stream);
   });
 
-  res.json({
+  ctx.body = {
     streams: paginatedStreams.docs,
     options: {
-      apps: await Stream.distinct('app', req.queryObj),
-      channels: await Stream.distinct('channel', req.queryObj),
+      apps: await Stream.distinct('app', ctx.queryObj),
+      channels: await Stream.distinct('channel', ctx.queryObj),
       countries: _.concat(uniqueCountries, uniqueApiMessages),
-      protocols: await Stream.distinct('protocol', req.queryObj)
+      protocols: await Stream.distinct('protocol', ctx.queryObj)
     },
     info: {
       totalBytes: _.get(aggregation, ['0', 'totalBytes'], 0),
@@ -145,17 +140,17 @@ export async function find(req: express.Request, res: express.Response, next: ex
     limit: paginatedStreams.limit,
     page: paginatedStreams.page,
     pages: paginatedStreams.pages
-  });
+  };
 }
 
-export async function graph(req: express.Request, res: express.Response, next: express.NextFunction) {
-  const stream = await Stream.findById(req.params.id);
+export async function graph(ctx: Router.IRouterContext, next: Next) {
+  const stream = await Stream.findById(ctx.params.id);
 
   if (!stream) {
     throw new Error('Stream not found.');
   }
 
-  const subscribers = await stream.getSubscribers(req.queryObj).sort({ connectCreated: 1 });
+  const subscribers = await stream.getSubscribers(ctx.queryObj).sort({ connectCreated: 1 });
 
   let graph = [];
 
@@ -208,7 +203,7 @@ export async function graph(req: express.Request, res: express.Response, next: e
 
   graph = _.sortBy(graph, ['time']);
 
-  hideFields(req.user, stream);
+  hideFields(ctx.state.user, stream);
 
-  res.json({ stream: stream, events: graph });
+  ctx.body = { stream: stream, events: graph };
 }

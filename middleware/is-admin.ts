@@ -1,7 +1,8 @@
-import * as express from 'express';
+import { Next } from 'koa';
+import * as Router from 'koa-router';
 
-export function isAdmin(req: express.Request, res: express.Response, next: express.NextFunction) {
-  if (req.user.isAdmin) {
+export function isAdmin(ctx: Router.IRouterContext, next: Next) {
+  if (ctx.state.user.isAdmin) {
     return next();
   }
 

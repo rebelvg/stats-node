@@ -1,15 +1,28 @@
-import * as express from 'express';
+import { Next } from 'koa';
+import * as Router from 'koa-router';
 
 import { User, IUserModel } from '../models/user';
 
-declare module 'express' {
-  interface Request {
-    user: IUserModel;
+declare module 'koa' {
+  interface Context {
+    state: {
+      user: IUserModel;
+      [key: string]: any;
+    };
   }
 }
 
-export async function readToken(req: express.Request, res: express.Response, next: express.NextFunction) {
-  const token = req.get('token');
+declare module 'koa-router' {
+  interface IRouterContext {
+    state: {
+      user: IUserModel;
+      [key: string]: any;
+    };
+  }
+}
+
+export async function readToken(ctx: Router.IRouterContext, next: Next) {
+  const token = ctx.get('token');
 
   if (!token) {
     return next();
@@ -19,7 +32,7 @@ export async function readToken(req: express.Request, res: express.Response, nex
     token
   });
 
-  req.user = user;
+  ctx.state.user = user;
 
   next();
 }

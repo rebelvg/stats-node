@@ -1,8 +1,9 @@
-import * as express from 'express';
+import { Next } from 'koa';
+import * as Router from 'koa-router';
 
 import { User } from '../../models/user';
 
-export async function find(req: express.Request, res: express.Response, next: express.NextFunction) {
+export async function find(ctx: Router.IRouterContext, next: Next) {
   const streamers = await User.find(
     {
       isStreamer: true
@@ -10,7 +11,7 @@ export async function find(req: express.Request, res: express.Response, next: ex
     ['_id', 'name', 'streamKey']
   );
 
-  res.json({
+  ctx.body = {
     streamers
-  });
+  };
 }

@@ -1,4 +1,5 @@
-import * as express from 'express';
+import { Next } from 'koa';
+import * as Router from 'koa-router';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import { strtotime } from 'locutus/php/datetime';
@@ -6,8 +7,8 @@ import { strtotime } from 'locutus/php/datetime';
 import { IP } from '../models/ip';
 import { shouldHideFields } from '../helpers/should-hide-fields';
 
-declare module 'express' {
-  interface Request {
+declare module 'koa-router' {
+  interface IRouterContext {
     queryObj: any;
   }
 }
@@ -57,7 +58,7 @@ const filterRules = {
   ip: {
     do: [],
     test: [_.isString],
-    cb: async function(queryObj, ip, req) {
+    cb: async function(queryObj, ip, ctx) {
       const ipQuery = [
         { 'api.country': new RegExp(ip, 'gi') },
         { 'api.city': new RegExp(ip, 'gi') },
@@ -74,7 +75,7 @@ const filterRules = {
 
       query.push({ ip: { $in: ips } });
 
-      if (!shouldHideFields(req.user)) {
+      if (!shouldHideFields(ctx.state.user)) {
         query.push({ ip: new RegExp(ip, 'gi') });
       }
 
@@ -200,17 +201,17 @@ const rulePresets = {
 export function parseFilter(modelName) {
   const rules = rulePresets?.[modelName];
 
-  return async function(req: express.Request, res: express.Response, next: express.NextFunction) {
+  return async function(ctx: Router.IRouterContext, next: Next) {
     const queryObj: any = {};
 
     await Promise.all(
       _.map(rules, async (rule, fieldName) => {
-        if (!req.query.hasOwnProperty(fieldName)) {
+        if (!ctx.query.hasOwnProperty(fieldName)) {
           return;
         }
 
         try {
-          let value = req.query[fieldName];
+          let value = ctx.query[fieldName];
 
           _.forEach(rule.do, fnc => {
             value = fnc(value);
@@ -222,12 +223,12 @@ export function parseFilter(modelName) {
             }
           }
 
-          await rule.cb(queryObj, value, req);
+          await rule.cb(queryObj, value, ctx);
         } catch (e) {}
       })
     );
 
-    req.queryObj = queryObj;
+    ctx.queryObj = queryObj;
 
     next();
   };

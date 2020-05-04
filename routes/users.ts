@@ -1,14 +1,14 @@
-import * as express from 'express';
-import * as passport from 'passport';
+import { Next } from 'koa';
+import * as Router from 'koa-router';
+import * as passport from 'koa-passport';
 
 import { isLoggedIn } from '../middleware/is-logged-in';
 import { stats } from '../config';
-import { IUserModel } from '../models/user';
 
-export const router = express.Router();
+export const router = new Router();
 
-router.get('/', isLoggedIn, (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  res.send({ user: req.user });
+router.get('/', isLoggedIn, (ctx: Router.IRouterContext, next: Next) => {
+  ctx.body = { user: ctx.state.user };
 });
 router.get(
   '/auth/google',
@@ -25,9 +25,9 @@ router.get(
 router.get(
   '/auth/google/callback',
   passport.authenticate('google', { session: false }),
-  (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    const { token } = req.user as IUserModel;
+  (ctx: Router.IRouterContext, next: Next) => {
+    const { token } = ctx.state.user;
 
-    res.redirect(stats.googleRedirect + `/?token=${token}`);
+    ctx.redirect(stats.googleRedirect + `/?token=${token}`);
   }
 );
