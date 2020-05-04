@@ -26,7 +26,7 @@ function getStartTime(server: string, app: string, channel: string): Date {
 }
 
 function appChannelStatsBase(server: string, app: string, channel: string) {
-  const channelStats: any = {
+  const channelStats = {
     isLive: false,
     viewers: 0,
     duration: 0,
@@ -44,7 +44,7 @@ function appChannelStatsBase(server: string, app: string, channel: string) {
 }
 
 export function channelStats(req: express.Request, res: express.Response, next: express.NextFunction) {
-  const channelsStats: any = {};
+  const channelsStats = {};
 
   _.forEach(liveStats?.[req.params.server], (channels, appName) => {
     _.forEach(channels, (channelObj, channelName) => {
@@ -86,7 +86,7 @@ export async function channels(req: express.Request, res: express.Response, next
 }
 
 export function legacy(req: express.Request, res: express.Response, next: express.NextFunction) {
-  const channelStats: any = {
+  const channelStats = {
     isLive: false,
     viewers: 0,
     bitrate_live: 0,
@@ -111,7 +111,7 @@ export function legacy(req: express.Request, res: express.Response, next: expres
 }
 
 export async function list(req: express.Request, res: express.Response, next: express.NextFunction) {
-  const liveChannels: any[] = [];
+  const liveChannels = [];
 
   _.forEach(liveStats, serverObj => {
     _.forEach(serverObj, appObj => {
