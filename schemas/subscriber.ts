@@ -76,7 +76,7 @@ schema.pre('save', function(next) {
 });
 
 schema.virtual('isLive').get(function() {
-  const subscribers = _.get(liveStats, [this.serverType, this.app, this.channel, 'subscribers'], []);
+  const subscribers = liveStats?.[this.serverType]?.[this.app]?.[this.channel].subscribers || [];
 
   return !!_.find(subscribers, ['id', this.id]);
 });

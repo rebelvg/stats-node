@@ -190,8 +190,8 @@ const rulePresets = {
   }
 };
 
-export function parseFilter(modelName: string) {
-  const rules = rulePresets?.[modelName] || {};
+export function parseFilter(modelName) {
+  const rules = rulePresets?.[modelName];
 
   return async function(req, res, next) {
     const queryObj: any = {};

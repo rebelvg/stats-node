@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
+import { IUserModel } from '../models/user';
 
-export function shouldHideFields(user) {
-  return !_.get(user, 'isAdmin', false);
+export function shouldHideFields(user: IUserModel) {
+  return !user?.isAdmin ?? true;
 }

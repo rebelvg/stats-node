@@ -82,7 +82,7 @@ schema.pre('save', function(next) {
 });
 
 schema.virtual('isLive').get(function() {
-  const stream = _.get(liveStats, [this.serverType, this.app, this.channel, 'publisher'], null);
+  const stream = liveStats?.[this.serverType]?.[this.app]?.[this.channel]?.publisher || null;
 
   if (!stream) {
     return false;

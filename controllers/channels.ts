@@ -4,27 +4,27 @@ import { Stream } from '../models/stream';
 import { Subscriber } from '../models/subscriber';
 import { liveStats } from '../servers';
 
-function isLive(server, app, channel) {
-  return _.get(_.get(liveStats, [server], {}), [app, channel, 'publisher'], null) !== null;
+function isLive(server: string, app: string, channel: string): boolean {
+  return liveStats?.[server]?.[app]?.[channel]?.publisher !== null;
 }
 
-function getViewers(server, app, channel) {
-  return _.get(_.get(liveStats, [server], {}), [app, channel, 'subscribers'], []).length;
+function getViewers(server: string, app: string, channel: string): number {
+  return liveStats?.[server]?.[app]?.[channel]?.subscribers?.length || 0;
 }
 
-function getDuration(server, app, channel) {
-  return _.get(_.get(liveStats, [server], {}), [app, channel, 'publisher', 'duration'], 0);
+function getDuration(server: string, app: string, channel: string): number {
+  return liveStats?.[server]?.[app]?.[channel]?.publisher?.duration || 0;
 }
 
-function getBitrate(server, app, channel) {
-  return _.get(_.get(liveStats, [server], {}), [app, channel, 'publisher', 'bitrate'], 0);
+function getBitrate(server: string, app: string, channel: string): number {
+  return liveStats?.[server]?.[app]?.[channel]?.publisher?.bitrate || 0;
 }
 
-function getStartTime(server, app, channel) {
-  return _.get(_.get(liveStats, [server], {}), [app, channel, 'publisher', 'connectCreated'], null);
+function getStartTime(server: string, app: string, channel: string): Date {
+  return liveStats?.[server]?.[app]?.[channel]?.publisher?.connectCreated || null;
 }
 
-function appChannelStatsBase(server, app, channel) {
+function appChannelStatsBase(server: string, app: string, channel: string) {
   const channelStats = {
     isLive: false,
     viewers: 0,
@@ -45,7 +45,7 @@ function appChannelStatsBase(server, app, channel) {
 export function channelStats(req, res, next) {
   const channelsStats = {};
 
-  _.forEach(_.get(liveStats, [req.params.server], {}), (channels, appName) => {
+  _.forEach(liveStats?.[req.params.server], (channels, appName) => {
     _.forEach(channels, (channelObj, channelName) => {
       channelsStats[appName] = appChannelStatsBase(req.params.server, appName, channelName);
     });
