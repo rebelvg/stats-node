@@ -1,8 +1,8 @@
 import * as mongoose from 'mongoose';
 import { Document } from 'mongoose';
+import { ObjectId } from 'mongodb';
 
 import { schema } from '../schemas/stream';
-import { IUserModel } from './user';
 
 export interface IStreamModel extends Document {
   app: string;
@@ -18,7 +18,7 @@ export interface IStreamModel extends Document {
   bitrate: number;
   totalConnectionsCount: number;
   peakViewersCount: number;
-  userId: IUserModel;
+  userId: ObjectId;
   createdAt: Date;
   updatedAt: Date;
   getSubscribers: (query?: any) => mongoose.DocumentQuery<IStreamModel[], IStreamModel>;

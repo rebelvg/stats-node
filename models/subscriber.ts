@@ -1,8 +1,8 @@
 import * as mongoose from 'mongoose';
 import { Document } from 'mongoose';
+import { ObjectId } from 'mongodb';
 
 import { schema } from '../schemas/subscriber';
-import { IUserModel } from './user';
 
 export interface ISubscriberModel extends Document {
   app: string;
@@ -15,7 +15,7 @@ export interface ISubscriberModel extends Document {
   ip: string;
   protocol: string;
   duration: number;
-  userId: IUserModel;
+  userId: ObjectId;
   createdAt: Date;
   updatedAt: Date;
   getStreams: (query?: any) => mongoose.DocumentQuery<ISubscriberModel[], ISubscriberModel>;

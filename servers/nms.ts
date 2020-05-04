@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as _ from 'lodash';
+import { ObjectId } from 'mongodb';
 
 import { Stream, IStreamModel } from '../models/stream';
 import { Subscriber, ISubscriberModel } from '../models/subscriber';
@@ -7,8 +8,36 @@ import { Subscriber, ISubscriberModel } from '../models/subscriber';
 import { nms as nmsConfigs } from '../config';
 import { liveStats } from '.';
 
-async function getNodeStats(host, token) {
-  const { data } = await axios.get(`${host}/api/streams`, {
+interface IStreamsResponse {
+  [app: string]: {
+    [channel: string]: {
+      publisher: {
+        app: string;
+        stream: string;
+        clientId: string;
+        connectCreated: Date;
+        bytes: number;
+        ip: string;
+        audio: { codec: string; profile: string; samplerate: number; channels: number };
+        video: { codec: string; size: string; fps: number };
+        userId: ObjectId;
+      };
+      subscribers: {
+        app: string;
+        stream: string;
+        clientId: string;
+        connectCreated: Date;
+        bytes: number;
+        ip: string;
+        protocol: string;
+        userId: ObjectId;
+      }[];
+    };
+  };
+}
+
+async function getNodeStats(host, token): Promise<IStreamsResponse> {
+  const { data } = await axios.get<IStreamsResponse>(`${host}/api/streams`, {
     headers: {
       token
     }
@@ -42,7 +71,7 @@ async function updateStats(nmsConfig) {
             channel: channelData.publisher.stream,
             serverType: name,
             serverId: channelData.publisher.clientId,
-            connectCreated: new Date(channelData.publisher.connectCreated)
+            connectCreated: channelData.publisher.connectCreated
           };
 
           streamObj = await Stream.findOne(streamQuery);
@@ -71,7 +100,7 @@ async function updateStats(nmsConfig) {
             channel: subscriber.stream,
             serverType: name,
             serverId: subscriber.clientId,
-            connectCreated: new Date(subscriber.connectCreated)
+            connectCreated: subscriber.connectCreated
           };
 
           let subscriberObj = await Subscriber.findOne(subscriberQuery);
