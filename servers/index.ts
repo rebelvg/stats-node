@@ -7,9 +7,9 @@ export interface IStream {
 }
 
 export interface ILiveStats {
-  [key: string]: {
-    [key: string]: {
-      [key: string]: IStream;
+  [server: string]: {
+    [app: string]: {
+      [channel: string]: IStream;
     };
   };
 }
