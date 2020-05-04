@@ -5,214 +5,209 @@ import { IP } from '../models/ip';
 import { hideFields } from '../helpers/hide-fields';
 import { filterSubscribers } from '../helpers/filter-subscribers';
 
-export function findById(req, res, next) {
-  Stream.findById(req.params.id)
-    .populate(['location'])
-    .then(async stream => {
-      if (!stream) {
-        throw new Error('Stream not found.');
-      }
+export async function findById(req, res, next) {
+  const stream = await Stream.findById(req.params.id).populate(['location']);
 
-      const subscribers = await stream
-        .getSubscribers(req.queryObj)
-        .sort(_.isEmpty(req.sortObj) ? { connectCreated: 1 } : req.sortObj)
-        .populate(['location']);
+  if (!stream) {
+    throw new Error('Stream not found.');
+  }
 
-      const relatedStreams = await stream
-        .getRelatedStreams()
-        .sort({ connectCreated: 1 })
-        .populate(['location']);
+  const subscribers = await stream
+    .getSubscribers(req.queryObj)
+    .sort(_.isEmpty(req.sortObj) ? { connectCreated: 1 } : req.sortObj)
+    .populate(['location']);
 
-      const options = {
-        countries: _.concat(
-          _.chain(subscribers)
-            .map('location.api.country')
-            .compact()
-            .uniq()
-            .value(),
-          _.chain(subscribers)
-            .map('location.api.message')
-            .compact()
-            .uniq()
-            .value()
-        ),
-        protocols: _.chain(subscribers)
-          .map('protocol')
-          .uniq()
-          .value()
-      };
+  const relatedStreams = await stream
+    .getRelatedStreams()
+    .sort({ connectCreated: 1 })
+    .populate(['location']);
 
-      let totalPeakViewers = 0;
+  const options = {
+    countries: _.concat(
+      _.chain(subscribers)
+        .map('location.api.country')
+        .compact()
+        .uniq()
+        .value(),
+      _.chain(subscribers)
+        .map('location.api.message')
+        .compact()
+        .uniq()
+        .value()
+    ),
+    protocols: _.chain(subscribers)
+      .map('protocol')
+      .uniq()
+      .value()
+  };
 
-      _.forEach(subscribers, subscriber => {
-        const viewersCount = filterSubscribers(subscribers, subscriber.connectCreated).length;
+  let totalPeakViewers = 0;
 
-        if (viewersCount > totalPeakViewers) {
-          totalPeakViewers = viewersCount;
-        }
-      });
+  _.forEach(subscribers, subscriber => {
+    const viewersCount = filterSubscribers(subscribers, subscriber.connectCreated).length;
 
-      const info = {
-        totalBytes: _.reduce(
-          subscribers,
-          (sum, sub) => {
-            return sum + sub.bytes;
-          },
-          0
-        ),
-        totalDuration: _.reduce(
-          subscribers,
-          (sum, sub) => {
-            return sum + sub.duration;
-          },
-          0
-        ),
-        totalPeakViewers: totalPeakViewers,
-        totalIPs: _.chain(subscribers)
-          .map('ip')
-          .uniq()
-          .value().length
-      };
+    if (viewersCount > totalPeakViewers) {
+      totalPeakViewers = viewersCount;
+    }
+  });
 
-      hideFields(req.user, stream);
+  const info = {
+    totalBytes: _.reduce(
+      subscribers,
+      (sum, sub) => {
+        return sum + sub.bytes;
+      },
+      0
+    ),
+    totalDuration: _.reduce(
+      subscribers,
+      (sum, sub) => {
+        return sum + sub.duration;
+      },
+      0
+    ),
+    totalPeakViewers: totalPeakViewers,
+    totalIPs: _.chain(subscribers)
+      .map('ip')
+      .uniq()
+      .value().length
+  };
 
-      _.forEach(subscribers, subscriber => {
-        hideFields(req.user, subscriber);
-      });
+  hideFields(req.user, stream);
 
-      res.json({
-        stream: stream,
-        subscribers: subscribers,
-        options: options,
-        info: info,
-        relatedStreams: relatedStreams
-      });
-    })
-    .catch(next);
+  _.forEach(subscribers, subscriber => {
+    hideFields(req.user, subscriber);
+  });
+
+  res.json({
+    stream: stream,
+    subscribers: subscribers,
+    options: options,
+    info: info,
+    relatedStreams: relatedStreams
+  });
 }
 
-export function find(req, res, next) {
-  Stream.paginate(req.queryObj, {
+export async function find(req, res, next) {
+  const paginatedStreams = await Stream.paginate(req.queryObj, {
     sort: _.isEmpty(req.sortObj) ? { connectCreated: -1 } : req.sortObj,
     page: req.query.page,
     limit: req.query.limit,
     populate: ['location']
-  })
-    .then(async ret => {
-      const aggregation = await Stream.aggregate([
-        { $match: req.queryObj },
-        {
-          $group: {
-            _id: null,
-            totalBytes: {
-              $sum: '$bytes'
-            },
-            totalDuration: {
-              $sum: '$duration'
-            },
-            totalConnections: {
-              $sum: '$totalConnectionsCount'
-            },
-            totalPeakViewers: {
-              $sum: '$peakViewersCount'
-            }
-          }
+  });
+
+  const aggregation = await Stream.aggregate([
+    { $match: req.queryObj },
+    {
+      $group: {
+        _id: null,
+        totalBytes: {
+          $sum: '$bytes'
+        },
+        totalDuration: {
+          $sum: '$duration'
+        },
+        totalConnections: {
+          $sum: '$totalConnectionsCount'
+        },
+        totalPeakViewers: {
+          $sum: '$peakViewersCount'
         }
-      ]);
+      }
+    }
+  ]);
 
-      const uniqueIPs = (await Stream.distinct('ip', req.queryObj)).length;
+  const uniqueIPs = await Stream.distinct('ip', req.queryObj);
+  const uniqueCountries = await IP.distinct('api.country');
+  const uniqueApiMessages = await IP.distinct('api.message');
 
-      _.forEach(ret.docs, stream => {
-        hideFields(req.user, stream);
-      });
+  _.forEach(paginatedStreams.docs, stream => {
+    hideFields(req.user, stream);
+  });
 
-      res.json({
-        streams: ret.docs,
-        options: {
-          apps: await Stream.distinct('app', req.queryObj),
-          channels: await Stream.distinct('channel', req.queryObj),
-          countries: _.concat(await IP.distinct('api.country'), await IP.distinct('api.message')),
-          protocols: await Stream.distinct('protocol', req.queryObj)
-        },
-        info: {
-          totalBytes: _.get(aggregation, ['0', 'totalBytes'], 0),
-          totalDuration: _.get(aggregation, ['0', 'totalDuration'], 0),
-          totalConnections: _.get(aggregation, ['0', 'totalConnections'], 0),
-          totalPeakViewers: _.get(aggregation, ['0', 'totalPeakViewers'], 0),
-          totalIPs: uniqueIPs
-        },
-        total: ret.total,
-        limit: ret.limit,
-        page: ret.page,
-        pages: ret.pages
-      });
-    })
-    .catch(next);
+  res.json({
+    streams: paginatedStreams.docs,
+    options: {
+      apps: await Stream.distinct('app', req.queryObj),
+      channels: await Stream.distinct('channel', req.queryObj),
+      countries: _.concat(uniqueCountries, uniqueApiMessages),
+      protocols: await Stream.distinct('protocol', req.queryObj)
+    },
+    info: {
+      totalBytes: _.get(aggregation, ['0', 'totalBytes'], 0),
+      totalDuration: _.get(aggregation, ['0', 'totalDuration'], 0),
+      totalConnections: _.get(aggregation, ['0', 'totalConnections'], 0),
+      totalPeakViewers: _.get(aggregation, ['0', 'totalPeakViewers'], 0),
+      totalIPs: uniqueIPs.length
+    },
+    total: paginatedStreams.total,
+    limit: paginatedStreams.limit,
+    page: paginatedStreams.page,
+    pages: paginatedStreams.pages
+  });
 }
 
-export function graph(req, res, next) {
-  Stream.findById(req.params.id)
-    .then(async stream => {
-      if (!stream) {
-        throw new Error('Stream not found.');
-      }
+export async function graph(req, res, next) {
+  const stream = await Stream.findById(req.params.id);
 
-      const subscribers = await stream.getSubscribers(req.queryObj).sort({ connectCreated: 1 });
+  if (!stream) {
+    throw new Error('Stream not found.');
+  }
 
-      let graph = [];
+  const subscribers = await stream.getSubscribers(req.queryObj).sort({ connectCreated: 1 });
 
-      graph.push({
-        eventName: 'streamStarted',
-        time: stream.connectCreated,
-        subscribers: filterSubscribers(subscribers, stream.connectCreated)
-      });
+  let graph = [];
 
-      _.forEach(subscribers, subscriber => {
-        if (stream.connectCreated >= subscriber.connectCreated) {
-          return;
-        }
+  graph.push({
+    eventName: 'streamStarted',
+    time: stream.connectCreated,
+    subscribers: filterSubscribers(subscribers, stream.connectCreated)
+  });
 
-        graph.push({
-          eventName: 'subscriberConnected',
-          time: subscriber.connectCreated,
-          subscribers: filterSubscribers(subscribers, subscriber.connectCreated)
-        });
-      });
+  _.forEach(subscribers, subscriber => {
+    if (stream.connectCreated >= subscriber.connectCreated) {
+      return;
+    }
 
-      _.forEach(subscribers, subscriber => {
-        if (subscriber.connectUpdated >= stream.connectUpdated) {
-          return;
-        }
-        if (subscriber.isLive) {
-          return;
-        }
+    graph.push({
+      eventName: 'subscriberConnected',
+      time: subscriber.connectCreated,
+      subscribers: filterSubscribers(subscribers, subscriber.connectCreated)
+    });
+  });
 
-        graph.push({
-          eventName: 'subscriberDisconnected',
-          time: subscriber.connectUpdated,
-          subscribers: filterSubscribers(subscribers, subscriber.connectUpdated)
-        });
-      });
+  _.forEach(subscribers, subscriber => {
+    if (subscriber.connectUpdated >= stream.connectUpdated) {
+      return;
+    }
+    if (subscriber.isLive) {
+      return;
+    }
 
-      if (!stream.isLive) {
-        graph.push({
-          eventName: 'streamEnded',
-          time: stream.connectUpdated,
-          subscribers: filterSubscribers(subscribers, stream.connectUpdated)
-        });
-      } else {
-        graph.push({
-          eventName: 'streamIsLive',
-          time: stream.connectUpdated,
-          subscribers: filterSubscribers(subscribers, stream.connectUpdated, true)
-        });
-      }
+    graph.push({
+      eventName: 'subscriberDisconnected',
+      time: subscriber.connectUpdated,
+      subscribers: filterSubscribers(subscribers, subscriber.connectUpdated)
+    });
+  });
 
-      graph = _.sortBy(graph, ['time']);
+  if (!stream.isLive) {
+    graph.push({
+      eventName: 'streamEnded',
+      time: stream.connectUpdated,
+      subscribers: filterSubscribers(subscribers, stream.connectUpdated)
+    });
+  } else {
+    graph.push({
+      eventName: 'streamIsLive',
+      time: stream.connectUpdated,
+      subscribers: filterSubscribers(subscribers, stream.connectUpdated, true)
+    });
+  }
 
-      hideFields(req.user, stream);
+  graph = _.sortBy(graph, ['time']);
 
-      res.json({ stream: stream, events: graph });
-    })
-    .catch(next);
+  hideFields(req.user, stream);
+
+  res.json({ stream: stream, events: graph });
 }

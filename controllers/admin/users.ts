@@ -2,38 +2,34 @@ import * as _ from 'lodash';
 
 import { User } from '../../models/user';
 
-export function find(req, res, next) {
-  User.find(null, null, {
+export async function find(req, res, next) {
+  const users = await User.find(null, null, {
     sort: {
       createdAt: -1
     }
-  })
-    .then(users => {
-      res.json({
-        users: users
-      });
-    })
-    .catch(next);
+  });
+
+  res.json({
+    users
+  });
 }
 
-export function update(req, res, next) {
-  User.findOne({
+export async function update(req, res, next) {
+  const user = await User.findOne({
     _id: req.params.id
-  })
-    .then(async user => {
-      if (!user) {
-        throw Error('User not found.');
-      }
+  });
 
-      _.forEach(req.body, (value, key) => {
-        user[key] = value;
-      });
+  if (!user) {
+    throw Error('User not found.');
+  }
 
-      await user.save();
+  _.forEach(req.body, (value, key) => {
+    user[key] = value;
+  });
 
-      res.json({
-        user: user
-      });
-    })
-    .catch(next);
+  await user.save();
+
+  res.json({
+    user
+  });
 }

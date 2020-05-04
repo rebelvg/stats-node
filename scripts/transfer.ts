@@ -3,11 +3,9 @@ import { URL } from 'url';
 import * as moment from 'moment';
 import * as mongoose from 'mongoose';
 
-(mongoose as any).Promise = Promise;
-
 import { db } from '../config';
 
-const amsMongoUrl = new URL(`mongodb://${db.host}/ams`);
+const amsMongoUrl = new URL(`mongodb://${db.host}`);
 
 if (db.authDb) {
   amsMongoUrl.username = encodeURIComponent(db.user);
@@ -16,7 +14,7 @@ if (db.authDb) {
   amsMongoUrl.searchParams.set('authSource', db.authDb);
 }
 
-const nodeMongoUrl = new URL(`mongodb://${db.host}/${db.dbName}`);
+const nodeMongoUrl = new URL(`mongodb://${db.host}`);
 
 if (db.authDb) {
   nodeMongoUrl.username = encodeURIComponent(db.user);
@@ -31,76 +29,78 @@ mongoose.connect(nodeMongoUrl.href, { useMongoClient: true }, error => {
   }
 });
 
-MongoClient.connect(amsMongoUrl.href)
-  .then(async amsDb => {
-    const amsIps = ((amsDb as unknown) as Db).collection('ips');
-    const amsStreams = ((amsDb as unknown) as Db).collection('streams');
-    const amsSubscribers = ((amsDb as unknown) as Db).collection('subscribers');
+(async () => {
+  const mongoClient = await MongoClient.connect(amsMongoUrl.href);
 
-    const nodeDB = await MongoClient.connect(nodeMongoUrl.href);
+  const amsDb = mongoClient.db('ams');
 
-    const nodeIPsCollection = ((nodeDB as unknown) as Db).collection('ips');
+  const amsIps = amsDb.collection('ips');
+  const amsStreams = amsDb.collection('streams');
+  const amsSubscribers = amsDb.collection('subscribers');
 
-    const nodeIPs = await amsIps.find().toArray();
+  const mongoClientNodeStats = await MongoClient.connect(nodeMongoUrl.href);
 
-    for (const ip of nodeIPs) {
-      try {
-        await nodeIPsCollection.insertOne({
-          ip: ip.ip,
-          api: ip.ip_stats,
-          createdAt: moment.unix(ip.timestamp).toDate(),
-          updatedAt: moment.unix(ip.timestamp).toDate()
-        });
-      } catch (error) {
-        console.error(error);
-      }
-    }
+  const nodeDb = mongoClientNodeStats.db('nodestats');
 
-    const nodeSubscribers = await amsSubscribers.find().toArray();
+  const nodeIPsCollection = nodeDb.collection('ips');
 
-    const Subscriber = require('../models/subscriber');
+  const nodeIPs = await amsIps.find().toArray();
 
-    for (const subscriber of nodeSubscribers) {
-      const subDoc = new Subscriber({
-        app: subscriber.app,
-        channel: subscriber.channel,
-        serverType: 'ams',
-        serverId: subscriber.id,
-        connectCreated: moment.unix(subscriber.timestamp).toDate(),
-        connectUpdated: moment.unix(subscriber.stats.timestamp).toDate(),
-        bytes: subscriber.stats.bytes_out,
-        ip: subscriber.stats.client_ip,
-        protocol: 'rtmp'
+  for (const ip of nodeIPs) {
+    try {
+      await nodeIPsCollection.insertOne({
+        ip: ip.ip,
+        api: ip.ip_stats,
+        createdAt: moment.unix(ip.timestamp).toDate(),
+        updatedAt: moment.unix(ip.timestamp).toDate()
       });
-
-      await subDoc.save();
+    } catch (error) {
+      console.error(error);
     }
+  }
 
-    const nodeStreams = await amsStreams.find().toArray();
+  const nodeSubscribers = await amsSubscribers.find().toArray();
 
-    const Stream = require('../models/stream');
+  const Subscriber = require('../models/subscriber');
 
-    for (const stream of nodeStreams) {
-      const streamDoc = new Stream({
-        app: stream.app,
-        channel: stream.channel,
-        serverType: 'ams',
-        serverId: stream.id,
-        connectCreated: moment.unix(stream.timestamp).toDate(),
-        connectUpdated: moment.unix(stream.stats.timestamp).toDate(),
-        bytes: stream.stats.bytes_in,
-        ip: stream.stats.streamer_ip,
-        protocol: 'rtmp'
-      });
+  for (const subscriber of nodeSubscribers) {
+    const subDoc = new Subscriber({
+      app: subscriber.app,
+      channel: subscriber.channel,
+      serverType: 'ams',
+      serverId: subscriber.id,
+      connectCreated: moment.unix(subscriber.timestamp).toDate(),
+      connectUpdated: moment.unix(subscriber.stats.timestamp).toDate(),
+      bytes: subscriber.stats.bytes_out,
+      ip: subscriber.stats.client_ip,
+      protocol: 'rtmp'
+    });
 
-      await streamDoc.save();
+    await subDoc.save();
+  }
 
-      await streamDoc.updateInfo();
-      await streamDoc.save();
-    }
+  const nodeStreams = await amsStreams.find().toArray();
 
-    console.log('export done.');
-  })
-  .catch(error => {
-    console.error(error);
-  });
+  const Stream = require('../models/stream');
+
+  for (const stream of nodeStreams) {
+    const streamDoc = new Stream({
+      app: stream.app,
+      channel: stream.channel,
+      serverType: 'ams',
+      serverId: stream.id,
+      connectCreated: moment.unix(stream.timestamp).toDate(),
+      connectUpdated: moment.unix(stream.stats.timestamp).toDate(),
+      bytes: stream.stats.bytes_in,
+      ip: stream.stats.streamer_ip,
+      protocol: 'rtmp'
+    });
+
+    await streamDoc.save();
+
+    await streamDoc.updateInfo();
+    await streamDoc.save();
+  }
+
+  console.log('export done.');
+})();
