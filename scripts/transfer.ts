@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient, Db } from 'mongodb';
 import { URL } from 'url';
 import * as moment from 'moment';
 import * as mongoose from 'mongoose';
@@ -25,25 +25,21 @@ if (db.authDb) {
   nodeMongoUrl.searchParams.set('authSource', db.authDb);
 }
 
-mongoose.connect(
-  nodeMongoUrl.href,
-  { useMongoClient: true },
-  error => {
-    if (error) {
-      throw error;
-    }
+mongoose.connect(nodeMongoUrl.href, { useMongoClient: true }, error => {
+  if (error) {
+    throw error;
   }
-);
+});
 
 MongoClient.connect(amsMongoUrl.href)
   .then(async amsDb => {
-    const amsIps = (amsDb as any).collection('ips');
-    const amsStreams = (amsDb as any).collection('streams');
-    const amsSubscribers = (amsDb as any).collection('subscribers');
+    const amsIps = ((amsDb as unknown) as Db).collection('ips');
+    const amsStreams = ((amsDb as unknown) as Db).collection('streams');
+    const amsSubscribers = ((amsDb as unknown) as Db).collection('subscribers');
 
     const nodeDB = await MongoClient.connect(nodeMongoUrl.href);
 
-    const nodeIPsCollection = (nodeDB as any).collection('ips');
+    const nodeIPsCollection = ((nodeDB as unknown) as Db).collection('ips');
 
     const nodeIPs = await amsIps.find().toArray();
 

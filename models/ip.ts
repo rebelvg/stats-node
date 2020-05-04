@@ -5,7 +5,22 @@ import { schema } from '../schemas/ip';
 
 export interface IPModel extends Document {
   ip: string;
-  api: any;
+  api: {
+    as: string;
+    city: string;
+    country: string;
+    countryCode: string;
+    isp: string;
+    lat: number;
+    lon: number;
+    org: string;
+    query: string;
+    region: string;
+    regionName: string;
+    status: string;
+    timezone: string;
+    zip: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }

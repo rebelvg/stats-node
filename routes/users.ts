@@ -3,6 +3,7 @@ import * as passport from 'passport';
 
 import { isLoggedIn } from '../middleware/is-logged-in';
 import { stats } from '../config';
+import { IUserModel } from '../models/user';
 
 export const router = express.Router();
 
@@ -22,7 +23,7 @@ router.get(
   })
 );
 router.get('/auth/google/callback', passport.authenticate('google', { session: false }), (req, res, next) => {
-  const { token } = req.user as any;
+  const { token } = req.user as IUserModel;
 
   res.redirect(stats.googleRedirect + `/?token=${token}`);
 });

@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient, Db } from 'mongodb';
 import { URL } from 'url';
 import * as moment from 'moment';
 
@@ -18,8 +18,8 @@ const Subscriber = require('../models/subscriber');
 
 MongoClient.connect(mongoUrl.href)
   .then(db => {
-    const streams = (db as any).collection('streams');
-    const subscribers = (db as any).collection('subscribers');
+    const streams = ((db as unknown) as Db).collection('streams');
+    const subscribers = ((db as unknown) as Db).collection('subscribers');
 
     // fs.writeFileSync('streams.json', JSON.stringify(await streams.find().toArray()));
     // fs.writeFileSync('subscribers.json', JSON.stringify(await subscribers.find().toArray()));

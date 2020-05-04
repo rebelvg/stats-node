@@ -14,12 +14,8 @@ if (db.authDb) {
   mongoUrl.searchParams.set('authSource', db.authDb);
 }
 
-mongoose.connect(
-  mongoUrl.href,
-  { useMongoClient: true },
-  error => {
-    if (error) {
-      throw error;
-    }
+mongoose.connect(mongoUrl.href, { useMongoClient: true }, error => {
+  if (error) {
+    throw error;
   }
-);
+});

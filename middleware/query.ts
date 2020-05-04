@@ -63,7 +63,9 @@ const filterRules = {
         $or: ipQuery
       });
 
-      const query: any = [{ ip: { $in: ips } }];
+      const query: any[] = [];
+
+      query.push({ ip: { $in: ips } });
 
       if (!shouldHideFields(req.user)) {
         query.push({ ip: new RegExp(ip, 'gi') });
@@ -188,31 +190,35 @@ const rulePresets = {
   }
 };
 
-export function parseFilter(modelName) {
-  const rules = _.get(rulePresets, [modelName], {});
+export function parseFilter(modelName: string) {
+  const rules = rulePresets?.[modelName] || {};
 
   return async function(req, res, next) {
     const queryObj: any = {};
 
-    loop1: for (const [fieldName, rule] of Object.entries(rules)) {
-      if (req.query.hasOwnProperty(fieldName)) {
+    await Promise.all(
+      _.map(rules, async (rule, fieldName) => {
+        if (!req.query.hasOwnProperty(fieldName)) {
+          return;
+        }
+
         try {
           let value = req.query[fieldName];
 
-          _.forEach((rule as any).do, fnc => {
+          _.forEach(rule.do, fnc => {
             value = fnc(value);
           });
 
-          for (const fnc of (rule as any).test) {
+          for (const fnc of rule.test) {
             if (!fnc(value)) {
-              continue loop1;
+              return;
             }
           }
 
-          await (rule as any).cb(queryObj, value, req);
+          await rule.cb(queryObj, value, req);
         } catch (e) {}
-      }
-    }
+      })
+    );
 
     req.queryObj = queryObj;
 

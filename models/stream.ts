@@ -21,8 +21,8 @@ export interface IStreamModel extends Document {
   userId: IUserModel;
   createdAt: Date;
   updatedAt: Date;
-  getSubscribers: any;
-  getRelatedStreams: any;
+  getSubscribers: (query?: any) => mongoose.DocumentQuery<IStreamModel[], IStreamModel>;
+  getRelatedStreams: (query?: any) => mongoose.DocumentQuery<IStreamModel[], IStreamModel>;
   isLive: boolean;
 }
 

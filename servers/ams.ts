@@ -1,8 +1,8 @@
 import axios from 'axios';
 import * as _ from 'lodash';
 
-import { Stream } from '../models/stream';
-import { Subscriber } from '../models/subscriber';
+import { Stream, IStreamModel } from '../models/stream';
+import { Subscriber, ISubscriberModel } from '../models/subscriber';
 
 import { ams as amsConfigs } from '../config';
 import { liveStats } from '.';
@@ -40,7 +40,7 @@ async function updateStats(amsConfigs) {
       let streamObj = null;
 
       if (channelData.publisher) {
-        const streamQuery: any = {
+        const streamQuery: Partial<IStreamModel> = {
           app: channelData.publisher.app,
           channel: channelData.publisher.stream,
           serverType: name,
@@ -69,7 +69,7 @@ async function updateStats(amsConfigs) {
       }
 
       for (const subscriber of channelData.subscribers) {
-        const subscriberQuery: any = {
+        const subscriberQuery: Partial<ISubscriberModel> = {
           app: subscriber.app,
           channel: subscriber.stream,
           serverType: name,

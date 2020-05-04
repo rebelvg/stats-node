@@ -64,13 +64,13 @@ export async function channels(req, res, next) {
   for (const [_serverName, serverObj] of Object.entries(liveStats)) {
     for (const [_appName, appObj] of Object.entries(serverObj)) {
       for (const [_channelName, channelObj] of Object.entries(appObj)) {
-        if ((channelObj as any).publisher) {
-          await Stream.populate((channelObj as any).publisher, {
+        if (channelObj.publisher) {
+          await Stream.populate(channelObj.publisher, {
             path: 'location'
           });
         }
 
-        for (const subscriberObj of (channelObj as any).subscribers) {
+        for (const subscriberObj of channelObj.subscribers) {
           await Subscriber.populate(subscriberObj, {
             path: 'location'
           });
@@ -93,8 +93,8 @@ export function legacy(req, res, next) {
 
   channelStats.isLive = isLive(req.params.server, 'live', req.params.channel);
 
-  _.forEach(_.get(liveStats, [req.params.server], {}), (channels, appName) => {
-    _.forEach(channels, (channelObj: any, channelName) => {
+  _.forEach(liveStats?.[req.params.server], (channels, appName) => {
+    _.forEach(channels, (channelObj, channelName) => {
       if (channelName === req.params.channel) {
         channelStats.viewers += channelObj.subscribers.length;
       }

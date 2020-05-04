@@ -8,7 +8,6 @@
     "lint": "prettier --list-different \"**/*.{ts,js,json,css,md}\"",
     "lint-fix": "prettier --write \"**/*.{ts,js,json,css,md}\"",
     "start": "ts-node .",
-    "transfer": "node scripts/transfer.js",
     "docker": "docker-compose up -d",
     "docker-import": "docker exec mongodb mongorestore"
   },
