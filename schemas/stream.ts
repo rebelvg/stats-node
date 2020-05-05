@@ -6,6 +6,7 @@ import * as ip6addr from 'ip6addr';
 import { filterSubscribers } from '../helpers/filter-subscribers';
 import { IP } from '../models/ip';
 import { liveStats } from '../servers';
+import { IStreamModel } from '../models/stream';
 
 const Schema = mongoose.Schema;
 
@@ -33,7 +34,7 @@ export const schema = new Schema(
   }
 );
 
-schema.pre('validate', function(next: mongoose.HookNextFunction) {
+schema.pre('validate', function(this: IStreamModel, next: mongoose.HookNextFunction) {
   const updatedAt = new Date();
 
   if (this.isNew) {
@@ -42,7 +43,7 @@ schema.pre('validate', function(next: mongoose.HookNextFunction) {
     this.ip = addr.kind() === 'ipv6' ? addr.toString({ format: 'v6' }) : addr.toString({ format: 'v4' });
   }
 
-  this.duration = Math.ceil((this.connectUpdated - this.connectCreated) / 1000);
+  this.duration = Math.ceil((this.connectUpdated.valueOf() - this.connectCreated.valueOf()) / 1000);
 
   this.bitrate = this.duration > 0 ? Math.ceil((this.bytes * 8) / this.duration / 1024) : 0;
 
@@ -58,7 +59,7 @@ schema.pre('validate', function(next: mongoose.HookNextFunction) {
   next();
 });
 
-schema.pre('save', async function(next: mongoose.HookNextFunction) {
+schema.pre('save', async function(this: IStreamModel, next: mongoose.HookNextFunction) {
   let ip = await IP.findOne({ ip: this.ip });
 
   if (ip) {
@@ -74,7 +75,7 @@ schema.pre('save', async function(next: mongoose.HookNextFunction) {
   next();
 });
 
-schema.virtual('isLive').get(function() {
+schema.virtual('isLive').get(function(this: IStreamModel) {
   const stream = liveStats?.[this.serverType]?.[this.app]?.[this.channel]?.publisher || null;
 
   if (!stream) {

@@ -1,6 +1,7 @@
 import * as mongoose from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate';
 import axios from 'axios';
+import { IPModel } from '../models/ip';
 
 const Schema = mongoose.Schema;
 
@@ -18,7 +19,7 @@ export const schema = new Schema(
   }
 );
 
-schema.pre('validate', async function(next: mongoose.HookNextFunction) {
+schema.pre('validate', async function(this: IPModel, next: mongoose.HookNextFunction) {
   try {
     if (!this.api) {
       const { data } = await axios.get(`${apiLink}/${this.ip}`);
@@ -30,7 +31,7 @@ schema.pre('validate', async function(next: mongoose.HookNextFunction) {
   next();
 });
 
-schema.pre('validate', function(next: mongoose.HookNextFunction) {
+schema.pre('validate', function(this: IPModel, next: mongoose.HookNextFunction) {
   const updatedAt = new Date();
 
   if (this.isNew) {

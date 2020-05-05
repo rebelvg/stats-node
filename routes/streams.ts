@@ -1,4 +1,3 @@
-import { Next } from 'koa';
 import * as Router from 'koa-router';
 import * as koaPaginate from 'koa-ctx-paginate';
 

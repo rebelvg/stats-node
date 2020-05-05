@@ -1,5 +1,6 @@
 import * as mongoose from 'mongoose';
 import * as uuidv4 from 'uuid/v4';
+import { IUserModel } from '../models/user';
 
 const Schema = mongoose.Schema;
 
@@ -22,7 +23,7 @@ export const schema = new Schema(
   }
 );
 
-schema.pre('validate', function(next: mongoose.HookNextFunction) {
+schema.pre('validate', function(this: IUserModel, next: mongoose.HookNextFunction) {
   if (this.isNew) {
     this.isAdmin = false;
     this.isStreamer = false;
@@ -33,7 +34,7 @@ schema.pre('validate', function(next: mongoose.HookNextFunction) {
   next();
 });
 
-schema.pre('validate', function(next: mongoose.HookNextFunction) {
+schema.pre('validate', function(this: IUserModel, next: mongoose.HookNextFunction) {
   const updatedAt = new Date();
 
   if (this.isNew) {

@@ -15,6 +15,7 @@ export interface ISubscriberModel extends Document {
   ip: string;
   protocol: string;
   duration: number;
+  bitrate: number;
   userId: ObjectId;
   createdAt: Date;
   updatedAt: Date;
