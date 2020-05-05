@@ -57,81 +57,87 @@ async function updateStats(nmsConfig) {
 
   await Promise.all(
     _.map(channels, (channelObjs, appName) => {
-      return _.map(channelObjs, async (channelData, channelName) => {
-        _.set(stats, [appName, channelName], {
-          publisher: null,
-          subscribers: []
-        });
+      return Promise.all(
+        _.map(channelObjs, async (channelData, channelName) => {
+          _.set(stats, [appName, channelName], {
+            publisher: null,
+            subscribers: []
+          });
 
-        let streamRecord: IStreamModel = null;
+          let streamRecord: IStreamModel = null;
 
-        if (channelData.publisher) {
-          const streamQuery: Partial<IStreamModel> = {
-            app: channelData.publisher.app,
-            channel: channelData.publisher.stream,
-            serverType: name,
-            serverId: channelData.publisher.clientId,
-            connectCreated: channelData.publisher.connectCreated
-          };
+          if (channelData.publisher) {
+            const streamQuery: Partial<IStreamModel> = {
+              app: channelData.publisher.app,
+              channel: channelData.publisher.stream,
+              serverType: name,
+              serverId: channelData.publisher.clientId,
+              connectCreated: channelData.publisher.connectCreated
+            };
 
-          streamRecord = await Stream.findOne(streamQuery);
+            streamRecord = await Stream.findOne(streamQuery);
 
-          if (!streamRecord) {
-            streamQuery.connectUpdated = statsUpdateTime;
-            streamQuery.bytes = channelData.publisher.bytes;
-            streamQuery.ip = channelData.publisher.ip;
-            streamQuery.protocol = 'rtmp';
-            streamQuery.userId = channelData.publisher.userId;
-            streamQuery.lastBitrate = 0;
+            if (!streamRecord) {
+              streamQuery.connectUpdated = statsUpdateTime;
+              streamQuery.bytes = channelData.publisher.bytes;
+              streamQuery.ip = channelData.publisher.ip;
+              streamQuery.protocol = 'rtmp';
+              streamQuery.userId = channelData.publisher.userId;
+              streamQuery.lastBitrate = 0;
 
-            streamRecord = new Stream(streamQuery);
-          } else {
-            const lastBitrate = StreamModel.calculateLastBitrate(channelData.publisher, streamRecord, statsUpdateTime);
+              streamRecord = new Stream(streamQuery);
+            } else {
+              const lastBitrate = StreamModel.calculateLastBitrate(
+                channelData.publisher,
+                streamRecord,
+                statsUpdateTime
+              );
 
-            streamRecord.bytes = channelData.publisher.bytes;
-            streamRecord.connectUpdated = statsUpdateTime;
-            streamRecord.lastBitrate = lastBitrate;
+              streamRecord.bytes = channelData.publisher.bytes;
+              streamRecord.connectUpdated = statsUpdateTime;
+              streamRecord.lastBitrate = lastBitrate;
+            }
+
+            await streamRecord.save();
+
+            _.set(stats, [appName, channelName, 'publisher'], streamRecord);
           }
 
-          await streamRecord.save();
+          for (const subscriber of channelData.subscribers) {
+            const subscriberQuery: Partial<ISubscriberModel> = {
+              app: subscriber.app,
+              channel: subscriber.stream,
+              serverType: name,
+              serverId: subscriber.clientId,
+              connectCreated: subscriber.connectCreated
+            };
 
-          _.set(stats, [appName, channelName, 'publisher'], streamRecord);
-        }
+            let subscriberObj = await Subscriber.findOne(subscriberQuery);
 
-        for (const subscriber of channelData.subscribers) {
-          const subscriberQuery: Partial<ISubscriberModel> = {
-            app: subscriber.app,
-            channel: subscriber.stream,
-            serverType: name,
-            serverId: subscriber.clientId,
-            connectCreated: subscriber.connectCreated
-          };
+            if (!subscriberObj) {
+              subscriberQuery.connectUpdated = statsUpdateTime;
+              subscriberQuery.bytes = subscriber.bytes;
+              subscriberQuery.ip = subscriber.ip;
+              subscriberQuery.protocol = subscriber.protocol;
+              subscriberQuery.userId = subscriber.userId;
 
-          let subscriberObj = await Subscriber.findOne(subscriberQuery);
+              subscriberObj = new Subscriber(subscriberQuery);
+            } else {
+              subscriberObj.bytes = subscriber.bytes;
+              subscriberObj.connectUpdated = statsUpdateTime;
+            }
 
-          if (!subscriberObj) {
-            subscriberQuery.connectUpdated = statsUpdateTime;
-            subscriberQuery.bytes = subscriber.bytes;
-            subscriberQuery.ip = subscriber.ip;
-            subscriberQuery.protocol = subscriber.protocol;
-            subscriberQuery.userId = subscriber.userId;
+            await subscriberObj.save();
 
-            subscriberObj = new Subscriber(subscriberQuery);
-          } else {
-            subscriberObj.bytes = subscriber.bytes;
-            subscriberObj.connectUpdated = statsUpdateTime;
+            stats[appName][channelName].subscribers.push(subscriberObj);
           }
 
-          await subscriberObj.save();
-
-          stats[appName][channelName].subscribers.push(subscriberObj);
-        }
-
-        if (streamRecord) {
-          await streamRecord.updateInfo();
-          await streamRecord.save();
-        }
-      });
+          if (streamRecord) {
+            await streamRecord.updateInfo();
+            await streamRecord.save();
+          }
+        })
+      );
     })
   );
 
