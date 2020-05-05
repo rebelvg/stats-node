@@ -63,7 +63,7 @@ async function updateStats(nmsConfig) {
           subscribers: []
         });
 
-        let streamObj = null;
+        let streamObj: IStreamModel = null;
 
         if (channelData.publisher) {
           const streamQuery: Partial<IStreamModel> = {
@@ -82,11 +82,19 @@ async function updateStats(nmsConfig) {
             streamQuery.ip = channelData.publisher.ip;
             streamQuery.protocol = 'rtmp';
             streamQuery.userId = channelData.publisher.userId;
+            streamQuery.lastBitrate = 0;
 
             streamObj = new Stream(streamQuery);
           } else {
+            const lastBitrate = Math.ceil(
+              ((channelData.publisher.bytes - streamObj.bytes) * 8) /
+                ((statsUpdateTime.valueOf() - streamObj.connectUpdated.valueOf()) / 1000) /
+                1024
+            );
+
             streamObj.bytes = channelData.publisher.bytes;
             streamObj.connectUpdated = statsUpdateTime;
+            streamObj.lastBitrate = lastBitrate;
           }
 
           await streamObj.save();

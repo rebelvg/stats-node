@@ -56,17 +56,13 @@ schema.pre('validate', function(this: ISubscriberModel, next: mongoose.HookNextF
 schema.pre('save', async function(this: ISubscriberModel, next: mongoose.HookNextFunction) {
   let ip = await IP.findOne({ ip: this.ip });
 
-  if (ip) {
-    await ip.save();
-
-    return next();
+  if (!ip) {
+    ip = new IP({ ip: this.ip });
   }
-
-  ip = new IP({ ip: this.ip });
 
   await ip.save();
 
-  next();
+  return next();
 });
 
 schema.virtual('isLive').get(function(this: ISubscriberModel) {

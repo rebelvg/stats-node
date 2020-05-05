@@ -23,6 +23,7 @@ export const schema = new Schema(
     protocol: { type: String, required: true },
     duration: { type: Number, required: true },
     bitrate: { type: Number, required: true },
+    lastBitrate: { type: Number, required: true },
     totalConnectionsCount: { type: Number, required: true },
     peakViewersCount: { type: Number, required: true },
     userId: { type: Schema.Types.ObjectId, ref: 'User', index: true, default: null },
@@ -62,17 +63,13 @@ schema.pre('validate', function(this: IStreamModel, next: mongoose.HookNextFunct
 schema.pre('save', async function(this: IStreamModel, next: mongoose.HookNextFunction) {
   let ip = await IP.findOne({ ip: this.ip });
 
-  if (ip) {
-    await ip.save();
-
-    return next();
+  if (!ip) {
+    ip = new IP({ ip: this.ip });
   }
-
-  ip = new IP({ ip: this.ip });
 
   await ip.save();
 
-  next();
+  return next();
 });
 
 schema.virtual('isLive').get(function(this: IStreamModel) {

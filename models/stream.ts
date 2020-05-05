@@ -16,6 +16,7 @@ export interface IStreamModel extends Document {
   protocol: string;
   duration: number;
   bitrate: number;
+  lastBitrate: number;
   totalConnectionsCount: number;
   peakViewersCount: number;
   userId: ObjectId;
@@ -24,6 +25,7 @@ export interface IStreamModel extends Document {
   getSubscribers: (query?: any) => mongoose.DocumentQuery<IStreamModel[], IStreamModel>;
   getRelatedStreams: (query?: any) => mongoose.DocumentQuery<IStreamModel[], IStreamModel>;
   isLive: boolean;
+  updateInfo: () => Promise<void>;
 }
 
 export const Stream = mongoose.model<IStreamModel>('Stream', schema);
