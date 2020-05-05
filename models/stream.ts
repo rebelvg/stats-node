@@ -3,6 +3,7 @@ import { Document } from 'mongoose';
 import { ObjectId } from 'mongodb';
 
 import { schema } from '../schemas/stream';
+import { IStreamsResponse } from '../servers/nms';
 
 export interface IStreamModel extends Document {
   app: string;
@@ -26,6 +27,20 @@ export interface IStreamModel extends Document {
   getRelatedStreams: (query?: any) => mongoose.DocumentQuery<IStreamModel[], IStreamModel>;
   isLive: boolean;
   updateInfo: () => Promise<void>;
+}
+
+export class StreamModel {
+  public static calculateLastBitrate(
+    livePublisher: IStreamsResponse['server']['app']['publisher'],
+    streamRecord: IStreamModel,
+    statsUpdateTime: Date
+  ): number {
+    return Math.ceil(
+      ((livePublisher.bytes - streamRecord.bytes) * 8) /
+        ((statsUpdateTime.valueOf() - streamRecord.connectUpdated.valueOf()) / 1000) /
+        1024
+    );
+  }
 }
 
 export const Stream = mongoose.model<IStreamModel>('Stream', schema);

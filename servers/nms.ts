@@ -2,13 +2,13 @@ import axios from 'axios';
 import * as _ from 'lodash';
 import { ObjectId } from 'mongodb';
 
-import { Stream, IStreamModel } from '../models/stream';
+import { Stream, IStreamModel, StreamModel } from '../models/stream';
 import { Subscriber, ISubscriberModel } from '../models/subscriber';
 
 import { nms as nmsConfigs } from '../config';
 import { liveStats } from '.';
 
-interface IStreamsResponse {
+export interface IStreamsResponse {
   [app: string]: {
     [channel: string]: {
       publisher: {
@@ -63,7 +63,7 @@ async function updateStats(nmsConfig) {
           subscribers: []
         });
 
-        let streamObj: IStreamModel = null;
+        let streamRecord: IStreamModel = null;
 
         if (channelData.publisher) {
           const streamQuery: Partial<IStreamModel> = {
@@ -74,9 +74,9 @@ async function updateStats(nmsConfig) {
             connectCreated: channelData.publisher.connectCreated
           };
 
-          streamObj = await Stream.findOne(streamQuery);
+          streamRecord = await Stream.findOne(streamQuery);
 
-          if (!streamObj) {
+          if (!streamRecord) {
             streamQuery.connectUpdated = statsUpdateTime;
             streamQuery.bytes = channelData.publisher.bytes;
             streamQuery.ip = channelData.publisher.ip;
@@ -84,22 +84,18 @@ async function updateStats(nmsConfig) {
             streamQuery.userId = channelData.publisher.userId;
             streamQuery.lastBitrate = 0;
 
-            streamObj = new Stream(streamQuery);
+            streamRecord = new Stream(streamQuery);
           } else {
-            const lastBitrate = Math.ceil(
-              ((channelData.publisher.bytes - streamObj.bytes) * 8) /
-                ((statsUpdateTime.valueOf() - streamObj.connectUpdated.valueOf()) / 1000) /
-                1024
-            );
+            const lastBitrate = StreamModel.calculateLastBitrate(channelData.publisher, streamRecord, statsUpdateTime);
 
-            streamObj.bytes = channelData.publisher.bytes;
-            streamObj.connectUpdated = statsUpdateTime;
-            streamObj.lastBitrate = lastBitrate;
+            streamRecord.bytes = channelData.publisher.bytes;
+            streamRecord.connectUpdated = statsUpdateTime;
+            streamRecord.lastBitrate = lastBitrate;
           }
 
-          await streamObj.save();
+          await streamRecord.save();
 
-          _.set(stats, [appName, channelName, 'publisher'], streamObj);
+          _.set(stats, [appName, channelName, 'publisher'], streamRecord);
         }
 
         for (const subscriber of channelData.subscribers) {
@@ -131,9 +127,9 @@ async function updateStats(nmsConfig) {
           stats[appName][channelName].subscribers.push(subscriberObj);
         }
 
-        if (streamObj) {
-          await streamObj.updateInfo();
-          await streamObj.save();
+        if (streamRecord) {
+          await streamRecord.updateInfo();
+          await streamRecord.save();
         }
       });
     })

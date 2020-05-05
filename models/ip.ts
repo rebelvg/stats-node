@@ -3,7 +3,7 @@ import { Document } from 'mongoose';
 
 import { schema } from '../schemas/ip';
 
-export interface IPModel extends Document {
+export interface IIPModel extends Document {
   ip: string;
   api: {
     as: string;
@@ -25,4 +25,4 @@ export interface IPModel extends Document {
   updatedAt: Date;
 }
 
-export const IP = mongoose.model<IPModel>('IP', schema);
+export const IP = mongoose.model<IIPModel>('IP', schema);
