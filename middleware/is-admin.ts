@@ -2,9 +2,13 @@ import { Next } from 'koa';
 import * as Router from 'koa-router';
 
 export function isAdmin(ctx: Router.IRouterContext, next: Next) {
-  if (ctx.state.user.isAdmin) {
-    return next();
+  if (!ctx.state.user) {
+    throw new Error('Not logged in.');
   }
 
-  throw new Error('Not authorized.');
+  if (!ctx.state.user.isAdmin) {
+    throw new Error('Not authorized.');
+  }
+
+  return next();
 }

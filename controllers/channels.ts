@@ -5,6 +5,7 @@ import * as _ from 'lodash';
 import { Stream } from '../models/stream';
 import { Subscriber } from '../models/subscriber';
 import { liveStats } from '../servers';
+import { hideFields } from '../helpers/hide-fields';
 
 function isLive(server: string, app: string, channel: string): boolean {
   return liveStats?.[server]?.[app]?.[channel]?.publisher !== null;
@@ -63,27 +64,37 @@ export function appChannelStats(ctx: Router.IRouterContext, next: Next) {
 }
 
 export async function channels(ctx: Router.IRouterContext, next: Next) {
-  await Promise.all(
-    _.map(liveStats, serverObj => {
-      return _.map(serverObj, appObj => {
-        return _.map(appObj, async channelObj => {
-          if (channelObj.publisher) {
-            await Stream.populate(channelObj.publisher, {
-              path: 'location'
-            });
-          }
+  const liveStatsClone = _.cloneDeep(liveStats);
 
-          for (const subscriberObj of channelObj.subscribers) {
-            await Subscriber.populate(subscriberObj, {
-              path: 'location'
-            });
-          }
-        });
-      });
+  await Promise.all(
+    _.map(liveStatsClone, async serverObj => {
+      return Promise.all(
+        _.map(serverObj, async appObj => {
+          return Promise.all(
+            _.map(appObj, async channelObj => {
+              if (channelObj.publisher) {
+                await Stream.populate(channelObj.publisher, {
+                  path: 'location'
+                });
+
+                hideFields(ctx.state.user, channelObj.publisher);
+              }
+
+              for (const subscriberObj of channelObj.subscribers) {
+                await Subscriber.populate(subscriberObj, {
+                  path: 'location'
+                });
+
+                hideFields(ctx.state.user, subscriberObj);
+              }
+            })
+          );
+        })
+      );
     })
   );
 
-  ctx.body = liveStats;
+  ctx.body = liveStatsClone;
 }
 
 export function legacy(ctx: Router.IRouterContext, next: Next) {

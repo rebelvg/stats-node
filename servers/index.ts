@@ -2,14 +2,14 @@ import { IStreamModel } from '../models/stream';
 import { ISubscriberModel } from '../models/subscriber';
 
 export interface IStream {
-  publisher: IStreamModel;
-  subscribers: ISubscriberModel[];
+  readonly publisher: IStreamModel;
+  readonly subscribers: ISubscriberModel[];
 }
 
 export interface ILiveStats {
-  [server: string]: {
-    [app: string]: {
-      [channel: string]: IStream;
+  readonly [server: string]: {
+    readonly [app: string]: {
+      readonly [channel: string]: IStream;
     };
   };
 }
