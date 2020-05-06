@@ -24,15 +24,13 @@ declare module 'koa-router' {
 export async function readToken(ctx: Router.IRouterContext, next: Next) {
   const token = ctx.get('token');
 
-  if (!token) {
-    return next();
+  if (token) {
+    const user = await User.findOne({
+      token
+    });
+
+    ctx.state.user = user;
   }
-
-  const user = await User.findOne({
-    token
-  });
-
-  ctx.state.user = user;
 
   await next();
 }
