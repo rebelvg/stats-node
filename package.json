@@ -7,9 +7,11 @@
     "prepush": "yarn run lint",
     "lint": "prettier --list-different \"**/*.{ts,js,json,css,md}\"",
     "lint-fix": "prettier --write \"**/*.{ts,js,json,css,md}\"",
+    "migrate": "ts-node migrate.ts",
     "start": "ts-node .",
     "docker": "docker-compose up -d",
-    "docker-import": "docker exec mongodb mongorestore"
+    "docker-import": "docker exec mongodb mongorestore",
+    "pm2": "yarn install && yarn run migrate && pm2 restart stats-node"
   },
   "dependencies": {
     "axios": "^0.18.0",

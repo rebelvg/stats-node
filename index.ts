@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 
 import { app } from './app';
-import './mongo';
+import { connectMongoose } from './mongo';
+
 import './passport';
 import './servers';
 
@@ -18,11 +19,15 @@ if (typeof stats.port === 'string') {
   }
 }
 
-app.listen(stats.port, () => {
-  console.log('server is running.');
+(async () => {
+  await connectMongoose();
 
-  // set unix socket rw rights for nginx
-  if (typeof stats.port === 'string') {
-    fs.chmodSync(stats.port, '777');
-  }
-});
+  app.listen(stats.port, () => {
+    console.log('server is running.');
+
+    // set unix socket rw rights for nginx
+    if (typeof stats.port === 'string') {
+      fs.chmodSync(stats.port, '777');
+    }
+  });
+})();
