@@ -1,14 +1,41 @@
 import axios from 'axios';
 import * as _ from 'lodash';
 
-import { Stream, IStreamModel } from '../models/stream';
+import { Stream, IStreamModel, StreamModel } from '../models/stream';
 import { Subscriber, ISubscriberModel } from '../models/subscriber';
 
 import { ams as amsConfigs } from '../config';
 import { liveStats } from '.';
 
-async function getNodeStats(host, token) {
-  const { data } = await axios.get(`${host}/streams`, {
+export interface IStreamsResponse {
+  [app: string]: {
+    [channel: string]: {
+      publisher: {
+        app: string;
+        channel: string;
+        serverId: string;
+        bytes: number;
+        ip: string;
+        protocol: string;
+        connectCreated: Date;
+        connectUpdated: Date;
+      };
+      subscribers: {
+        app: string;
+        channel: string;
+        serverId: string;
+        bytes: number;
+        ip: string;
+        protocol: string;
+        connectCreated: Date;
+        connectUpdated: Date;
+      }[];
+    };
+  };
+}
+
+async function getNodeStats(host: string, token: string): Promise<IStreamsResponse> {
+  const { data } = await axios.get<IStreamsResponse>(`${host}/v1/streams`, {
     headers: {
       token
     }
@@ -35,43 +62,51 @@ async function updateStats(amsConfigs) {
             subscribers: []
           });
 
-          let streamObj = null;
+          let streamRecord: IStreamModel = null;
 
           if (channelData.publisher) {
             const streamQuery: Partial<IStreamModel> = {
               app: channelData.publisher.app,
-              channel: channelData.publisher.stream,
+              channel: channelData.publisher.channel,
               serverType: name,
-              serverId: channelData.publisher.clientId,
+              serverId: channelData.publisher.serverId,
               connectCreated: new Date(channelData.publisher.connectCreated)
             };
 
-            streamObj = await Stream.findOne(streamQuery);
+            streamRecord = await Stream.findOne(streamQuery);
 
-            if (!streamObj) {
+            if (!streamRecord) {
               streamQuery.connectUpdated = statsUpdateTime;
               streamQuery.bytes = channelData.publisher.bytes;
               streamQuery.ip = channelData.publisher.ip;
-              streamQuery.protocol = 'rtmp';
-              streamQuery.userId = channelData.publisher.userId;
+              streamQuery.protocol = channelData.publisher.protocol;
+              streamQuery.userId = null;
+              streamQuery.lastBitrate = 0;
 
-              streamObj = new Stream(streamQuery);
+              streamRecord = new Stream(streamQuery);
             } else {
-              streamObj.bytes = channelData.publisher.bytes;
-              streamObj.connectUpdated = statsUpdateTime;
+              const lastBitrate = StreamModel.calculateLastBitrate(
+                channelData.publisher.bytes,
+                streamRecord,
+                statsUpdateTime
+              );
+
+              streamRecord.bytes = channelData.publisher.bytes;
+              streamRecord.connectUpdated = statsUpdateTime;
+              streamRecord.lastBitrate = lastBitrate;
             }
 
-            await streamObj.save();
+            await streamRecord.save();
 
-            _.set(stats, [appName, channelName, 'publisher'], streamObj);
+            _.set(stats, [appName, channelName, 'publisher'], streamRecord);
           }
 
           for (const subscriber of channelData.subscribers) {
             const subscriberQuery: Partial<ISubscriberModel> = {
               app: subscriber.app,
-              channel: subscriber.stream,
+              channel: subscriber.channel,
               serverType: name,
-              serverId: subscriber.clientId,
+              serverId: subscriber.serverId,
               connectCreated: new Date(subscriber.connectCreated)
             };
 
@@ -82,7 +117,7 @@ async function updateStats(amsConfigs) {
               subscriberQuery.bytes = subscriber.bytes;
               subscriberQuery.ip = subscriber.ip;
               subscriberQuery.protocol = subscriber.protocol;
-              subscriberQuery.userId = subscriber.userId;
+              subscriberQuery.userId = null;
 
               subscriberObj = new Subscriber(subscriberQuery);
             } else {
@@ -95,9 +130,9 @@ async function updateStats(amsConfigs) {
             stats[appName][channelName].subscribers.push(subscriberObj);
           }
 
-          if (streamObj) {
-            await streamObj.updateInfo();
-            await streamObj.save();
+          if (streamRecord) {
+            await streamRecord.updateInfo();
+            await streamRecord.save();
           }
         })
       );

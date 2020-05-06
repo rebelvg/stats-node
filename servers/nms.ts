@@ -88,7 +88,7 @@ async function updateStats(nmsConfig) {
               streamRecord = new Stream(streamQuery);
             } else {
               const lastBitrate = StreamModel.calculateLastBitrate(
-                channelData.publisher,
+                channelData.publisher.bytes,
                 streamRecord,
                 statsUpdateTime
               );
