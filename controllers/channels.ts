@@ -8,7 +8,7 @@ import { liveStats } from '../servers';
 import { hideFields } from '../helpers/hide-fields';
 
 function isLive(server: string, app: string, channel: string): boolean {
-  return liveStats?.[server]?.[app]?.[channel]?.publisher !== null;
+  return !!liveStats?.[server]?.[app]?.[channel]?.publisher;
 }
 
 function getViewers(server: string, app: string, channel: string): number {
@@ -48,9 +48,11 @@ function appChannelStatsBase(server: string, app: string, channel: string) {
 export function channelStats(ctx: Router.IRouterContext, next: Next) {
   const channelsStats = {};
 
-  _.forEach(liveStats?.[ctx.params.server], (channels, appName) => {
+  const { server, channel } = ctx.params;
+
+  _.forEach(liveStats?.[server], (channels, appName) => {
     _.forEach(channels, (channelObj, channelName) => {
-      channelsStats[appName] = appChannelStatsBase(ctx.params.server, appName, channelName);
+      channelsStats[appName] = appChannelStatsBase(server, appName, channel);
     });
   });
 
