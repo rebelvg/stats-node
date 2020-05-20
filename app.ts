@@ -3,6 +3,7 @@ import * as bodyParser from 'koa-bodyparser';
 import * as Router from 'koa-router';
 import * as koaQs from 'koa-qs';
 import * as passport from 'koa-passport';
+import * as cors from '@koa/cors';
 
 import { readToken } from './middleware/read-token';
 
@@ -14,6 +15,8 @@ import { router as users } from './routes/users';
 import { router as admin } from './routes/admin';
 
 export const app = new Koa();
+
+app.use(cors());
 
 app.use(passport.initialize());
 

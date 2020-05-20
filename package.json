@@ -15,6 +15,7 @@
     "pm2:update": "yarn install && yarn run migrate && pm2 restart stats-node"
   },
   "dependencies": {
+    "@koa/cors": "^3.1.0",
     "axios": "^0.18.0",
     "ip6addr": "^0.2.3",
     "koa": "^2.6.2",
