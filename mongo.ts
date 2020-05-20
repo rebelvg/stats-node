@@ -1,15 +1,12 @@
 import * as mongoose from 'mongoose';
-import { URL } from 'url';
 import { MongoClient, Db, Collection } from 'mongodb';
 
 import { db } from './config';
 
 (mongoose as any).Promise = Promise;
 
-const mongoUrl = new URL(`mongodb://${db.host}/${db.dbName}`);
-
 export async function connectMongoose() {
-  await mongoose.connect(mongoUrl.href, { useMongoClient: true });
+  await mongoose.connect(`mongodb://${db.host}/${db.dbName}`, { useMongoClient: true });
 }
 
 export interface IMigration {
@@ -32,7 +29,7 @@ export class MongoCollections {
     return mongoClientDb.collection(name);
   }
 
-  public static get migrations(): Collection<IMigration> {
+  public static get Migrations(): Collection<IMigration> {
     return mongoClientDb.collection<IMigration>('migrations');
   }
 }

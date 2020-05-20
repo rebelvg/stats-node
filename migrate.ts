@@ -5,11 +5,11 @@ import { connectMongoDriver, MongoCollections } from './mongo';
 async function migrate() {
   const mongoClient = await connectMongoDriver();
 
-  const { migrations } = MongoCollections;
+  const { Migrations } = MongoCollections;
 
   const files = fs.readdirSync('./migrations');
 
-  const migrationNames: string[] = await migrations.distinct('name', {});
+  const migrationNames: string[] = await Migrations.distinct('name', {});
 
   for (const fileName of files) {
     if (migrationNames.includes(fileName)) {
@@ -20,7 +20,7 @@ async function migrate() {
 
     await up();
 
-    await migrations.insertOne({
+    await Migrations.insertOne({
       name: fileName,
       timeCreated: new Date()
     });
