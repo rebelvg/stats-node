@@ -23,6 +23,10 @@ function getBitrate(server: string, app: string, channel: string): number {
   return liveStats?.[server]?.[app]?.[channel]?.publisher?.bitrate || 0;
 }
 
+function getLastBitrate(server: string, app: string, channel: string): number {
+  return liveStats?.[server]?.[app]?.[channel]?.publisher?.lastBitrate || 0;
+}
+
 function getStartTime(server: string, app: string, channel: string): Date {
   return liveStats?.[server]?.[app]?.[channel]?.publisher?.connectCreated || null;
 }
@@ -33,6 +37,7 @@ function appChannelStatsBase(server: string, app: string, channel: string) {
     viewers: 0,
     duration: 0,
     bitrate: 0,
+    lastBitrate: 0,
     startTime: null
   };
 
@@ -40,6 +45,7 @@ function appChannelStatsBase(server: string, app: string, channel: string) {
   channelStats.viewers = getViewers(server, app, channel);
   channelStats.duration = getDuration(server, app, channel);
   channelStats.bitrate = getBitrate(server, app, channel);
+  channelStats.lastBitrate = getLastBitrate(server, app, channel);
   channelStats.startTime = getStartTime(server, app, channel);
 
   return channelStats;
