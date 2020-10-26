@@ -5,7 +5,7 @@ import { Stream, IStreamModel, StreamModel } from '../models/stream';
 import { Subscriber, ISubscriberModel } from '../models/subscriber';
 
 import { ams as amsConfigs } from '../config';
-import { liveStats } from '.';
+import { liveStats } from './';
 
 export interface IStreamsResponse {
   [app: string]: {

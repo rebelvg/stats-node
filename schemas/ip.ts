@@ -21,7 +21,9 @@ export const schema = new Schema(
 
 schema.pre('validate', async function(this: IIPModel, next: mongoose.HookNextFunction) {
   try {
-    if (!this.api) {
+    const isRecordMonthOld = new Date().valueOf() - this.updatedAt?.valueOf() > 30 * 24 * 60 * 60 * 1000;
+
+    if (!this.api || isRecordMonthOld) {
       const { data } = await axios.get(`${apiLink}/${this.ip}`);
 
       this.api = data;
@@ -32,13 +34,13 @@ schema.pre('validate', async function(this: IIPModel, next: mongoose.HookNextFun
 });
 
 schema.pre('validate', function(this: IIPModel, next: mongoose.HookNextFunction) {
-  const updatedAt = new Date();
+  const currentTime = new Date();
 
   if (this.isNew) {
-    this.createdAt = updatedAt;
+    this.createdAt = currentTime;
   }
 
-  this.updatedAt = updatedAt;
+  this.updatedAt = currentTime;
 
   next();
 });
