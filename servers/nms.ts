@@ -155,12 +155,12 @@ async function runUpdate() {
         _.set(liveStats, [name], stats);
       } catch (error) {
         if (error.code === 'ECONNREFUSED') {
-          console.error(error.message);
+          console.log('nms_update_econnrefused', error.message);
 
           return;
         }
 
-        console.error(error);
+        console.log('nms_update_error', error);
       }
     })
   );

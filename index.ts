@@ -29,7 +29,7 @@ if (typeof stats.port === 'string') {
   await connectMongoose();
 
   app.listen(stats.port, () => {
-    console.log('server is running.');
+    console.log('server_running');
 
     // set unix socket rw rights for nginx
     if (typeof stats.port === 'string') {

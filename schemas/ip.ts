@@ -31,7 +31,7 @@ schema.pre('validate', async function(this: IIPModel, next: mongoose.HookNextFun
       this.apiUpdatedAt = new Date();
     }
   } catch (error) {
-    console.error(error);
+    console.log('ips_validate_error', error);
   }
 
   next();
