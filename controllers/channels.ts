@@ -137,7 +137,7 @@ export async function list(ctx: Router.IRouterContext, next: Next) {
     _.forEach(serverObj, appObj => {
       _.forEach(appObj, channelObj => {
         if (channelObj.publisher) {
-          liveChannels.push(channelObj.publisher.channel);
+          liveChannels.push({ app: channelObj.publisher.app, channel: channelObj.publisher.channel });
         }
       });
     });
