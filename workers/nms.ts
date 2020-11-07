@@ -6,7 +6,7 @@ import { Stream, IStreamModel, StreamModel } from '../models/stream';
 import { Subscriber, ISubscriberModel } from '../models/subscriber';
 
 import { nms as nmsConfigs } from '../config';
-import { liveStats } from './';
+import { ILiveStats, INmsWorkerConfig, liveStats } from './';
 
 export interface IStreamsResponse {
   [app: string]: {
@@ -36,7 +36,7 @@ export interface IStreamsResponse {
   };
 }
 
-async function getNodeStats(host, token): Promise<IStreamsResponse> {
+async function getNodeStats(host: string, token: string): Promise<IStreamsResponse> {
   const { data } = await axios.get<IStreamsResponse>(`${host}/api/streams`, {
     headers: {
       token
@@ -46,12 +46,12 @@ async function getNodeStats(host, token): Promise<IStreamsResponse> {
   return data;
 }
 
-async function updateStats(nmsConfig) {
+async function updateStats(nmsConfig: INmsWorkerConfig) {
   const { name, host, token } = nmsConfig;
 
   const channels = await getNodeStats(host, token);
 
-  const stats = {};
+  const stats: ILiveStats[0] = {};
 
   const statsUpdateTime = new Date();
 

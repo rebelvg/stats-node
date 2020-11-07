@@ -14,6 +14,18 @@ export interface ILiveStats {
   };
 }
 
+export interface IAmsWorkerConfig {
+  name: string;
+  host: string;
+  token: string;
+}
+
+export interface INmsWorkerConfig {
+  name: string;
+  host: string;
+  token: string;
+}
+
 export const liveStats: ILiveStats = {};
 
 import './ams';

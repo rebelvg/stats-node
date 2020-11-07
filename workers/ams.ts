@@ -5,7 +5,7 @@ import { Stream, IStreamModel, StreamModel } from '../models/stream';
 import { Subscriber, ISubscriberModel } from '../models/subscriber';
 
 import { ams as amsConfigs } from '../config';
-import { liveStats } from './';
+import { IAmsWorkerConfig, ILiveStats, liveStats } from './';
 
 export interface IStreamsResponse {
   [app: string]: {
@@ -44,12 +44,12 @@ async function getNodeStats(host: string, token: string): Promise<IStreamsRespon
   return data;
 }
 
-async function updateStats(amsConfigs) {
-  const { name, host, token } = amsConfigs;
+async function updateStats(amsConfig: IAmsWorkerConfig) {
+  const { name, host, token } = amsConfig;
 
   const channels = await getNodeStats(host, token);
 
-  const stats = {};
+  const stats: ILiveStats[0] = {};
 
   const statsUpdateTime = new Date();
 
