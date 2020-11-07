@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 
 import { Stream } from '../models/stream';
 import { Subscriber } from '../models/subscriber';
-import { liveStats } from '../servers';
+import { liveStats } from '../workers';
 import { hideFields } from '../helpers/hide-fields';
 
 function isLive(server: string, app: string, channel: string): boolean {

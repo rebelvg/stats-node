@@ -4,7 +4,7 @@ import { app } from './app';
 import { connectMongoose } from './mongo';
 
 import './passport';
-import './servers';
+import './workers';
 
 import { stats } from './config';
 

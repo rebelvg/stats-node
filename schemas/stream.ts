@@ -5,7 +5,7 @@ import * as ip6addr from 'ip6addr';
 
 import { filterSubscribers } from '../helpers/filter-subscribers';
 import { IP } from '../models/ip';
-import { liveStats } from '../servers';
+import { liveStats } from '../workers';
 import { IStreamModel } from '../models/stream';
 
 const Schema = mongoose.Schema;

@@ -1,11 +1,10 @@
 import axios from 'axios';
 import * as _ from 'lodash';
-import { ObjectId } from 'mongodb';
 
 import { Stream, IStreamModel, StreamModel } from '../models/stream';
 import { Subscriber, ISubscriberModel } from '../models/subscriber';
 
-import { nms as nmsConfigs } from '../config';
+import { ams as amsConfigs } from '../config';
 import { liveStats } from './';
 
 export interface IStreamsResponse {
@@ -13,31 +12,30 @@ export interface IStreamsResponse {
     [channel: string]: {
       publisher: {
         app: string;
-        stream: string;
-        clientId: string;
-        connectCreated: Date;
-        bytes: number;
-        ip: string;
-        audio: { codec: string; profile: string; samplerate: number; channels: number };
-        video: { codec: string; size: string; fps: number };
-        userId: ObjectId;
-      };
-      subscribers: {
-        app: string;
-        stream: string;
-        clientId: string;
-        connectCreated: Date;
+        channel: string;
+        serverId: string;
         bytes: number;
         ip: string;
         protocol: string;
-        userId: ObjectId;
+        connectCreated: Date;
+        connectUpdated: Date;
+      };
+      subscribers: {
+        app: string;
+        channel: string;
+        serverId: string;
+        bytes: number;
+        ip: string;
+        protocol: string;
+        connectCreated: Date;
+        connectUpdated: Date;
       }[];
     };
   };
 }
 
-async function getNodeStats(host, token): Promise<IStreamsResponse> {
-  const { data } = await axios.get<IStreamsResponse>(`${host}/api/streams`, {
+async function getNodeStats(host: string, token: string): Promise<IStreamsResponse> {
+  const { data } = await axios.get<IStreamsResponse>(`${host}/v1/streams`, {
     headers: {
       token
     }
@@ -46,8 +44,8 @@ async function getNodeStats(host, token): Promise<IStreamsResponse> {
   return data;
 }
 
-async function updateStats(nmsConfig) {
-  const { name, host, token } = nmsConfig;
+async function updateStats(amsConfigs) {
+  const { name, host, token } = amsConfigs;
 
   const channels = await getNodeStats(host, token);
 
@@ -69,10 +67,10 @@ async function updateStats(nmsConfig) {
           if (channelData.publisher) {
             const streamQuery: Partial<IStreamModel> = {
               app: channelData.publisher.app,
-              channel: channelData.publisher.stream,
+              channel: channelData.publisher.channel,
               serverType: name,
-              serverId: channelData.publisher.clientId,
-              connectCreated: channelData.publisher.connectCreated
+              serverId: channelData.publisher.serverId,
+              connectCreated: new Date(channelData.publisher.connectCreated)
             };
 
             streamRecord = await Stream.findOne(streamQuery);
@@ -81,8 +79,8 @@ async function updateStats(nmsConfig) {
               streamQuery.connectUpdated = statsUpdateTime;
               streamQuery.bytes = channelData.publisher.bytes;
               streamQuery.ip = channelData.publisher.ip;
-              streamQuery.protocol = 'rtmp';
-              streamQuery.userId = channelData.publisher.userId;
+              streamQuery.protocol = channelData.publisher.protocol;
+              streamQuery.userId = null;
               streamQuery.lastBitrate = 0;
 
               streamRecord = new Stream(streamQuery);
@@ -106,10 +104,10 @@ async function updateStats(nmsConfig) {
           for (const subscriber of channelData.subscribers) {
             const subscriberQuery: Partial<ISubscriberModel> = {
               app: subscriber.app,
-              channel: subscriber.stream,
+              channel: subscriber.channel,
               serverType: name,
-              serverId: subscriber.clientId,
-              connectCreated: subscriber.connectCreated
+              serverId: subscriber.serverId,
+              connectCreated: new Date(subscriber.connectCreated)
             };
 
             let subscriberObj = await Subscriber.findOne(subscriberQuery);
@@ -119,7 +117,7 @@ async function updateStats(nmsConfig) {
               subscriberQuery.bytes = subscriber.bytes;
               subscriberQuery.ip = subscriber.ip;
               subscriberQuery.protocol = subscriber.protocol;
-              subscriberQuery.userId = subscriber.userId;
+              subscriberQuery.userId = null;
 
               subscriberObj = new Subscriber(subscriberQuery);
             } else {
@@ -146,27 +144,29 @@ async function updateStats(nmsConfig) {
 
 async function runUpdate() {
   await Promise.all(
-    nmsConfigs.map(async nmsConfig => {
+    amsConfigs.map(async amsConfig => {
       try {
-        const { name } = nmsConfig;
+        const { name } = amsConfig;
 
-        const stats = await updateStats(nmsConfig);
+        const stats = await updateStats(amsConfig);
 
         _.set(liveStats, [name], stats);
       } catch (error) {
         if (error.code === 'ECONNREFUSED') {
-          console.log('nms_update_econnrefused', error.message);
+          console.log('ams_update_econnrefused', error.message);
 
           return;
         }
 
-        console.log('nms_update_error', error);
+        console.log('ams_update_error', error);
       }
     })
   );
 }
 
 (async () => {
+  console.log('ams_worker_running');
+
   // eslint-disable-next-line no-constant-condition
   while (true) {
     await runUpdate();

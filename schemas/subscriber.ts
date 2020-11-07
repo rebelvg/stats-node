@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import * as ip6addr from 'ip6addr';
 
 import { IP } from '../models/ip';
-import { liveStats } from '../servers';
+import { liveStats } from '../workers';
 import { ISubscriberModel } from '../models/subscriber';
 
 const Schema = mongoose.Schema;
