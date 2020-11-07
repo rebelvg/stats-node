@@ -4,6 +4,7 @@ import * as Router from 'koa-router';
 import * as koaQs from 'koa-qs';
 import * as passport from 'koa-passport';
 import * as cors from '@koa/cors';
+import * as koaMorgan from 'koa-morgan';
 
 import { readToken } from './middleware/read-token';
 
@@ -16,6 +17,8 @@ import { router as admin } from './routes/admin';
 
 export const app = new Koa();
 
+app.use(koaMorgan('combined', { immediate: true }));
+app.use(koaMorgan('short'));
 app.use(cors());
 
 app.use(passport.initialize());
