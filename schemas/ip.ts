@@ -21,7 +21,7 @@ export const schema = new Schema(
 
 schema.pre('validate', async function(this: IIPModel, next: mongoose.HookNextFunction) {
   try {
-    const isRecordMonthOld = new Date().valueOf() - this.apiUpdatedAt?.valueOf() > 30 * 24 * 60 * 60 * 1000;
+    const isRecordMonthOld = new Date().valueOf() - this.apiUpdatedAt.valueOf() > 30 * 24 * 60 * 60 * 1000;
 
     if (!this.api || isRecordMonthOld) {
       const { data } = await axios.get(`${apiLink}/${this.ip}`);
