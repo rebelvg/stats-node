@@ -38,6 +38,8 @@ schema.pre('validate', async function(
     }
   } catch (error) {
     console.log('ips_validate_error', error);
+
+    return next(error);
   }
 
   next();

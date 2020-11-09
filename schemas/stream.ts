@@ -84,7 +84,11 @@ schema.pre('save', async function(
     ip = new IP({ ip: this.ip });
   }
 
-  await ip.save();
+  try {
+    await ip.save();
+  } catch (error) {
+    return next(error);
+  }
 
   return next();
 });
