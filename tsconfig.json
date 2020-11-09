@@ -4,6 +4,7 @@
     "module": "commonjs",
     "resolveJsonModule": true,
     "noImplicitThis": true,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
+    "sourceMap": true
   }
 }
