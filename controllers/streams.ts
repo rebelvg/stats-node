@@ -35,18 +35,21 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
         .map('location.api.message')
         .compact()
         .uniq()
-        .value()
+        .value(),
     ),
     protocols: _.chain(subscribers)
       .map('protocol')
       .uniq()
-      .value()
+      .value(),
   };
 
   let totalPeakViewers = 0;
 
   _.forEach(subscribers, subscriber => {
-    const viewersCount = filterSubscribers(subscribers, subscriber.connectCreated).length;
+    const viewersCount = filterSubscribers(
+      subscribers,
+      subscriber.connectCreated,
+    ).length;
 
     if (viewersCount > totalPeakViewers) {
       totalPeakViewers = viewersCount;
@@ -59,20 +62,20 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
       (sum, sub) => {
         return sum + sub.bytes;
       },
-      0
+      0,
     ),
     totalDuration: _.reduce(
       subscribers,
       (sum, sub) => {
         return sum + sub.duration;
       },
-      0
+      0,
     ),
     totalPeakViewers: totalPeakViewers,
     totalIPs: _.chain(subscribers)
       .map('ip')
       .uniq()
-      .value().length
+      .value().length,
   };
 
   hideFields(ctx.state.user, stream);
@@ -81,7 +84,13 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
     hideFields(ctx.state.user, subscriber);
   });
 
-  ctx.body = { stream: stream, subscribers: subscribers, options: options, info: info, relatedStreams: relatedStreams };
+  ctx.body = {
+    stream: stream,
+    subscribers: subscribers,
+    options: options,
+    info: info,
+    relatedStreams: relatedStreams,
+  };
 }
 
 export async function find(ctx: Router.IRouterContext, next: Next) {
@@ -89,7 +98,7 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
     sort: _.isEmpty(ctx.sortObj) ? { connectCreated: -1 } : ctx.sortObj,
     page: parseInt(ctx.query.page as string),
     limit: parseInt(ctx.query.limit as string),
-    populate: ['location']
+    populate: ['location'],
   });
 
   const aggregation = await Stream.aggregate([
@@ -98,19 +107,19 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
       $group: {
         _id: null,
         totalBytes: {
-          $sum: '$bytes'
+          $sum: '$bytes',
         },
         totalDuration: {
-          $sum: '$duration'
+          $sum: '$duration',
         },
         totalConnections: {
-          $sum: '$totalConnectionsCount'
+          $sum: '$totalConnectionsCount',
         },
         totalPeakViewers: {
-          $sum: '$peakViewersCount'
-        }
-      }
-    }
+          $sum: '$peakViewersCount',
+        },
+      },
+    },
   ]);
 
   const uniqueIPs = await Stream.distinct('ip', ctx.queryObj);
@@ -127,19 +136,19 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
       apps: await Stream.distinct('app', ctx.queryObj),
       channels: await Stream.distinct('channel', ctx.queryObj),
       countries: _.concat(uniqueCountries, uniqueApiMessages),
-      protocols: await Stream.distinct('protocol', ctx.queryObj)
+      protocols: await Stream.distinct('protocol', ctx.queryObj),
     },
     info: {
       totalBytes: _.get(aggregation, ['0', 'totalBytes'], 0),
       totalDuration: _.get(aggregation, ['0', 'totalDuration'], 0),
       totalConnections: _.get(aggregation, ['0', 'totalConnections'], 0),
       totalPeakViewers: _.get(aggregation, ['0', 'totalPeakViewers'], 0),
-      totalIPs: uniqueIPs.length
+      totalIPs: uniqueIPs.length,
     },
     total: paginatedStreams.total,
     limit: paginatedStreams.limit,
     page: paginatedStreams.page,
-    pages: paginatedStreams.pages
+    pages: paginatedStreams.pages,
   };
 }
 
@@ -150,14 +159,16 @@ export async function graph(ctx: Router.IRouterContext, next: Next) {
     throw new Error('Stream not found.');
   }
 
-  const subscribers = await stream.getSubscribers(ctx.queryObj).sort({ connectCreated: 1 });
+  const subscribers = await stream
+    .getSubscribers(ctx.queryObj)
+    .sort({ connectCreated: 1 });
 
   let graph = [];
 
   graph.push({
     eventName: 'streamStarted',
     time: stream.connectCreated,
-    subscribers: filterSubscribers(subscribers, stream.connectCreated)
+    subscribers: filterSubscribers(subscribers, stream.connectCreated),
   });
 
   _.forEach(subscribers, subscriber => {
@@ -168,7 +179,7 @@ export async function graph(ctx: Router.IRouterContext, next: Next) {
     graph.push({
       eventName: 'subscriberConnected',
       time: subscriber.connectCreated,
-      subscribers: filterSubscribers(subscribers, subscriber.connectCreated)
+      subscribers: filterSubscribers(subscribers, subscriber.connectCreated),
     });
   });
 
@@ -183,7 +194,7 @@ export async function graph(ctx: Router.IRouterContext, next: Next) {
     graph.push({
       eventName: 'subscriberDisconnected',
       time: subscriber.connectUpdated,
-      subscribers: filterSubscribers(subscribers, subscriber.connectUpdated)
+      subscribers: filterSubscribers(subscribers, subscriber.connectUpdated),
     });
   });
 
@@ -191,13 +202,13 @@ export async function graph(ctx: Router.IRouterContext, next: Next) {
     graph.push({
       eventName: 'streamEnded',
       time: stream.connectUpdated,
-      subscribers: filterSubscribers(subscribers, stream.connectUpdated)
+      subscribers: filterSubscribers(subscribers, stream.connectUpdated),
     });
   } else {
     graph.push({
       eventName: 'streamIsLive',
       time: stream.connectUpdated,
-      subscribers: filterSubscribers(subscribers, stream.connectUpdated, true)
+      subscribers: filterSubscribers(subscribers, stream.connectUpdated, true),
     });
   }
 

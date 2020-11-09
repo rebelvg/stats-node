@@ -6,12 +6,12 @@ import { User } from '../../models/user';
 export async function find(ctx: Router.IRouterContext, next: Next) {
   const streamers = await User.find(
     {
-      isStreamer: true
+      isStreamer: true,
     },
-    ['_id', 'name', 'streamKey']
+    ['_id', 'name', 'streamKey'],
   );
 
   ctx.body = {
-    streamers
+    streamers,
   };
 }

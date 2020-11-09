@@ -22,7 +22,7 @@ async function migrate() {
 
     await Migrations.insertOne({
       name: fileName,
-      timeCreated: new Date()
+      timeCreated: new Date(),
     });
 
     console.log(`${fileName} migration done.`);

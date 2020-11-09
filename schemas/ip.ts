@@ -13,16 +13,21 @@ export const schema = new Schema(
     api: { type: Object, required: true },
     createdAt: { type: Date, required: true, index: true },
     updatedAt: { type: Date, required: true, index: true },
-    apiUpdatedAt: { type: Date, required: true, index: true }
+    apiUpdatedAt: { type: Date, required: true, index: true },
   },
   {
-    retainKeyOrder: true
-  }
+    retainKeyOrder: true,
+  },
 );
 
-schema.pre('validate', async function(this: IIPModel, next: mongoose.HookNextFunction) {
+schema.pre('validate', async function(
+  this: IIPModel,
+  next: mongoose.HookNextFunction,
+) {
   try {
-    const isRecordMonthOld = new Date().valueOf() - this.apiUpdatedAt?.valueOf() > 30 * 24 * 60 * 60 * 1000;
+    const isRecordMonthOld =
+      new Date().valueOf() - this.apiUpdatedAt?.valueOf() >
+      30 * 24 * 60 * 60 * 1000;
 
     if (!this.api || isRecordMonthOld) {
       const { data } = await axios.get(`${apiLink}/${this.ip}`);
@@ -38,7 +43,10 @@ schema.pre('validate', async function(this: IIPModel, next: mongoose.HookNextFun
   next();
 });
 
-schema.pre('validate', function(this: IIPModel, next: mongoose.HookNextFunction) {
+schema.pre('validate', function(
+  this: IIPModel,
+  next: mongoose.HookNextFunction,
+) {
   const currentTime = new Date();
 
   if (this.isNew) {

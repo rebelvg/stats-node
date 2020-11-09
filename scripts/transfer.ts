@@ -52,7 +52,7 @@ mongoose.connect(nodeMongoUrl.href, { useMongoClient: true }, error => {
         ip: ip.ip,
         api: ip.ip_stats,
         createdAt: moment.unix(ip.timestamp).toDate(),
-        updatedAt: moment.unix(ip.timestamp).toDate()
+        updatedAt: moment.unix(ip.timestamp).toDate(),
       });
     } catch (error) {
       console.error(error);
@@ -73,7 +73,7 @@ mongoose.connect(nodeMongoUrl.href, { useMongoClient: true }, error => {
       connectUpdated: moment.unix(subscriber.stats.timestamp).toDate(),
       bytes: subscriber.stats.bytes_out,
       ip: subscriber.stats.client_ip,
-      protocol: 'rtmp'
+      protocol: 'rtmp',
     });
 
     await subDoc.save();
@@ -93,7 +93,7 @@ mongoose.connect(nodeMongoUrl.href, { useMongoClient: true }, error => {
       connectUpdated: moment.unix(stream.stats.timestamp).toDate(),
       bytes: stream.stats.bytes_in,
       ip: stream.stats.streamer_ip,
-      protocol: 'rtmp'
+      protocol: 'rtmp',
     });
 
     await streamDoc.save();

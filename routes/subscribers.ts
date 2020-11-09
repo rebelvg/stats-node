@@ -9,4 +9,10 @@ import { Subscriber } from '../models/subscriber';
 export const router = new Router();
 
 router.get('/:id', findById);
-router.get('/', koaPaginate.middleware(10, 100), parseFilter('subscriber'), parseSort(Subscriber), find);
+router.get(
+  '/',
+  koaPaginate.middleware(10, 100),
+  parseFilter('subscriber'),
+  parseSort(Subscriber),
+  find,
+);

@@ -18,7 +18,12 @@ export interface IStreamsResponse {
         connectCreated: Date;
         bytes: number;
         ip: string;
-        audio: { codec: string; profile: string; samplerate: number; channels: number };
+        audio: {
+          codec: string;
+          profile: string;
+          samplerate: number;
+          channels: number;
+        };
         video: { codec: string; size: string; fps: number };
         userId: ObjectId;
       };
@@ -36,11 +41,14 @@ export interface IStreamsResponse {
   };
 }
 
-async function getNodeStats(host: string, token: string): Promise<IStreamsResponse> {
+async function getNodeStats(
+  host: string,
+  token: string,
+): Promise<IStreamsResponse> {
   const { data } = await axios.get<IStreamsResponse>(`${host}/api/streams`, {
     headers: {
-      token
-    }
+      token,
+    },
   });
 
   return data;
@@ -61,7 +69,7 @@ async function updateStats(nmsConfig: INmsWorkerConfig) {
         _.map(channelObjs, async (channelData, channelName) => {
           _.set(stats, [appName, channelName], {
             publisher: null,
-            subscribers: []
+            subscribers: [],
           });
 
           let streamRecord: IStreamModel = null;
@@ -72,7 +80,7 @@ async function updateStats(nmsConfig: INmsWorkerConfig) {
               channel: channelData.publisher.stream,
               serverType: name,
               serverId: channelData.publisher.clientId,
-              connectCreated: channelData.publisher.connectCreated
+              connectCreated: channelData.publisher.connectCreated,
             };
 
             streamRecord = await Stream.findOne(streamQuery);
@@ -90,7 +98,7 @@ async function updateStats(nmsConfig: INmsWorkerConfig) {
               const lastBitrate = StreamModel.calculateLastBitrate(
                 channelData.publisher.bytes,
                 streamRecord,
-                statsUpdateTime
+                statsUpdateTime,
               );
 
               streamRecord.bytes = channelData.publisher.bytes;
@@ -109,7 +117,7 @@ async function updateStats(nmsConfig: INmsWorkerConfig) {
               channel: subscriber.stream,
               serverType: name,
               serverId: subscriber.clientId,
-              connectCreated: subscriber.connectCreated
+              connectCreated: subscriber.connectCreated,
             };
 
             let subscriberObj = await Subscriber.findOne(subscriberQuery);
@@ -136,9 +144,9 @@ async function updateStats(nmsConfig: INmsWorkerConfig) {
             await streamRecord.updateInfo();
             await streamRecord.save();
           }
-        })
+        }),
       );
-    })
+    }),
   );
 
   return stats;
@@ -162,7 +170,7 @@ async function runUpdate() {
 
         console.log('nms_update_error', error);
       }
-    })
+    }),
   );
 }
 

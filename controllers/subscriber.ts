@@ -7,7 +7,9 @@ import { IP } from '../models/ip';
 import { hideFields } from '../helpers/hide-fields';
 
 export async function findById(ctx: Router.IRouterContext, next: Next) {
-  const subscriber = await Subscriber.findById(ctx.params.id).populate(['location']);
+  const subscriber = await Subscriber.findById(ctx.params.id).populate([
+    'location',
+  ]);
 
   if (!subscriber) {
     throw new Error('Subscriber not found.');
@@ -32,7 +34,7 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
     sort: _.isEmpty(ctx.sortObj) ? { connectCreated: -1 } : ctx.sortObj,
     page: parseInt(ctx.query.page as string),
     limit: parseInt(ctx.query.limit as string),
-    populate: ['location']
+    populate: ['location'],
   });
 
   const aggregation = await Subscriber.aggregate([
@@ -41,13 +43,13 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
       $group: {
         _id: null,
         totalBytes: {
-          $sum: '$bytes'
+          $sum: '$bytes',
         },
         totalDuration: {
-          $sum: '$duration'
-        }
-      }
-    }
+          $sum: '$duration',
+        },
+      },
+    },
   ]);
 
   const uniqueIPs = await Subscriber.distinct('ip', ctx.queryObj);
@@ -64,16 +66,16 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
       apps: await Subscriber.distinct('app', ctx.queryObj),
       channels: await Subscriber.distinct('channel', ctx.queryObj),
       countries: _.concat(uniqueCountries, uniqueApiMessages),
-      protocols: await Subscriber.distinct('protocol', ctx.queryObj)
+      protocols: await Subscriber.distinct('protocol', ctx.queryObj),
     },
     info: {
       totalBytes: _.get(aggregation, ['0', 'totalBytes'], 0),
       totalDuration: _.get(aggregation, ['0', 'totalDuration'], 0),
-      totalIPs: uniqueIPs.length
+      totalIPs: uniqueIPs.length,
     },
     total: paginatedSubscribers.total,
     limit: paginatedSubscribers.limit,
     page: paginatedSubscribers.page,
-    pages: paginatedSubscribers.pages
+    pages: paginatedSubscribers.pages,
   };
 }

@@ -26,7 +26,7 @@ export async function readToken(ctx: Router.IRouterContext, next: Next) {
 
   if (token) {
     const user = await User.findOne({
-      token
+      token,
     });
 
     ctx.state.user = user;

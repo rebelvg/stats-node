@@ -16,14 +16,17 @@ export const schema = new Schema(
     token: { type: String, required: true, unique: true, index: true },
     streamKey: { type: String, required: true, unique: true, index: true },
     createdAt: { type: Date, required: true, index: true },
-    updatedAt: { type: Date, required: true, index: true }
+    updatedAt: { type: Date, required: true, index: true },
   },
   {
-    retainKeyOrder: true
-  }
+    retainKeyOrder: true,
+  },
 );
 
-schema.pre('validate', function(this: IUserModel, next: mongoose.HookNextFunction) {
+schema.pre('validate', function(
+  this: IUserModel,
+  next: mongoose.HookNextFunction,
+) {
   if (this.isNew) {
     this.isAdmin = false;
     this.isStreamer = false;
@@ -34,7 +37,10 @@ schema.pre('validate', function(this: IUserModel, next: mongoose.HookNextFunctio
   next();
 });
 
-schema.pre('validate', function(this: IUserModel, next: mongoose.HookNextFunction) {
+schema.pre('validate', function(
+  this: IUserModel,
+  next: mongoose.HookNextFunction,
+) {
   const updatedAt = new Date();
 
   if (this.isNew) {

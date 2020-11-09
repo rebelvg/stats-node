@@ -1,6 +1,12 @@
 import * as Router from 'koa-router';
 
-import { legacy, appChannelStats, channelStats, channels, list } from '../controllers/channels';
+import {
+  legacy,
+  appChannelStats,
+  channelStats,
+  channels,
+  list,
+} from '../controllers/channels';
 
 export const router = new Router();
 

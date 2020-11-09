@@ -28,7 +28,9 @@ function getLastBitrate(server: string, app: string, channel: string): number {
 }
 
 function getStartTime(server: string, app: string, channel: string): Date {
-  return liveStats?.[server]?.[app]?.[channel]?.publisher?.connectCreated || null;
+  return (
+    liveStats?.[server]?.[app]?.[channel]?.publisher?.connectCreated || null
+  );
 }
 
 function appChannelStatsBase(server: string, app: string, channel: string) {
@@ -38,7 +40,7 @@ function appChannelStatsBase(server: string, app: string, channel: string) {
     duration: 0,
     bitrate: 0,
     lastBitrate: 0,
-    startTime: null
+    startTime: null,
   };
 
   channelStats.isLive = isLive(server, app, channel);
@@ -66,7 +68,11 @@ export function channelStats(ctx: Router.IRouterContext, next: Next) {
 }
 
 export function appChannelStats(ctx: Router.IRouterContext, next: Next) {
-  const channelStats = appChannelStatsBase(ctx.params.server, ctx.params.app, ctx.params.channel);
+  const channelStats = appChannelStatsBase(
+    ctx.params.server,
+    ctx.params.app,
+    ctx.params.channel,
+  );
 
   ctx.body = channelStats;
 }
@@ -82,7 +88,7 @@ export async function channels(ctx: Router.IRouterContext, next: Next) {
             _.map(appObj, async channelObj => {
               if (channelObj.publisher) {
                 await Stream.populate(channelObj.publisher, {
-                  path: 'location'
+                  path: 'location',
                 });
 
                 hideFields(ctx.state.user, channelObj.publisher);
@@ -90,16 +96,16 @@ export async function channels(ctx: Router.IRouterContext, next: Next) {
 
               for (const subscriberObj of channelObj.subscribers) {
                 await Subscriber.populate(subscriberObj, {
-                  path: 'location'
+                  path: 'location',
                 });
 
                 hideFields(ctx.state.user, subscriberObj);
               }
-            })
+            }),
           );
-        })
+        }),
       );
-    })
+    }),
   );
 
   ctx.body = liveStatsClone;
@@ -111,7 +117,7 @@ export function legacy(ctx: Router.IRouterContext, next: Next) {
     viewers: 0,
     bitrate_live: 0,
     bitrate_restream: 0,
-    title: null
+    title: null,
   };
 
   channelStats.isLive = isLive(ctx.params.server, 'live', ctx.params.channel);
@@ -124,8 +130,16 @@ export function legacy(ctx: Router.IRouterContext, next: Next) {
     });
   });
 
-  channelStats.bitrate_live = getBitrate(ctx.params.server, 'live', ctx.params.channel);
-  channelStats.bitrate_restream = getBitrate(ctx.params.server, 'restream', ctx.params.channel);
+  channelStats.bitrate_live = getBitrate(
+    ctx.params.server,
+    'live',
+    ctx.params.channel,
+  );
+  channelStats.bitrate_restream = getBitrate(
+    ctx.params.server,
+    'restream',
+    ctx.params.channel,
+  );
 
   ctx.body = channelStats;
 }
@@ -137,7 +151,10 @@ export async function list(ctx: Router.IRouterContext, next: Next) {
     _.forEach(serverObj, appObj => {
       _.forEach(appObj, channelObj => {
         if (channelObj.publisher) {
-          liveChannels.push({ app: channelObj.publisher.app, channel: channelObj.publisher.channel });
+          liveChannels.push({
+            app: channelObj.publisher.app,
+            channel: channelObj.publisher.channel,
+          });
         }
       });
     });

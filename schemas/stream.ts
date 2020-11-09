@@ -26,27 +26,41 @@ export const schema = new Schema(
     lastBitrate: { type: Number, required: true },
     totalConnectionsCount: { type: Number, required: true },
     peakViewersCount: { type: Number, required: true },
-    userId: { type: Schema.Types.ObjectId, ref: 'User', index: true, default: null },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      index: true,
+      default: null,
+    },
     createdAt: { type: Date, required: true, index: true },
-    updatedAt: { type: Date, required: true, index: true }
+    updatedAt: { type: Date, required: true, index: true },
   },
   {
-    retainKeyOrder: true
-  }
+    retainKeyOrder: true,
+  },
 );
 
-schema.pre('validate', function(this: IStreamModel, next: mongoose.HookNextFunction) {
+schema.pre('validate', function(
+  this: IStreamModel,
+  next: mongoose.HookNextFunction,
+) {
   const updatedAt = new Date();
 
   if (this.isNew) {
     const addr = ip6addr.parse(this.ip);
 
-    this.ip = addr.kind() === 'ipv6' ? addr.toString({ format: 'v6' }) : addr.toString({ format: 'v4' });
+    this.ip =
+      addr.kind() === 'ipv6'
+        ? addr.toString({ format: 'v6' })
+        : addr.toString({ format: 'v4' });
   }
 
-  this.duration = Math.ceil((this.connectUpdated.valueOf() - this.connectCreated.valueOf()) / 1000);
+  this.duration = Math.ceil(
+    (this.connectUpdated.valueOf() - this.connectCreated.valueOf()) / 1000,
+  );
 
-  this.bitrate = this.duration > 0 ? Math.ceil((this.bytes * 8) / this.duration / 1024) : 0;
+  this.bitrate =
+    this.duration > 0 ? Math.ceil((this.bytes * 8) / this.duration / 1024) : 0;
 
   if (this.isNew) {
     this.totalConnectionsCount = 0;
@@ -60,7 +74,10 @@ schema.pre('validate', function(this: IStreamModel, next: mongoose.HookNextFunct
   next();
 });
 
-schema.pre('save', async function(this: IStreamModel, next: mongoose.HookNextFunction) {
+schema.pre('save', async function(
+  this: IStreamModel,
+  next: mongoose.HookNextFunction,
+) {
   let ip = await IP.findOne({ ip: this.ip });
 
   if (!ip) {
@@ -73,7 +90,8 @@ schema.pre('save', async function(this: IStreamModel, next: mongoose.HookNextFun
 });
 
 schema.virtual('isLive').get(function(this: IStreamModel) {
-  const stream = liveStats?.[this.serverType]?.[this.app]?.[this.channel]?.publisher || null;
+  const stream =
+    liveStats?.[this.serverType]?.[this.app]?.[this.channel]?.publisher || null;
 
   if (!stream) {
     return false;
@@ -86,7 +104,7 @@ schema.virtual('location', {
   ref: 'IP',
   localField: 'ip',
   foreignField: 'ip',
-  justOne: true
+  justOne: true,
 });
 
 schema.set('toJSON', { virtuals: true });
@@ -99,10 +117,10 @@ schema.methods.getSubscribers = function(query = {}) {
         channel: this.channel,
         serverType: this.serverType,
         connectUpdated: { $gte: this.connectCreated },
-        connectCreated: { $lte: this.connectUpdated }
+        connectCreated: { $lte: this.connectUpdated },
       },
-      query
-    ]
+      query,
+    ],
   };
 
   return this.model('Subscriber').find(query);
@@ -116,10 +134,10 @@ schema.methods.getRelatedStreams = function(query = {}) {
         channel: this.channel,
         serverType: this.serverType,
         connectUpdated: { $gte: this.connectCreated },
-        connectCreated: { $lte: this.connectUpdated }
+        connectCreated: { $lte: this.connectUpdated },
       },
-      query
-    ]
+      query,
+    ],
   };
 
   return this.model('Stream').find(query);
@@ -131,7 +149,10 @@ schema.methods.updateInfo = async function() {
   this.totalConnectionsCount = subscribers.length;
 
   _.forEach(subscribers, subscriber => {
-    const viewersCount = filterSubscribers(subscribers, subscriber.connectCreated).length;
+    const viewersCount = filterSubscribers(
+      subscribers,
+      subscriber.connectCreated,
+    ).length;
 
     if (viewersCount > this.peakViewersCount) {
       this.peakViewersCount = viewersCount;

@@ -19,7 +19,12 @@ export interface ISubscriberModel extends Document {
   userId: ObjectId;
   createdAt: Date;
   updatedAt: Date;
-  getStreams: (query?: any) => mongoose.DocumentQuery<ISubscriberModel[], ISubscriberModel>;
+  getStreams: (
+    query?: any,
+  ) => mongoose.DocumentQuery<ISubscriberModel[], ISubscriberModel>;
 }
 
-export const Subscriber = mongoose.model<ISubscriberModel>('Subscriber', schema);
+export const Subscriber = mongoose.model<ISubscriberModel>(
+  'Subscriber',
+  schema,
+);

@@ -10,4 +10,11 @@ import { isAdmin } from '../middleware/is-admin';
 export const router = new Router();
 
 router.get('/:id', isAdmin, parseFilter('ip'), parseSort(IP), findById);
-router.get('/', isAdmin, koaPaginate.middleware(10, 100), parseFilter('ip'), parseSort(IP), find);
+router.get(
+  '/',
+  isAdmin,
+  koaPaginate.middleware(10, 100),
+  parseFilter('ip'),
+  parseSort(IP),
+  find,
+);

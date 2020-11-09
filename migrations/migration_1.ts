@@ -15,13 +15,13 @@ export async function up(): Promise<void> {
     if (!record.lastBitrate) {
       await streams.updateOne(
         {
-          _id: record._id
+          _id: record._id,
         },
         {
           $set: {
-            lastBitrate: record.bitrate
-          }
-        }
+            lastBitrate: record.bitrate,
+          },
+        },
       );
     }
   }

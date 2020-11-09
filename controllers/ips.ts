@@ -12,7 +12,7 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
   }
 
   ctx.body = {
-    ip
+    ip,
   };
 }
 
@@ -20,7 +20,7 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
   const paginatedIps = await IP.paginate(ctx.queryObj, {
     sort: _.isEmpty(ctx.sortObj) ? { createdAt: -1 } : ctx.sortObj,
     page: parseInt(ctx.query.page as string),
-    limit: parseInt(ctx.query.limit as string)
+    limit: parseInt(ctx.query.limit as string),
   });
 
   const counties = await IP.distinct('api.country', ctx.queryObj);
@@ -33,16 +33,16 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
     options: {
       countries: _.concat(counties, uniqueApiMessages),
       cities: cities,
-      ISPs
+      ISPs,
     },
     info: {
       totalCountries: counties.length,
       totalCities: cities.length,
-      totalISPs: ISPs.length
+      totalISPs: ISPs.length,
     },
     total: paginatedIps.total,
     limit: paginatedIps.limit,
     page: paginatedIps.page,
-    pages: paginatedIps.pages
+    pages: paginatedIps.pages,
   };
 }

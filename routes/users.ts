@@ -19,9 +19,9 @@ router.get(
       'https://www.googleapis.com/auth/plus.login',
       'https://www.googleapis.com/auth/plus.me',
       'https://www.googleapis.com/auth/userinfo.email',
-      'https://www.googleapis.com/auth/userinfo.profile'
-    ]
-  })
+      'https://www.googleapis.com/auth/userinfo.profile',
+    ],
+  }),
 );
 router.get(
   '/auth/google/callback',
@@ -31,14 +31,14 @@ router.get(
 
     await User.updateOne(
       {
-        _id
+        _id,
       },
       {
         ipCreated: ipCreated ? ipCreated : ctx.ip,
-        ipUpdated: ctx.ip
-      }
+        ipUpdated: ctx.ip,
+      },
     );
 
     ctx.redirect(stats.googleRedirect + `/?token=${token}`);
-  }
+  },
 );

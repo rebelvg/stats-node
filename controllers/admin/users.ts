@@ -7,18 +7,18 @@ import { User } from '../../models/user';
 export async function find(ctx: Router.IRouterContext, next: Next) {
   const users = await User.find(null, null, {
     sort: {
-      createdAt: -1
-    }
+      createdAt: -1,
+    },
   });
 
   ctx.body = {
-    users
+    users,
   };
 }
 
 export async function update(ctx: Router.IRouterContext, next: Next) {
   const user = await User.findOne({
-    _id: ctx.params.id
+    _id: ctx.params.id,
   });
 
   if (!user) {
@@ -32,6 +32,6 @@ export async function update(ctx: Router.IRouterContext, next: Next) {
   await user.save();
 
   ctx.body = {
-    user
+    user,
   };
 }

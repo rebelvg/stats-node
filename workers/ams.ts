@@ -34,11 +34,14 @@ export interface IStreamsResponse {
   };
 }
 
-async function getNodeStats(host: string, token: string): Promise<IStreamsResponse> {
+async function getNodeStats(
+  host: string,
+  token: string,
+): Promise<IStreamsResponse> {
   const { data } = await axios.get<IStreamsResponse>(`${host}/v1/streams`, {
     headers: {
-      token
-    }
+      token,
+    },
   });
 
   return data;
@@ -59,7 +62,7 @@ async function updateStats(amsConfig: IAmsWorkerConfig) {
         _.map(channelObjs, async (channelData, channelName) => {
           _.set(stats, [appName, channelName], {
             publisher: null,
-            subscribers: []
+            subscribers: [],
           });
 
           let streamRecord: IStreamModel = null;
@@ -70,7 +73,7 @@ async function updateStats(amsConfig: IAmsWorkerConfig) {
               channel: channelData.publisher.channel,
               serverType: name,
               serverId: channelData.publisher.serverId,
-              connectCreated: new Date(channelData.publisher.connectCreated)
+              connectCreated: new Date(channelData.publisher.connectCreated),
             };
 
             streamRecord = await Stream.findOne(streamQuery);
@@ -88,7 +91,7 @@ async function updateStats(amsConfig: IAmsWorkerConfig) {
               const lastBitrate = StreamModel.calculateLastBitrate(
                 channelData.publisher.bytes,
                 streamRecord,
-                statsUpdateTime
+                statsUpdateTime,
               );
 
               streamRecord.bytes = channelData.publisher.bytes;
@@ -107,7 +110,7 @@ async function updateStats(amsConfig: IAmsWorkerConfig) {
               channel: subscriber.channel,
               serverType: name,
               serverId: subscriber.serverId,
-              connectCreated: new Date(subscriber.connectCreated)
+              connectCreated: new Date(subscriber.connectCreated),
             };
 
             let subscriberObj = await Subscriber.findOne(subscriberQuery);
@@ -134,9 +137,9 @@ async function updateStats(amsConfig: IAmsWorkerConfig) {
             await streamRecord.updateInfo();
             await streamRecord.save();
           }
-        })
+        }),
       );
-    })
+    }),
   );
 
   return stats;
@@ -160,7 +163,7 @@ async function runUpdate() {
 
         console.log('ams_update_error', error);
       }
-    })
+    }),
   );
 }
 

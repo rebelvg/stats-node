@@ -10,12 +10,12 @@ passport.use(
     {
       clientID: googleKeys.web.client_id,
       clientSecret: googleKeys.web.client_secret,
-      callbackURL: `${stats.googleCallbackHost}/users/auth/google/callback`
+      callbackURL: `${stats.googleCallbackHost}/users/auth/google/callback`,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
         const user = await User.findOne({
-          googleId: profile.id
+          googleId: profile.id,
         });
 
         if (user) {
@@ -30,13 +30,13 @@ passport.use(
         const newUser = await User.create({
           googleId: profile.id,
           emails: profile.emails,
-          name: profile.displayName
+          name: profile.displayName,
         });
 
         return done(null, newUser);
       } catch (error) {
         done(error);
       }
-    }
-  )
+    },
+  ),
 );

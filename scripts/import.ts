@@ -41,7 +41,7 @@ const Subscriber = require('../models/subscriber');
       connectCreated: moment.unix(data.timestamp),
       connectUpdated: moment.unix(data.stats.timestamp),
       bytes: data.stats.bytes_in,
-      ip: data.stats.streamer_ip
+      ip: data.stats.streamer_ip,
     });
 
     await stream.save();
@@ -50,7 +50,7 @@ const Subscriber = require('../models/subscriber');
       app: data.app,
       channel: data.channel,
       'stats.timestamp': { $gte: data.timestamp },
-      timestamp: { $lte: data.stats.timestamp }
+      timestamp: { $lte: data.stats.timestamp },
     });
 
     await stream.save();
@@ -73,7 +73,7 @@ const Subscriber = require('../models/subscriber');
       connectCreated: moment.unix(data.timestamp),
       connectUpdated: moment.unix(data.stats.timestamp),
       bytes: data.stats.bytes_out,
-      ip: data.stats.client_ip
+      ip: data.stats.client_ip,
     });
 
     await subscriber.save();
