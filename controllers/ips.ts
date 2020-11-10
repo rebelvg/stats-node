@@ -8,7 +8,7 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
   const ip = await IP.findById(ctx.params.id);
 
   if (!ip) {
-    throw new Error('IP not found.');
+    throw new Error('ip_not_found');
   }
 
   ctx.body = {

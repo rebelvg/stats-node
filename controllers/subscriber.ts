@@ -12,7 +12,7 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
   ]);
 
   if (!subscriber) {
-    throw new Error('Subscriber not found.');
+    throw new Error('subscriber_not_found');
   }
 
   const streams = await subscriber

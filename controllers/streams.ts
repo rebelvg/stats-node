@@ -11,7 +11,7 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
   const stream = await Stream.findById(ctx.params.id).populate(['location']);
 
   if (!stream) {
-    throw new Error('Stream not found.');
+    throw new Error('stream_not_found');
   }
 
   const subscribers = await stream
@@ -156,7 +156,7 @@ export async function graph(ctx: Router.IRouterContext, next: Next) {
   const stream = await Stream.findById(ctx.params.id);
 
   if (!stream) {
-    throw new Error('Stream not found.');
+    throw new Error('stream_not_found');
   }
 
   const subscribers = await stream

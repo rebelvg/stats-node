@@ -6,5 +6,5 @@ export function isLoggedIn(ctx: Router.IRouterContext, next: Next) {
     return next();
   }
 
-  throw new Error('Not logged in.');
+  throw new Error('user_not_logged_in');
 }

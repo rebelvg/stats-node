@@ -22,7 +22,7 @@ export async function update(ctx: Router.IRouterContext, next: Next) {
   });
 
   if (!user) {
-    throw Error('User not found.');
+    throw Error('user_not_found');
   }
 
   _.forEach(ctx.request.body, (value, key) => {
