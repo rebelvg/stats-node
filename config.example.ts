@@ -1,6 +1,9 @@
 export const db = {
   host: 'localhost',
   dbName: 'nodestats',
+  authDb: undefined,
+  user: undefined,
+  password: undefined,
 };
 
 export const ams = [

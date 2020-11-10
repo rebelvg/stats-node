@@ -1,4 +1,4 @@
-import { MongoClient, Db } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import { URL } from 'url';
 import * as moment from 'moment';
 import * as mongoose from 'mongoose';

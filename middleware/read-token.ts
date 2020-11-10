@@ -4,6 +4,7 @@ import * as Router from 'koa-router';
 import { User, IUserModel } from '../models/user';
 
 declare module 'koa' {
+  // eslint-disable-next-line no-unused-vars
   interface Context {
     state: {
       user: IUserModel;
@@ -13,6 +14,7 @@ declare module 'koa' {
 }
 
 declare module 'koa-router' {
+  // eslint-disable-next-line no-unused-vars
   interface IRouterContext {
     state: {
       user: IUserModel;

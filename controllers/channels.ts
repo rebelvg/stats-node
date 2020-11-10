@@ -81,9 +81,9 @@ export async function channels(ctx: Router.IRouterContext, next: Next) {
   const liveStatsClone = _.cloneDeep(liveStats);
 
   await Promise.all(
-    _.map(liveStatsClone, async serverObj => {
+    _.map(liveStatsClone, serverObj => {
       return Promise.all(
-        _.map(serverObj, async appObj => {
+        _.map(serverObj, appObj => {
           return Promise.all(
             _.map(appObj, async channelObj => {
               if (channelObj.publisher) {
