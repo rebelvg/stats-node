@@ -1,6 +1,7 @@
 .vscode/
 .idea/
 node_modules/
+logs/
 config.ts
 google-keys.json
 dump/
