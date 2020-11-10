@@ -8,8 +8,7 @@ import { IP } from '../models/ip';
 import { shouldHideFields } from '../helpers/should-hide-fields';
 
 declare module 'koa-router' {
-  // eslint-disable-next-line no-unused-vars
-  interface IRouterContext {
+  export interface IRouterContext {
     queryObj: any;
   }
 }

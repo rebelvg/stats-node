@@ -5,8 +5,7 @@ import * as _ from 'lodash';
 const allowedPaths = ['api.country', 'api.city', 'api.isp'];
 
 declare module 'koa-router' {
-  // eslint-disable-next-line no-unused-vars
-  interface IRouterContext {
+  export interface IRouterContext {
     sortObj: any;
   }
 }
