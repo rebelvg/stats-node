@@ -5,8 +5,8 @@
   "license": "MIT",
   "scripts": {
     "prepush": "yarn run lint",
-    "lint": "prettier --list-different \"**/*.{ts,js,json,css,md}\"",
-    "lint-fix": "prettier --write \"**/*.{ts,js,json,css,md}\"",
+    "lint": "eslint . --ext .ts && prettier --list-different \"**/*.{ts,js,json,css,md}\"",
+    "lint-fix": "eslint . --ext .ts --fix && prettier --write \"**/*.{ts,js,json,css,md}\"",
     "migrate": "ts-node migrate.ts",
     "start": "ts-node .",
     "docker": "docker-compose up -d",
