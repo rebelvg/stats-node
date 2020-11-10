@@ -1,0 +1,2 @@
+::1 - - [10/Nov/2020:00:41:17 +0000] "GET /admin/users HTTP/1.1" - - "-" "PostmanRuntime/7.26.5"
+::1 - GET /admin/users HTTP/1.1 500 26 - 20.559 ms

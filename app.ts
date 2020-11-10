@@ -5,6 +5,7 @@ import * as koaQs from 'koa-qs';
 import * as passport from 'koa-passport';
 import * as cors from '@koa/cors';
 import * as koaMorgan from 'koa-morgan';
+import * as fs from 'fs';
 
 import { readToken } from './middleware/read-token';
 
@@ -15,10 +16,16 @@ import { router as ips } from './routes/ips';
 import { router as users } from './routes/users';
 import { router as admin } from './routes/admin';
 
+if (!fs.existsSync('logs')) {
+  fs.mkdirSync('logs');
+}
+
+const logFileStream = fs.createWriteStream('./logs/access.log', { flags: 'a' });
+
 export const app = new Koa();
 
-app.use(koaMorgan('combined', { immediate: true }));
-app.use(koaMorgan('short'));
+app.use(koaMorgan('combined', { immediate: true, stream: logFileStream }));
+app.use(koaMorgan('short', { stream: logFileStream }));
 app.use(cors());
 
 app.use(passport.initialize());
