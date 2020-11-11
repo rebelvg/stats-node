@@ -80,7 +80,7 @@ schema.pre('save', async function(
   try {
     await ip.save();
   } catch (error) {
-    return next(error);
+    console.log('subscriber_failed_to_save_ip', error);
   }
 
   return next();
