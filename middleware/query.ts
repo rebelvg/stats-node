@@ -17,30 +17,30 @@ const filterRules = {
   app: {
     do: [],
     test: [_.isString],
-    cb: function(queryObj, app) {
+    cb: function (queryObj, app) {
       queryObj.app = new RegExp(app, 'gi');
     },
   },
   channel: {
     do: [],
     test: [_.isString],
-    cb: function(queryObj, channel) {
+    cb: function (queryObj, channel) {
       queryObj.channel = new RegExp(channel, 'gi');
     },
   },
   connectCreated: {
-    do: [strtotime, moment.unix, value => value.toDate()],
+    do: [strtotime, moment.unix, (value) => value.toDate()],
     test: [_.isDate],
-    cb: function(queryObj, connectCreated) {
+    cb: function (queryObj, connectCreated) {
       queryObj.connectCreated = {
         $gte: connectCreated,
       };
     },
   },
   connectUpdated: {
-    do: [strtotime, moment.unix, value => value.toDate()],
+    do: [strtotime, moment.unix, (value) => value.toDate()],
     test: [_.isDate],
-    cb: function(queryObj, connectUpdated) {
+    cb: function (queryObj, connectUpdated) {
       queryObj.connectUpdated = {
         $gte: connectUpdated,
       };
@@ -49,7 +49,7 @@ const filterRules = {
   bytes: {
     do: [_.toNumber],
     test: [_.isFinite],
-    cb: function(queryObj, bytes) {
+    cb: function (queryObj, bytes) {
       queryObj.bytes = {
         $gte: bytes * 1024 * 1024,
       };
@@ -58,7 +58,7 @@ const filterRules = {
   ip: {
     do: [],
     test: [_.isString],
-    cb: async function(queryObj, ip, ctx) {
+    cb: async function (queryObj, ip, ctx) {
       const ipQuery = [
         { 'api.country': new RegExp(ip, 'gi') },
         { 'api.city': new RegExp(ip, 'gi') },
@@ -85,14 +85,14 @@ const filterRules = {
   protocol: {
     do: [],
     test: [_.isString],
-    cb: function(queryObj, protocol) {
+    cb: function (queryObj, protocol) {
       queryObj.protocol = new RegExp(protocol, 'gi');
     },
   },
   duration: {
     do: [_.toNumber],
     test: [_.isFinite],
-    cb: function(queryObj, duration) {
+    cb: function (queryObj, duration) {
       queryObj.duration = {
         $gte: duration * 60,
       };
@@ -101,7 +101,7 @@ const filterRules = {
   bitrate: {
     do: [_.toNumber],
     test: [_.isFinite],
-    cb: function(queryObj, bitrate) {
+    cb: function (queryObj, bitrate) {
       queryObj.bitrate = {
         $gte: bitrate,
       };
@@ -110,7 +110,7 @@ const filterRules = {
   totalConnectionsCount: {
     do: [_.toNumber],
     test: [_.isFinite],
-    cb: function(queryObj, totalConnectionsCount) {
+    cb: function (queryObj, totalConnectionsCount) {
       queryObj.totalConnectionsCount = {
         $gte: totalConnectionsCount,
       };
@@ -119,16 +119,16 @@ const filterRules = {
   peakViewersCount: {
     do: [_.toNumber],
     test: [_.isFinite],
-    cb: function(queryObj, peakViewersCount) {
+    cb: function (queryObj, peakViewersCount) {
       queryObj.peakViewersCount = {
         $gte: peakViewersCount,
       };
     },
   },
   createdAt: {
-    do: [strtotime, moment.unix, value => value.toDate()],
+    do: [strtotime, moment.unix, (value) => value.toDate()],
     test: [_.isDate],
-    cb: function(queryObj, createdAt) {
+    cb: function (queryObj, createdAt) {
       queryObj.createdAt = {
         $gte: createdAt,
       };
@@ -137,14 +137,14 @@ const filterRules = {
   'ip.ip': {
     do: [],
     test: [_.isString],
-    cb: function(queryObj, ip) {
+    cb: function (queryObj, ip) {
       queryObj['ip'] = new RegExp(ip, 'gi');
     },
   },
   'api.country': {
     do: [],
     test: [_.isString],
-    cb: function(queryObj, country) {
+    cb: function (queryObj, country) {
       queryObj.$or = [
         { 'api.country': new RegExp(country, 'gi') },
         { 'api.message': new RegExp(country, 'gi') },
@@ -154,14 +154,14 @@ const filterRules = {
   'api.city': {
     do: [],
     test: [_.isString],
-    cb: function(queryObj, city) {
+    cb: function (queryObj, city) {
       queryObj['api.city'] = new RegExp(city, 'gi');
     },
   },
   'api.isp': {
     do: [],
     test: [_.isString],
-    cb: function(queryObj, isp) {
+    cb: function (queryObj, isp) {
       queryObj['api.isp'] = new RegExp(isp, 'gi');
     },
   },
@@ -204,7 +204,7 @@ const rulePresets = {
 export function parseFilter(modelName) {
   const rules = rulePresets?.[modelName];
 
-  return async function(ctx: Router.IRouterContext, next: Next) {
+  return async function (ctx: Router.IRouterContext, next: Next) {
     const queryObj: any = {};
 
     await Promise.all(
@@ -216,7 +216,7 @@ export function parseFilter(modelName) {
         try {
           let value = ctx.query[fieldName];
 
-          _.forEach(rule.do, fnc => {
+          _.forEach(rule.do, (fnc) => {
             value = fnc(value);
           });
 

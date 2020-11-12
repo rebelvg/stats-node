@@ -23,7 +23,7 @@ if (db.authDb) {
   nodeMongoUrl.searchParams.set('authSource', db.authDb);
 }
 
-mongoose.connect(nodeMongoUrl.href, { useMongoClient: true }, error => {
+mongoose.connect(nodeMongoUrl.href, { useMongoClient: true }, (error) => {
   if (error) {
     throw error;
   }

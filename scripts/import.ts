@@ -28,12 +28,9 @@ const Subscriber = require('../models/subscriber');
   // fs.writeFileSync('subscribers.json', JSON.stringify(await subscribers.find().toArray()));
   // console.log('done.');
 
-  const cursor = streams
-    .find()
-    .sort({ timestamp: 1 })
-    .stream();
+  const cursor = streams.find().sort({ timestamp: 1 }).stream();
 
-  cursor.on('data', async data => {
+  cursor.on('data', async (data) => {
     const stream = new Stream({
       app: data.app,
       channel: data.channel,
@@ -60,12 +57,9 @@ const Subscriber = require('../models/subscriber');
     console.log('cursor stopped.');
   });
 
-  const subscribersCursor = subscribers
-    .find()
-    .sort({ timestamp: 1 })
-    .stream();
+  const subscribersCursor = subscribers.find().sort({ timestamp: 1 }).stream();
 
-  subscribersCursor.on('data', async data => {
+  subscribersCursor.on('data', async (data) => {
     const subscriber = new Subscriber({
       app: data.app,
       channel: data.channel,

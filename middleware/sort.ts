@@ -11,23 +11,26 @@ declare module 'koa-router' {
 }
 
 export function parseSort(model) {
-  return async function(ctx: Router.IRouterContext, next: Next) {
+  return async function (ctx: Router.IRouterContext, next: Next) {
     const sortObj = {};
 
     if (_.isArray(ctx.query.sort)) {
-      _.forEach(ctx.query.sort, sort => {
-        _.forEach(_.concat(_.keys(model.schema.paths), allowedPaths), path => {
-          switch (sort) {
-            case `-${path}`: {
-              sortObj[path] = -1;
-              break;
+      _.forEach(ctx.query.sort, (sort) => {
+        _.forEach(
+          _.concat(_.keys(model.schema.paths), allowedPaths),
+          (path) => {
+            switch (sort) {
+              case `-${path}`: {
+                sortObj[path] = -1;
+                break;
+              }
+              case path: {
+                sortObj[path] = 1;
+                break;
+              }
             }
-            case path: {
-              sortObj[path] = 1;
-              break;
-            }
-          }
-        });
+          },
+        );
       });
     }
 

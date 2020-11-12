@@ -147,7 +147,7 @@ async function updateStats(amsConfig: IAmsWorkerConfig) {
 
 async function runUpdate() {
   await Promise.all(
-    amsConfigs.map(async amsConfig => {
+    amsConfigs.map(async (amsConfig) => {
       try {
         const { name } = amsConfig;
 
@@ -174,6 +174,6 @@ async function runUpdate() {
   while (true) {
     await runUpdate();
 
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
   }
 })();

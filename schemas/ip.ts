@@ -20,7 +20,7 @@ export const schema = new Schema(
   },
 );
 
-schema.pre('validate', async function(
+schema.pre('validate', async function (
   this: IIPModel,
   next: mongoose.HookNextFunction,
 ) {
@@ -45,7 +45,7 @@ schema.pre('validate', async function(
   next();
 });
 
-schema.pre('validate', function(
+schema.pre('validate', function (
   this: IIPModel,
   next: mongoose.HookNextFunction,
 ) {

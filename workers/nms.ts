@@ -154,7 +154,7 @@ async function updateStats(nmsConfig: INmsWorkerConfig) {
 
 async function runUpdate() {
   await Promise.all(
-    nmsConfigs.map(async nmsConfig => {
+    nmsConfigs.map(async (nmsConfig) => {
       try {
         const { name } = nmsConfig;
 
@@ -181,6 +181,6 @@ async function runUpdate() {
   while (true) {
     await runUpdate();
 
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
   }
 })();

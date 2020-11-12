@@ -23,7 +23,7 @@ export const schema = new Schema(
   },
 );
 
-schema.pre('validate', function(
+schema.pre('validate', function (
   this: IUserModel,
   next: mongoose.HookNextFunction,
 ) {
@@ -37,7 +37,7 @@ schema.pre('validate', function(
   next();
 });
 
-schema.pre('validate', function(
+schema.pre('validate', function (
   this: IUserModel,
   next: mongoose.HookNextFunction,
 ) {

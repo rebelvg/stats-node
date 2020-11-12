@@ -22,7 +22,7 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
 
   hideFields(ctx.state.user, subscriber);
 
-  _.forEach(streams, stream => {
+  _.forEach(streams, (stream) => {
     hideFields(ctx.state.user, stream);
   });
 
@@ -56,7 +56,7 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
   const uniqueCountries = await IP.distinct('api.country');
   const uniqueApiMessages = await IP.distinct('api.message');
 
-  _.forEach(paginatedSubscribers.docs, subscriber => {
+  _.forEach(paginatedSubscribers.docs, (subscriber) => {
     hideFields(ctx.state.user, subscriber);
   });
 

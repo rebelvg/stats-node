@@ -81,11 +81,11 @@ export async function channels(ctx: Router.IRouterContext, next: Next) {
   const liveStatsClone = _.cloneDeep(liveStats);
 
   await Promise.all(
-    _.map(liveStatsClone, serverObj => {
+    _.map(liveStatsClone, (serverObj) => {
       return Promise.all(
-        _.map(serverObj, appObj => {
+        _.map(serverObj, (appObj) => {
           return Promise.all(
-            _.map(appObj, async channelObj => {
+            _.map(appObj, async (channelObj) => {
               if (channelObj.publisher) {
                 await Stream.populate(channelObj.publisher, {
                   path: 'location',
@@ -147,9 +147,9 @@ export function legacy(ctx: Router.IRouterContext, next: Next) {
 export async function list(ctx: Router.IRouterContext, next: Next) {
   const liveChannels = [];
 
-  _.forEach(liveStats, serverObj => {
-    _.forEach(serverObj, appObj => {
-      _.forEach(appObj, channelObj => {
+  _.forEach(liveStats, (serverObj) => {
+    _.forEach(serverObj, (appObj) => {
+      _.forEach(appObj, (channelObj) => {
         if (channelObj.publisher) {
           liveChannels.push({
             app: channelObj.publisher.app,

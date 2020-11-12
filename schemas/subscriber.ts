@@ -36,7 +36,7 @@ export const schema = new Schema(
   },
 );
 
-schema.pre('validate', function(
+schema.pre('validate', function (
   this: ISubscriberModel,
   next: mongoose.HookNextFunction,
 ) {
@@ -67,7 +67,7 @@ schema.pre('validate', function(
   next();
 });
 
-schema.pre('save', async function(
+schema.pre('save', async function (
   this: ISubscriberModel,
   next: mongoose.HookNextFunction,
 ) {
@@ -86,7 +86,7 @@ schema.pre('save', async function(
   return next();
 });
 
-schema.virtual('isLive').get(function(this: ISubscriberModel) {
+schema.virtual('isLive').get(function (this: ISubscriberModel) {
   const subscribers =
     liveStats?.[this.serverType]?.[this.app]?.[this.channel]?.subscribers || [];
 
@@ -102,7 +102,7 @@ schema.virtual('location', {
 
 schema.set('toJSON', { virtuals: true });
 
-schema.methods.getStreams = function(query = {}) {
+schema.methods.getStreams = function (query = {}) {
   query = {
     $and: [
       {

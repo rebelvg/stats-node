@@ -26,26 +26,15 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
 
   const options = {
     countries: _.concat(
-      _.chain(subscribers)
-        .map('location.api.country')
-        .compact()
-        .uniq()
-        .value(),
-      _.chain(subscribers)
-        .map('location.api.message')
-        .compact()
-        .uniq()
-        .value(),
+      _.chain(subscribers).map('location.api.country').compact().uniq().value(),
+      _.chain(subscribers).map('location.api.message').compact().uniq().value(),
     ),
-    protocols: _.chain(subscribers)
-      .map('protocol')
-      .uniq()
-      .value(),
+    protocols: _.chain(subscribers).map('protocol').uniq().value(),
   };
 
   let totalPeakViewers = 0;
 
-  _.forEach(subscribers, subscriber => {
+  _.forEach(subscribers, (subscriber) => {
     const viewersCount = filterSubscribers(
       subscribers,
       subscriber.connectCreated,
@@ -72,15 +61,12 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
       0,
     ),
     totalPeakViewers: totalPeakViewers,
-    totalIPs: _.chain(subscribers)
-      .map('ip')
-      .uniq()
-      .value().length,
+    totalIPs: _.chain(subscribers).map('ip').uniq().value().length,
   };
 
   hideFields(ctx.state.user, stream);
 
-  _.forEach(subscribers, subscriber => {
+  _.forEach(subscribers, (subscriber) => {
     hideFields(ctx.state.user, subscriber);
   });
 
@@ -126,7 +112,7 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
   const uniqueCountries = await IP.distinct('api.country');
   const uniqueApiMessages = await IP.distinct('api.message');
 
-  _.forEach(paginatedStreams.docs, stream => {
+  _.forEach(paginatedStreams.docs, (stream) => {
     hideFields(ctx.state.user, stream);
   });
 
@@ -171,7 +157,7 @@ export async function graph(ctx: Router.IRouterContext, next: Next) {
     subscribers: filterSubscribers(subscribers, stream.connectCreated),
   });
 
-  _.forEach(subscribers, subscriber => {
+  _.forEach(subscribers, (subscriber) => {
     if (stream.connectCreated >= subscriber.connectCreated) {
       return;
     }
@@ -183,7 +169,7 @@ export async function graph(ctx: Router.IRouterContext, next: Next) {
     });
   });
 
-  _.forEach(subscribers, subscriber => {
+  _.forEach(subscribers, (subscriber) => {
     if (subscriber.connectUpdated >= stream.connectUpdated) {
       return;
     }

@@ -40,7 +40,7 @@ export const schema = new Schema(
   },
 );
 
-schema.pre('validate', function(
+schema.pre('validate', function (
   this: IStreamModel,
   next: mongoose.HookNextFunction,
 ) {
@@ -74,7 +74,7 @@ schema.pre('validate', function(
   next();
 });
 
-schema.pre('save', async function(
+schema.pre('save', async function (
   this: IStreamModel,
   next: mongoose.HookNextFunction,
 ) {
@@ -93,7 +93,7 @@ schema.pre('save', async function(
   return next();
 });
 
-schema.virtual('isLive').get(function(this: IStreamModel) {
+schema.virtual('isLive').get(function (this: IStreamModel) {
   const stream =
     liveStats?.[this.serverType]?.[this.app]?.[this.channel]?.publisher || null;
 
@@ -113,7 +113,7 @@ schema.virtual('location', {
 
 schema.set('toJSON', { virtuals: true });
 
-schema.methods.getSubscribers = function(query = {}) {
+schema.methods.getSubscribers = function (query = {}) {
   query = {
     $and: [
       {
@@ -130,7 +130,7 @@ schema.methods.getSubscribers = function(query = {}) {
   return this.model('Subscriber').find(query);
 };
 
-schema.methods.getRelatedStreams = function(query = {}) {
+schema.methods.getRelatedStreams = function (query = {}) {
   query = {
     $and: [
       {
@@ -147,12 +147,12 @@ schema.methods.getRelatedStreams = function(query = {}) {
   return this.model('Stream').find(query);
 };
 
-schema.methods.updateInfo = async function() {
+schema.methods.updateInfo = async function () {
   const subscribers = await this.getSubscribers();
 
   this.totalConnectionsCount = subscribers.length;
 
-  _.forEach(subscribers, subscriber => {
+  _.forEach(subscribers, (subscriber) => {
     const viewersCount = filterSubscribers(
       subscribers,
       subscriber.connectCreated,

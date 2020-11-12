@@ -59,6 +59,6 @@ router.use('/admin', admin.routes());
 
 app.use(router.routes());
 
-app.use(ctx => {
+app.use((ctx) => {
   ctx.throw(404);
 });

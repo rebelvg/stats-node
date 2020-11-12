@@ -10,7 +10,7 @@ export function hideFields(user: IUserModel, obj) {
     return;
   }
 
-  _.forEach(paths, path => {
+  _.forEach(paths, (path) => {
     if (_.get(obj, path)) {
       _.set(obj, path, '*');
     }

@@ -12,7 +12,7 @@ process.on('unhandledRejection', (reason, p) => {
   throw reason;
 });
 
-process.on('uncaughtException', error => {
+process.on('uncaughtException', (error) => {
   console.error('uncaughtException', error);
 
   process.exit(1);

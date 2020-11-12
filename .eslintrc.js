@@ -19,12 +19,10 @@ module.exports = {
     semi: ['error', 'always'],
     'eol-last': ['error', 'always'],
     'no-console': 0,
-    'no-unused-vars': 0,
     'no-var': 'error',
     eqeqeq: ['error', 'always'],
     curly: ['error', 'all'],
     'no-multiple-empty-lines': ['error', { max: 1 }],
-    'prefer-const': ['error'],
     'no-unused-vars': [
       'error',
       {
@@ -35,6 +33,7 @@ module.exports = {
     'no-empty': ['error', { allowEmptyCatch: true }],
     'prefer-arrow-callback': ['error'],
     'require-await': 'error',
+    'no-case-declarations': 0,
     'prefer-const': [
       'error',
       {
@@ -42,5 +41,6 @@ module.exports = {
         ignoreReadBeforeAssign: false,
       },
     ],
+    'no-prototype-builtins': 'off',
   },
 };
