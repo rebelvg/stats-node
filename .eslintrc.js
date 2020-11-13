@@ -42,5 +42,6 @@ module.exports = {
       },
     ],
     'no-prototype-builtins': 'off',
+    'newline-after-var': ['error', 'always'],
   },
 };
