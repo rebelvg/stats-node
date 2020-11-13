@@ -3,9 +3,9 @@ import * as mongoosePaginate from 'mongoose-paginate';
 import * as _ from 'lodash';
 import * as ip6addr from 'ip6addr';
 
-import { IP } from '../models/ip';
 import { liveStats } from '../workers';
 import { ISubscriberModel } from '../models/subscriber';
+import { ipService } from '../services/ip';
 
 const Schema = mongoose.Schema;
 
@@ -71,14 +71,8 @@ schema.pre('save', async function (
   this: ISubscriberModel,
   next: mongoose.HookNextFunction,
 ) {
-  let ip = await IP.findOne({ ip: this.ip });
-
-  if (!ip) {
-    ip = new IP({ ip: this.ip });
-  }
-
   try {
-    await ip.save();
+    await ipService.upsert(this.ip);
   } catch (error) {
     console.log('subscriber_failed_to_save_ip', error);
   }

@@ -4,9 +4,9 @@ import * as _ from 'lodash';
 import * as ip6addr from 'ip6addr';
 
 import { filterSubscribers } from '../helpers/filter-subscribers';
-import { IP } from '../models/ip';
 import { liveStats } from '../workers';
 import { IStreamModel } from '../models/stream';
+import { ipService } from '../services/ip';
 
 const Schema = mongoose.Schema;
 
@@ -78,14 +78,8 @@ schema.pre('save', async function (
   this: IStreamModel,
   next: mongoose.HookNextFunction,
 ) {
-  let ip = await IP.findOne({ ip: this.ip });
-
-  if (!ip) {
-    ip = new IP({ ip: this.ip });
-  }
-
   try {
-    await ip.save();
+    await ipService.upsert(this.ip);
   } catch (error) {
     console.log('stream_failed_to_save_ip', error);
   }

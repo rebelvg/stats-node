@@ -229,10 +229,10 @@
   resolved "https://registry.yarnpkg.com/@types/mongoose-paginate/-/mongoose-paginate-5.0.8.tgz#6b925c3ccf1c45bfb116830c77471cc1ba045308"
   integrity sha512-6Ybb8X+iBB1/CeScDhzn0q5ZXljHu2Zzg9Wp4nYI5V3Pjc02YuLq6GHHLQrljsA/hMytULnbwQovUYWeI3IxWA==
 
-"@types/mongoose@4":
-  version "4.7.53"
-  resolved "https://registry.yarnpkg.com/@types/mongoose/-/mongoose-4.7.53.tgz#ce1b2a7741755818537b0330624d4611cc5d149f"
-  integrity sha512-eYKBdFBD7hUW+ZOA2n8r8gXzP7oRv4a1K7GXj4sZ5UTsVNtL87DeFYnU5V5Cl0/Ro2ku08cO9hV3FGlcPqjfDw==
+"@types/mongoose@^4.0.0":
+  version "4.7.54"
+  resolved "https://registry.yarnpkg.com/@types/mongoose/-/mongoose-4.7.54.tgz#a23679cdf07a10385c12f61da393c200e51b66ea"
+  integrity sha512-AZMXICg0Kcfuy1tctpLHs6L0cJnEkCd9I+OYZjfk6MsR5m7Sbzjlpr+JmCamSFrH0gGreZpRsBlRCVHjiTVvBQ==
   dependencies:
     "@types/mongodb" "*"
     "@types/node" "*"
