@@ -43,5 +43,10 @@ module.exports = {
     ],
     'no-prototype-builtins': 'off',
     'newline-after-var': ['error', 'always'],
+    'padding-line-between-statements': [
+      'error',
+      { blankLine: 'always', prev: '*', next: 'return' },
+    ],
+    'no-return-await': 'error',
   },
 };
