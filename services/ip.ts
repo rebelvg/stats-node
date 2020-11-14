@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { IP } from '../models/ip';
+import { IIPModel, IP } from '../models/ip';
 
 const apiLink = `http://ip-api.com/json`;
 
@@ -14,13 +14,13 @@ class IpService {
       const { data } = await axios.get(`${apiLink}/${ip}`);
 
       await IP.updateOne(
-        { ip },
+        { ip } as Partial<IIPModel>,
         {
           api: data,
           createdAt: currentTime,
           updatedAt: currentTime,
           apiUpdatedAt: currentTime,
-        },
+        } as Partial<IIPModel>,
         { upsert: true },
       );
 
@@ -38,12 +38,12 @@ class IpService {
     const { data } = await axios.get(`${apiLink}/${ip}`);
 
     await IP.updateOne(
-      { _id: ipRecord._id },
+      { _id: ipRecord._id } as Partial<IIPModel>,
       {
         api: data,
         updatedAt: currentTime,
         apiUpdatedAt: currentTime,
-      },
+      } as Partial<IIPModel>,
     );
   }
 }
