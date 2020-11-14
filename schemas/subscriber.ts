@@ -96,21 +96,4 @@ schema.virtual('location', {
 
 schema.set('toJSON', { virtuals: true });
 
-schema.methods.getStreams = function (query = {}) {
-  query = {
-    $and: [
-      {
-        app: this.app,
-        channel: this.channel,
-        serverType: this.serverType,
-        connectUpdated: { $gte: this.connectCreated },
-        connectCreated: { $lte: this.connectUpdated },
-      },
-      query,
-    ],
-  };
-
-  return this.model('Stream').find(query);
-};
-
 schema.plugin(mongoosePaginate);

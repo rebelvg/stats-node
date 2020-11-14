@@ -20,9 +20,6 @@ export interface ISubscriberModel extends Document {
   createdAt: Date;
   updatedAt: Date;
   isLive: boolean;
-  getStreams: (
-    query?: any,
-  ) => mongoose.DocumentQuery<ISubscriberModel[], ISubscriberModel>;
 }
 
 export const Subscriber = mongoose.model<ISubscriberModel>(
