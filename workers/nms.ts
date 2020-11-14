@@ -73,6 +73,35 @@ async function updateStats(nmsConfig: INmsWorkerConfig) {
             subscribers: [],
           });
 
+          for (const subscriber of channelData.subscribers) {
+            const subscriberQuery: Partial<ISubscriberModel> = {
+              app: subscriber.app,
+              channel: subscriber.stream,
+              serverType: name,
+              serverId: subscriber.clientId,
+              connectCreated: subscriber.connectCreated,
+            };
+
+            let subscriberObj = await Subscriber.findOne(subscriberQuery);
+
+            if (!subscriberObj) {
+              subscriberQuery.connectUpdated = statsUpdateTime;
+              subscriberQuery.bytes = subscriber.bytes;
+              subscriberQuery.ip = subscriber.ip;
+              subscriberQuery.protocol = subscriber.protocol;
+              subscriberQuery.userId = subscriber.userId;
+
+              subscriberObj = new Subscriber(subscriberQuery);
+            } else {
+              subscriberObj.bytes = subscriber.bytes;
+              subscriberObj.connectUpdated = statsUpdateTime;
+            }
+
+            await subscriberObj.save();
+
+            stats[appName][channelName].subscribers.push(subscriberObj);
+          }
+
           let streamRecord: IStreamModel = null;
 
           if (channelData.publisher) {
@@ -111,40 +140,6 @@ async function updateStats(nmsConfig: INmsWorkerConfig) {
             await streamRecord.save();
 
             _.set(stats, [appName, channelName, 'publisher'], streamRecord);
-          }
-
-          for (const subscriber of channelData.subscribers) {
-            const subscriberQuery: Partial<ISubscriberModel> = {
-              app: subscriber.app,
-              channel: subscriber.stream,
-              serverType: name,
-              serverId: subscriber.clientId,
-              connectCreated: subscriber.connectCreated,
-            };
-
-            let subscriberObj = await Subscriber.findOne(subscriberQuery);
-
-            if (!subscriberObj) {
-              subscriberQuery.connectUpdated = statsUpdateTime;
-              subscriberQuery.bytes = subscriber.bytes;
-              subscriberQuery.ip = subscriber.ip;
-              subscriberQuery.protocol = subscriber.protocol;
-              subscriberQuery.userId = subscriber.userId;
-
-              subscriberObj = new Subscriber(subscriberQuery);
-            } else {
-              subscriberObj.bytes = subscriber.bytes;
-              subscriberObj.connectUpdated = statsUpdateTime;
-            }
-
-            await subscriberObj.save();
-
-            stats[appName][channelName].subscribers.push(subscriberObj);
-          }
-
-          if (streamRecord) {
-            await streamRecord.updateInfo();
-            await streamRecord.save();
           }
         }),
       );

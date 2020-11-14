@@ -97,9 +97,6 @@ mongoose.connect(nodeMongoUrl.href, { useMongoClient: true }, (error) => {
     });
 
     await streamDoc.save();
-
-    await streamDoc.updateInfo();
-    await streamDoc.save();
   }
 
   console.log('export done.');

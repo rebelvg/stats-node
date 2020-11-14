@@ -44,16 +44,7 @@ schema.pre('validate', function (
   this: IStreamModel,
   next: mongoose.HookNextFunction,
 ) {
-  const updatedAt = new Date();
-
-  if (this.isNew) {
-    const addr = ip6addr.parse(this.ip);
-
-    this.ip =
-      addr.kind() === 'ipv6'
-        ? addr.toString({ format: 'v6' })
-        : addr.toString({ format: 'v4' });
-  }
+  const currentTime = new Date();
 
   this.duration = Math.ceil(
     (this.connectUpdated.valueOf() - this.connectCreated.valueOf()) / 1000,
@@ -63,13 +54,20 @@ schema.pre('validate', function (
     this.duration > 0 ? Math.ceil((this.bytes * 8) / this.duration / 1024) : 0;
 
   if (this.isNew) {
+    const addr = ip6addr.parse(this.ip);
+
+    this.ip =
+      addr.kind() === 'ipv6'
+        ? addr.toString({ format: 'v6' })
+        : addr.toString({ format: 'v4' });
+
     this.totalConnectionsCount = 0;
     this.peakViewersCount = 0;
 
-    this.createdAt = updatedAt;
+    this.createdAt = currentTime;
   }
 
-  this.updatedAt = updatedAt;
+  this.updatedAt = currentTime;
 
   next();
 });
@@ -78,6 +76,11 @@ schema.pre('save', async function (
   this: IStreamModel,
   next: mongoose.HookNextFunction,
 ) {
+  const streamViewers = await streamService.countViewers(this);
+
+  this.totalConnectionsCount = streamViewers.totalConnectionsCount;
+  this.peakViewersCount = streamViewers.peakViewersCount;
+
   try {
     await ipService.upsert(this.ip);
   } catch (error) {
@@ -106,12 +109,5 @@ schema.virtual('location', {
 });
 
 schema.set('toJSON', { virtuals: true });
-
-schema.methods.updateInfo = async function () {
-  const streamViewers = await streamService.countViewers(this);
-
-  this.totalConnectionsCount = streamViewers.totalConnectionsCount;
-  this.peakViewersCount = streamViewers.peakViewersCount;
-};
 
 schema.plugin(mongoosePaginate);

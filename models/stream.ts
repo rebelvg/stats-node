@@ -23,7 +23,6 @@ export interface IStreamModel extends Document {
   createdAt: Date;
   updatedAt: Date;
   isLive: boolean;
-  updateInfo: () => Promise<void>;
 }
 
 export const Stream = mongoose.model<IStreamModel>('Stream', schema);
