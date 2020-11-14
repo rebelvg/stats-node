@@ -3,10 +3,10 @@ import * as mongoosePaginate from 'mongoose-paginate';
 import * as _ from 'lodash';
 import * as ip6addr from 'ip6addr';
 
-import { filterSubscribers } from '../helpers/filter-subscribers';
 import { liveStats } from '../workers';
 import { IStreamModel } from '../models/stream';
 import { ipService } from '../services/ip';
+import { streamService } from '../services/stream';
 
 const Schema = mongoose.Schema;
 
@@ -107,55 +107,11 @@ schema.virtual('location', {
 
 schema.set('toJSON', { virtuals: true });
 
-schema.methods.getSubscribers = function (query = {}) {
-  query = {
-    $and: [
-      {
-        app: this.app,
-        channel: this.channel,
-        serverType: this.serverType,
-        connectUpdated: { $gte: this.connectCreated },
-        connectCreated: { $lte: this.connectUpdated },
-      },
-      query,
-    ],
-  };
-
-  return this.model('Subscriber').find(query);
-};
-
-schema.methods.getRelatedStreams = function (query = {}) {
-  query = {
-    $and: [
-      {
-        _id: { $ne: this._id },
-        channel: this.channel,
-        serverType: this.serverType,
-        connectUpdated: { $gte: this.connectCreated },
-        connectCreated: { $lte: this.connectUpdated },
-      },
-      query,
-    ],
-  };
-
-  return this.model('Stream').find(query);
-};
-
 schema.methods.updateInfo = async function () {
-  const subscribers = await this.getSubscribers();
+  const streamViewers = await streamService.countViewers(this);
 
-  this.totalConnectionsCount = subscribers.length;
-
-  _.forEach(subscribers, (subscriber) => {
-    const viewersCount = filterSubscribers(
-      subscribers,
-      subscriber.connectCreated,
-    ).length;
-
-    if (viewersCount > this.peakViewersCount) {
-      this.peakViewersCount = viewersCount;
-    }
-  });
+  this.totalConnectionsCount = streamViewers.totalConnectionsCount;
+  this.peakViewersCount = streamViewers.peakViewersCount;
 };
 
 schema.plugin(mongoosePaginate);

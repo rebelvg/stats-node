@@ -1,11 +1,12 @@
 import axios from 'axios';
 import * as _ from 'lodash';
 
-import { Stream, IStreamModel, StreamModel } from '../models/stream';
+import { Stream, IStreamModel } from '../models/stream';
 import { Subscriber, ISubscriberModel } from '../models/subscriber';
 
 import { ams as amsConfigs } from '../config';
 import { IAmsWorkerConfig, ILiveStats, liveStats } from './';
+import { streamService } from '../services/stream';
 
 export interface IStreamsResponse {
   [app: string]: {
@@ -88,10 +89,11 @@ async function updateStats(amsConfig: IAmsWorkerConfig) {
 
               streamRecord = new Stream(streamQuery);
             } else {
-              const lastBitrate = StreamModel.calculateLastBitrate(
+              const lastBitrate = streamService.calculateLastBitrate(
                 channelData.publisher.bytes,
-                streamRecord,
+                streamRecord.bytes,
                 statsUpdateTime,
+                streamRecord.connectUpdated,
               );
 
               streamRecord.bytes = channelData.publisher.bytes;

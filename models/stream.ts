@@ -22,29 +22,8 @@ export interface IStreamModel extends Document {
   userId: ObjectId;
   createdAt: Date;
   updatedAt: Date;
-  getSubscribers: (
-    query?: any,
-  ) => mongoose.DocumentQuery<IStreamModel[], IStreamModel>;
-  getRelatedStreams: (
-    query?: any,
-  ) => mongoose.DocumentQuery<IStreamModel[], IStreamModel>;
   isLive: boolean;
   updateInfo: () => Promise<void>;
-}
-
-export class StreamModel {
-  public static calculateLastBitrate(
-    bytes: number,
-    streamRecord: IStreamModel,
-    statsUpdateTime: Date,
-  ): number {
-    return Math.ceil(
-      ((bytes - streamRecord.bytes) * 8) /
-        ((statsUpdateTime.valueOf() - streamRecord.connectUpdated.valueOf()) /
-          1000) /
-        1024,
-    );
-  }
 }
 
 export const Stream = mongoose.model<IStreamModel>('Stream', schema);

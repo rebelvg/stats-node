@@ -19,6 +19,7 @@ export interface ISubscriberModel extends Document {
   userId: ObjectId;
   createdAt: Date;
   updatedAt: Date;
+  isLive: boolean;
   getStreams: (
     query?: any,
   ) => mongoose.DocumentQuery<ISubscriberModel[], ISubscriberModel>;

@@ -6,6 +6,7 @@ import { Stream } from '../models/stream';
 import { IP } from '../models/ip';
 import { hideFields } from '../helpers/hide-fields';
 import { filterSubscribers } from '../helpers/filter-subscribers';
+import { streamService } from '../services/stream';
 
 export async function findById(ctx: Router.IRouterContext, next: Next) {
   const stream = await Stream.findById(ctx.params.id).populate(['location']);
@@ -14,13 +15,13 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
     throw new Error('stream_not_found');
   }
 
-  const subscribers = await stream
+  const subscribers = await streamService
     .getSubscribers(ctx.queryObj)
     .sort(_.isEmpty(ctx.sortObj) ? { connectCreated: 1 } : ctx.sortObj)
     .populate(['location']);
 
-  const relatedStreams = await stream
-    .getRelatedStreams()
+  const relatedStreams = await streamService
+    .getRelatedStreams(stream)
     .sort({ connectCreated: 1 })
     .populate(['location']);
 
@@ -145,7 +146,7 @@ export async function graph(ctx: Router.IRouterContext, next: Next) {
     throw new Error('stream_not_found');
   }
 
-  const subscribers = await stream
+  const subscribers = await streamService
     .getSubscribers(ctx.queryObj)
     .sort({ connectCreated: 1 });
 
