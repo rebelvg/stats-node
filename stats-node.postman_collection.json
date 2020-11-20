@@ -1,216 +1,171 @@
 {
-	"info": {
-		"_postman_id": "fbc5caf3-f6da-4367-9d62-9c50146194ec",
-		"name": "stats-node",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "GET {{stats_node_host}}/admin/users",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "token",
-						"type": "text",
-						"value": "{{stats_node_token}}"
-					}
-				],
-				"url": {
-					"raw": "{{stats_node_host}}/admin/users",
-					"host": [
-						"{{stats_node_host}}"
-					],
-					"path": [
-						"admin",
-						"users"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "PUT {{stats_node_host}}/admin/users/:id",
-			"request": {
-				"method": "PUT",
-				"header": [
-					{
-						"key": "token",
-						"value": "{{stats_node_token}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"isStreamer\": true\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{stats_node_host}}/admin/users/5eb46409db171128b0fe54aa",
-					"host": [
-						"{{stats_node_host}}"
-					],
-					"path": [
-						"admin",
-						"users",
-						"5eb46409db171128b0fe54aa"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "GET {{stats_node_host}}/admin/streamers",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "token",
-						"type": "text",
-						"value": "{{stats_node_token}}"
-					}
-				],
-				"url": {
-					"raw": "{{stats_node_host}}/admin/streamers",
-					"host": [
-						"{{stats_node_host}}"
-					],
-					"path": [
-						"admin",
-						"streamers"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "GET {{stats_node_host}}/channels/legacy/:server/:channel",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "token",
-						"type": "text",
-						"value": "{{stats_node_token}}"
-					}
-				],
-				"url": {
-					"raw": "{{stats_node_host}}/channels/legacy/nms1/main",
-					"host": [
-						"{{stats_node_host}}"
-					],
-					"path": [
-						"channels",
-						"legacy",
-						"nms1",
-						"main"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "GET {{stats_node_host}}/channels/:server/:app/:channel",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "token",
-						"type": "text",
-						"value": "{{stats_node_token}}"
-					}
-				],
-				"url": {
-					"raw": "{{stats_node_host}}/channels/nms1/live/main",
-					"host": [
-						"{{stats_node_host}}"
-					],
-					"path": [
-						"channels",
-						"nms1",
-						"live",
-						"main"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "GET {{stats_node_host}}/channels/:server/:channel",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "token",
-						"type": "text",
-						"value": "{{stats_node_token}}"
-					}
-				],
-				"url": {
-					"raw": "{{stats_node_host}}/channels/nms1/main",
-					"host": [
-						"{{stats_node_host}}"
-					],
-					"path": [
-						"channels",
-						"nms1",
-						"main"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "GET {{stats_node_host}}/channels",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "token",
-						"type": "text",
-						"value": "{{stats_node_token}}"
-					}
-				],
-				"url": {
-					"raw": "{{stats_node_host}}/channels",
-					"host": [
-						"{{stats_node_host}}"
-					],
-					"path": [
-						"channels"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "GET {{stats_node_host}}/channels/list",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "token",
-						"type": "text",
-						"value": "{{stats_node_token}}"
-					}
-				],
-				"url": {
-					"raw": "{{stats_node_host}}/channels/list",
-					"host": [
-						"{{stats_node_host}}"
-					],
-					"path": [
-						"channels",
-						"list"
-					]
-				}
-			},
-			"response": []
-		}
-	],
-	"protocolProfileBehavior": {}
+  "info": {
+    "_postman_id": "fbc5caf3-f6da-4367-9d62-9c50146194ec",
+    "name": "stats-node",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET {{stats_node_host}}/admin/users",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "token",
+            "type": "text",
+            "value": "{{stats_node_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{stats_node_host}}/admin/users",
+          "host": ["{{stats_node_host}}"],
+          "path": ["admin", "users"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PUT {{stats_node_host}}/admin/users/:id",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "token",
+            "value": "{{stats_node_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"isStreamer\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{stats_node_host}}/admin/users/5eb46409db171128b0fe54aa",
+          "host": ["{{stats_node_host}}"],
+          "path": ["admin", "users", "5eb46409db171128b0fe54aa"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET {{stats_node_host}}/admin/streamers",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "token",
+            "type": "text",
+            "value": "{{stats_node_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{stats_node_host}}/admin/streamers",
+          "host": ["{{stats_node_host}}"],
+          "path": ["admin", "streamers"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET {{stats_node_host}}/channels/legacy/:server/:channel",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "token",
+            "type": "text",
+            "value": "{{stats_node_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{stats_node_host}}/channels/legacy/nms1/main",
+          "host": ["{{stats_node_host}}"],
+          "path": ["channels", "legacy", "nms1", "main"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET {{stats_node_host}}/channels/:server/:app/:channel",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "token",
+            "type": "text",
+            "value": "{{stats_node_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{stats_node_host}}/channels/nms1/live/main",
+          "host": ["{{stats_node_host}}"],
+          "path": ["channels", "nms1", "live", "main"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET {{stats_node_host}}/channels/:server/:channel",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "token",
+            "type": "text",
+            "value": "{{stats_node_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{stats_node_host}}/channels/nms1/main",
+          "host": ["{{stats_node_host}}"],
+          "path": ["channels", "nms1", "main"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET {{stats_node_host}}/channels",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "token",
+            "type": "text",
+            "value": "{{stats_node_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{stats_node_host}}/channels",
+          "host": ["{{stats_node_host}}"],
+          "path": ["channels"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET {{stats_node_host}}/channels/list",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "token",
+            "type": "text",
+            "value": "{{stats_node_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{stats_node_host}}/channels/list",
+          "host": ["{{stats_node_host}}"],
+          "path": ["channels", "list"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "protocolProfileBehavior": {}
 }
