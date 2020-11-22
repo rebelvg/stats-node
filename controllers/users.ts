@@ -15,13 +15,14 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
   }
 
   if (shouldHideFields(ctx.state.user)) {
-    _.set(userRecord, 'ipCreated', '*');
-    _.set(userRecord, 'ipUpdated', '*');
+    _.set(userRecord, 'ipCreated', undefined);
+    _.set(userRecord, 'ipUpdated', undefined);
   }
 
-  _.set(userRecord, 'emails', []);
-  _.set(userRecord, 'token', '*');
-  _.set(userRecord, 'streamKey', '*');
+  _.set(userRecord, 'googleId', undefined);
+  _.set(userRecord, 'emails', undefined);
+  _.set(userRecord, 'token', undefined);
+  _.set(userRecord, 'streamKey', undefined);
 
   ctx.body = { user: userRecord };
 }
