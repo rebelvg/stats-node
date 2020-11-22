@@ -8,16 +8,16 @@ export const db = {
 
 export const ams = [
   {
-    name: 'ams1',
-    host: 'http://localhost:11000',
+    name: 'localhost:11001',
+    host: 'http://localhost:11001',
     token: null,
   },
 ];
 
 export const nms = [
   {
-    name: 'nms1',
-    host: 'http://localhost:11000',
+    name: 'localhost:11002',
+    host: 'http://localhost:11002',
     token: null,
   },
 ];
