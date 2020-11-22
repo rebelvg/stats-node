@@ -10,7 +10,7 @@
     "migrate": "ts-node migrate.ts",
     "start": "ts-node .",
     "docker": "docker-compose up -d",
-    "docker-import": "docker exec mongodb mongorestore",
+    "docker:import": "docker exec mongodb mongorestore",
     "pm2:setup": "pm2 start pm2.json",
     "pm2": "yarn install && yarn run migrate && pm2 restart stats-node"
   },

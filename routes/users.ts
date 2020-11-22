@@ -5,12 +5,16 @@ import * as passport from 'koa-passport';
 import { isLoggedIn } from '../middleware/is-logged-in';
 import { stats } from '../config';
 import { User } from '../models/user';
+import { findById } from '../controllers/users';
 
 export const router = new Router();
 
 router.get('/', isLoggedIn, (ctx: Router.IRouterContext, next: Next) => {
   ctx.body = { user: ctx.state.user };
 });
+
+router.get('/:id', isLoggedIn, findById);
+
 router.get(
   '/auth/google',
   passport.authenticate('google', {
@@ -23,6 +27,7 @@ router.get(
     ],
   }),
 );
+
 router.get(
   '/auth/google/callback',
   passport.authenticate('google', { session: false }),
