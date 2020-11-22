@@ -13,7 +13,7 @@ router.get('/', isLoggedIn, (ctx: Router.IRouterContext, next: Next) => {
   ctx.body = { user: ctx.state.user };
 });
 
-router.get('/:id', isLoggedIn, findById);
+router.get('/:id', findById);
 
 router.get(
   '/auth/google',
