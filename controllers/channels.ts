@@ -111,39 +111,6 @@ export async function channels(ctx: Router.IRouterContext, next: Next) {
   ctx.body = liveStatsClone;
 }
 
-export function legacy(ctx: Router.IRouterContext, next: Next) {
-  const channelStats = {
-    isLive: false,
-    viewers: 0,
-    bitrate_live: 0,
-    bitrate_restream: 0,
-    title: null,
-  };
-
-  channelStats.isLive = isLive(ctx.params.server, 'live', ctx.params.channel);
-
-  _.forEach(liveStats?.[ctx.params.server], (channels, appName) => {
-    _.forEach(channels, (channelObj, channelName) => {
-      if (channelName === ctx.params.channel) {
-        channelStats.viewers += channelObj.subscribers.length;
-      }
-    });
-  });
-
-  channelStats.bitrate_live = getBitrate(
-    ctx.params.server,
-    'live',
-    ctx.params.channel,
-  );
-  channelStats.bitrate_restream = getBitrate(
-    ctx.params.server,
-    'restream',
-    ctx.params.channel,
-  );
-
-  ctx.body = channelStats;
-}
-
 export async function list(ctx: Router.IRouterContext, next: Next) {
   const liveChannels = [];
 
