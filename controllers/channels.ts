@@ -4,32 +4,60 @@ import * as _ from 'lodash';
 
 import { Stream } from '../models/stream';
 import { Subscriber } from '../models/subscriber';
-import { liveStats } from '../workers';
+import { liveStats, STREAM_SERVERS } from '../workers';
 import { hideFields } from '../helpers/hide-fields';
 
+function findServerByHost(server: string) {
+  return _.find(STREAM_SERVERS, (streamServer) =>
+    streamServer.hosts.includes(server),
+  );
+}
+
 function isLive(server: string, app: string, channel: string): boolean {
-  return !!liveStats?.[server]?.[app]?.[channel]?.publisher;
+  const streamServer = findServerByHost(server);
+
+  return !!liveStats?.[streamServer?.name]?.[app]?.[channel]?.publisher;
 }
 
 function getViewers(server: string, app: string, channel: string): number {
-  return liveStats?.[server]?.[app]?.[channel]?.subscribers?.length || 0;
+  const streamServer = findServerByHost(server);
+
+  return (
+    liveStats?.[streamServer?.name]?.[app]?.[channel]?.subscribers?.length || 0
+  );
 }
 
 function getDuration(server: string, app: string, channel: string): number {
-  return liveStats?.[server]?.[app]?.[channel]?.publisher?.duration || 0;
+  const streamServer = findServerByHost(server);
+
+  return (
+    liveStats?.[streamServer?.name]?.[app]?.[channel]?.publisher?.duration || 0
+  );
 }
 
 function getBitrate(server: string, app: string, channel: string): number {
-  return liveStats?.[server]?.[app]?.[channel]?.publisher?.bitrate || 0;
+  const streamServer = findServerByHost(server);
+
+  return (
+    liveStats?.[streamServer?.name]?.[app]?.[channel]?.publisher?.bitrate || 0
+  );
 }
 
 function getLastBitrate(server: string, app: string, channel: string): number {
-  return liveStats?.[server]?.[app]?.[channel]?.publisher?.lastBitrate || 0;
+  const streamServer = findServerByHost(server);
+
+  return (
+    liveStats?.[streamServer?.name]?.[app]?.[channel]?.publisher?.lastBitrate ||
+    0
+  );
 }
 
 function getStartTime(server: string, app: string, channel: string): Date {
+  const streamServer = findServerByHost(server);
+
   return (
-    liveStats?.[server]?.[app]?.[channel]?.publisher?.connectCreated || null
+    liveStats?.[streamServer?.name]?.[app]?.[channel]?.publisher
+      ?.connectCreated || null
   );
 }
 
@@ -51,20 +79,6 @@ function appChannelStatsBase(server: string, app: string, channel: string) {
   channelStats.startTime = getStartTime(server, app, channel);
 
   return channelStats;
-}
-
-export function channelStats(ctx: Router.IRouterContext, next: Next) {
-  const channelsStats = {};
-
-  const { server, channel } = ctx.params;
-
-  _.forEach(liveStats?.[server], (channels, appName) => {
-    _.forEach(channels, (channelObj, channelName) => {
-      channelsStats[appName] = appChannelStatsBase(server, appName, channel);
-    });
-  });
-
-  ctx.body = channelsStats;
 }
 
 export function appChannelStats(ctx: Router.IRouterContext, next: Next) {

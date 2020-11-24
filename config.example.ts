@@ -1,4 +1,4 @@
-export const db = {
+export const DB = {
   host: 'localhost',
   dbName: 'nodestats',
   authDb: undefined,
@@ -6,23 +6,25 @@ export const db = {
   password: undefined,
 };
 
-export const ams = [
+export const AMS = [
   {
-    name: 'localhost:11001',
+    name: 'ams1',
+    hosts: ['localhost:11001'],
     host: 'http://localhost:11001',
     token: null,
   },
 ];
 
-export const nms = [
+export const NMS = [
   {
-    name: 'localhost:11002',
+    name: 'nms1',
+    hosts: ['localhost:11002'],
     host: 'http://localhost:11002',
     token: null,
   },
 ];
 
-export const stats = {
+export const API = {
   port: 8000,
   googleCallbackHost: 'http://localhost:8000',
   googleRedirect: 'http://localhost:3000',

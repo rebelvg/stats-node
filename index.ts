@@ -6,7 +6,7 @@ import { connectMongoose } from './mongo';
 import './passport';
 import './workers';
 
-import { stats } from './config';
+import { API } from './config';
 
 process.on('unhandledRejection', (reason, p) => {
   throw reason;
@@ -19,21 +19,21 @@ process.on('uncaughtException', (error) => {
 });
 
 // remove previous unix socket
-if (typeof stats.port === 'string') {
-  if (fs.existsSync(stats.port)) {
-    fs.unlinkSync(stats.port);
+if (typeof API.port === 'string') {
+  if (fs.existsSync(API.port)) {
+    fs.unlinkSync(API.port);
   }
 }
 
 (async () => {
   await connectMongoose();
 
-  app.listen(stats.port, () => {
+  app.listen(API.port, () => {
     console.log('http_server_running');
 
     // set unix socket rw rights for nginx
-    if (typeof stats.port === 'string') {
-      fs.chmodSync(stats.port, '777');
+    if (typeof API.port === 'string') {
+      fs.chmodSync(API.port, '777');
     }
   });
 })();

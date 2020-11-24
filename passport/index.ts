@@ -3,14 +3,14 @@ import { Strategy } from 'passport-google-oauth20';
 
 import { User } from '../models/user';
 import * as googleKeys from '../google-keys.json';
-import { stats } from '../config';
+import { API } from '../config';
 
 passport.use(
   new Strategy(
     {
       clientID: googleKeys.web.client_id,
       clientSecret: googleKeys.web.client_secret,
-      callbackURL: `${stats.googleCallbackHost}/users/auth/google/callback`,
+      callbackURL: `${API.googleCallbackHost}/users/auth/google/callback`,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {

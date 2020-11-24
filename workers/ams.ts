@@ -4,8 +4,8 @@ import * as _ from 'lodash';
 import { Stream, IStreamModel } from '../models/stream';
 import { Subscriber, ISubscriberModel } from '../models/subscriber';
 
-import { ams as amsConfigs } from '../config';
-import { IAmsWorkerConfig, ILiveStats, liveStats } from './';
+import { AMS } from '../config';
+import { IWorkerConfig, ILiveStats, liveStats } from './';
 import { streamService } from '../services/stream';
 
 export interface IStreamsResponse {
@@ -48,10 +48,10 @@ async function getNodeStats(
   return data;
 }
 
-async function updateStats(amsConfig: IAmsWorkerConfig) {
-  const { name, host, token } = amsConfig;
+async function updateStats(amsConfig: IWorkerConfig) {
+  const { name, apiHost, apiToken } = amsConfig;
 
-  const channels = await getNodeStats(host, token);
+  const channels = await getNodeStats(apiHost, apiToken);
 
   const stats: ILiveStats[0] = {};
 
@@ -144,7 +144,7 @@ async function updateStats(amsConfig: IAmsWorkerConfig) {
 
 async function runUpdate() {
   await Promise.all(
-    amsConfigs.map(async (amsConfig) => {
+    AMS.map(async (amsConfig) => {
       try {
         const { name } = amsConfig;
 

@@ -3,7 +3,7 @@ import * as Router from 'koa-router';
 import * as passport from 'koa-passport';
 
 import { isLoggedIn } from '../middleware/is-logged-in';
-import { stats } from '../config';
+import { API } from '../config';
 import { User } from '../models/user';
 import { findById } from '../controllers/users';
 
@@ -44,6 +44,6 @@ router.get(
       },
     );
 
-    ctx.redirect(stats.googleRedirect + `/?token=${token}`);
+    ctx.redirect(API.googleRedirect + `/?token=${token}`);
   },
 );

@@ -1,3 +1,6 @@
+import * as _ from 'lodash';
+
+import { AMS, NMS } from '../config';
 import { IStreamModel } from '../models/stream';
 import { ISubscriberModel } from '../models/subscriber';
 
@@ -14,17 +17,14 @@ export interface ILiveStats {
   };
 }
 
-export interface IAmsWorkerConfig {
+export interface IWorkerConfig {
   name: string;
-  host: string;
-  token: string;
+  hosts: string[];
+  apiHost: string;
+  apiToken: string;
 }
 
-export interface INmsWorkerConfig {
-  name: string;
-  host: string;
-  token: string;
-}
+export const STREAM_SERVERS: IWorkerConfig[] = AMS.concat(NMS);
 
 export const liveStats: ILiveStats = {};
 

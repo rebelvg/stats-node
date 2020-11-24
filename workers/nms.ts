@@ -5,8 +5,8 @@ import { ObjectId } from 'mongodb';
 import { Stream, IStreamModel } from '../models/stream';
 import { Subscriber, ISubscriberModel } from '../models/subscriber';
 
-import { nms as nmsConfigs } from '../config';
-import { ILiveStats, INmsWorkerConfig, liveStats } from './';
+import { NMS } from '../config';
+import { ILiveStats, IWorkerConfig, liveStats } from './';
 import { streamService } from '../services/stream';
 
 export interface IStreamsResponse {
@@ -55,10 +55,10 @@ async function getNodeStats(
   return data;
 }
 
-async function updateStats(nmsConfig: INmsWorkerConfig) {
-  const { name, host, token } = nmsConfig;
+async function updateStats(nmsConfig: IWorkerConfig) {
+  const { name, apiHost, apiToken } = nmsConfig;
 
-  const channels = await getNodeStats(host, token);
+  const channels = await getNodeStats(apiHost, apiToken);
 
   const stats: ILiveStats[0] = {};
 
@@ -151,7 +151,7 @@ async function updateStats(nmsConfig: INmsWorkerConfig) {
 
 async function runUpdate() {
   await Promise.all(
-    nmsConfigs.map(async (nmsConfig) => {
+    NMS.map(async (nmsConfig) => {
       try {
         const { name } = nmsConfig;
 
