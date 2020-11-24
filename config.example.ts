@@ -10,8 +10,8 @@ export const AMS = [
   {
     name: 'ams1',
     hosts: ['localhost:11001'],
-    host: 'http://localhost:11001',
-    token: null,
+    apiHost: 'http://localhost:11001',
+    apiToken: null,
   },
 ];
 
@@ -19,8 +19,8 @@ export const NMS = [
   {
     name: 'nms1',
     hosts: ['localhost:11002'],
-    host: 'http://localhost:11002',
-    token: null,
+    apiHost: 'http://localhost:11002',
+    apiToken: null,
   },
 ];
 
