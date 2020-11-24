@@ -16,12 +16,12 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
   }
 
   const subscribers = await streamService
-    .getSubscribers(ctx.queryObj)
+    .getSubscribers(stream, ctx.queryObj)
     .sort(_.isEmpty(ctx.sortObj) ? { connectCreated: 1 } : ctx.sortObj)
     .populate(['location']);
 
   const relatedStreams = await streamService
-    .getRelatedStreams(stream)
+    .getRelatedStreams(stream, {})
     .sort({ connectCreated: 1 })
     .populate(['location']);
 
@@ -147,7 +147,7 @@ export async function graph(ctx: Router.IRouterContext, next: Next) {
   }
 
   const subscribers = await streamService
-    .getSubscribers(ctx.queryObj)
+    .getSubscribers(stream, ctx.queryObj)
     .sort({ connectCreated: 1 });
 
   let graph = [];

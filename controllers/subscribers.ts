@@ -17,7 +17,7 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
   }
 
   const streams = await subscriberService
-    .getStreams(subscriber)
+    .getStreams(subscriber, {})
     .sort({ connectCreated: 1 })
     .populate(['location']);
 

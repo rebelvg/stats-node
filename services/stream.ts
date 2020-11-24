@@ -8,7 +8,7 @@ import { filterSubscribers } from '../helpers/filter-subscribers';
 class StreamService {
   public getSubscribers(
     streamRecord: IStreamModel,
-    query: any = {},
+    query: any,
   ): DocumentQuery<ISubscriberModel[], ISubscriberModel> {
     query = {
       $and: [
@@ -28,7 +28,7 @@ class StreamService {
 
   public getRelatedStreams(
     streamRecord: IStreamModel,
-    query: any = {},
+    query: any,
   ): DocumentQuery<IStreamModel[], IStreamModel> {
     query = {
       $and: [
@@ -47,7 +47,7 @@ class StreamService {
   }
 
   public async countViewers(streamRecord: IStreamModel) {
-    const subscribers = await this.getSubscribers(streamRecord);
+    const subscribers = await this.getSubscribers(streamRecord, {});
 
     const totalConnectionsCount = subscribers.length;
     let peakViewersCount = 0;

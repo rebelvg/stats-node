@@ -94,35 +94,67 @@ export function appChannelStats(ctx: Router.IRouterContext, next: Next) {
 export async function channels(ctx: Router.IRouterContext, next: Next) {
   const liveStatsClone = _.cloneDeep(liveStats);
 
+  const liveServers = [];
+
   await Promise.all(
-    _.map(liveStatsClone, (serverObj) => {
-      return Promise.all(
-        _.map(serverObj, (appObj) => {
-          return Promise.all(
-            _.map(appObj, async (channelObj) => {
+    _.map(liveStatsClone, async (serverObj, serverName) => {
+      const liveServer = {
+        serverName,
+        apps: [],
+      };
+
+      await Promise.all(
+        _.map(serverObj, async (appObj, appName) => {
+          const liveApp = {
+            appName,
+            channels: [],
+          };
+
+          await Promise.all(
+            _.map(appObj, async (channelObj, channelName) => {
+              const liveChannel = {
+                channelName,
+                publisher: null,
+                subscribers: [],
+              };
+
               if (channelObj.publisher) {
-                await Stream.populate(channelObj.publisher, {
+                const livePublisher = channelObj.publisher;
+
+                await Stream.populate(livePublisher, {
                   path: 'location',
                 });
 
-                hideFields(ctx.state.user, channelObj.publisher);
+                hideFields(ctx.state.user, livePublisher);
+
+                liveChannel.publisher = channelObj.publisher;
               }
 
               for (const subscriberObj of channelObj.subscribers) {
-                await Subscriber.populate(subscriberObj, {
+                const liveSubscriber = subscriberObj;
+
+                await Subscriber.populate(liveSubscriber, {
                   path: 'location',
                 });
 
-                hideFields(ctx.state.user, subscriberObj);
+                hideFields(ctx.state.user, liveSubscriber);
+
+                liveChannel.subscribers.push(liveSubscriber);
               }
+
+              liveApp.channels.push(liveChannel);
             }),
           );
+
+          liveServer.apps.push(liveApp);
         }),
       );
+
+      liveServers.push(liveServer);
     }),
   );
 
-  ctx.body = liveStatsClone;
+  ctx.body = { live: liveServers };
 }
 
 export async function list(ctx: Router.IRouterContext, next: Next) {

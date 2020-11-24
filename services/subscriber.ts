@@ -5,7 +5,7 @@ import { ISubscriberModel } from '../models/subscriber';
 class SubscriberService {
   public getStreams(
     subscriberRecord: ISubscriberModel,
-    query: any = {},
+    query: any,
   ): DocumentQuery<IStreamModel[], IStreamModel> {
     query = {
       $and: [
