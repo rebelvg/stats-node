@@ -3,24 +3,24 @@ import { URL } from 'url';
 import * as moment from 'moment';
 import * as mongoose from 'mongoose';
 
-import { db } from '../config';
+import { DB } from '../config';
 
-const amsMongoUrl = new URL(`mongodb://${db.host}`);
+const amsMongoUrl = new URL(`mongodb://${DB.host}`);
 
-if (db.authDb) {
-  amsMongoUrl.username = encodeURIComponent(db.user);
-  amsMongoUrl.password = encodeURIComponent(db.password);
+if (DB.authDb) {
+  amsMongoUrl.username = encodeURIComponent(DB.user);
+  amsMongoUrl.password = encodeURIComponent(DB.password);
 
-  amsMongoUrl.searchParams.set('authSource', db.authDb);
+  amsMongoUrl.searchParams.set('authSource', DB.authDb);
 }
 
-const nodeMongoUrl = new URL(`mongodb://${db.host}`);
+const nodeMongoUrl = new URL(`mongodb://${DB.host}`);
 
-if (db.authDb) {
-  nodeMongoUrl.username = encodeURIComponent(db.user);
-  nodeMongoUrl.password = encodeURIComponent(db.password);
+if (DB.authDb) {
+  nodeMongoUrl.username = encodeURIComponent(DB.user);
+  nodeMongoUrl.password = encodeURIComponent(DB.password);
 
-  nodeMongoUrl.searchParams.set('authSource', db.authDb);
+  nodeMongoUrl.searchParams.set('authSource', DB.authDb);
 }
 
 mongoose.connect(nodeMongoUrl.href, { useMongoClient: true }, (error) => {

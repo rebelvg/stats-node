@@ -2,19 +2,18 @@ import { MongoClient } from 'mongodb';
 import { URL } from 'url';
 import * as moment from 'moment';
 
-import { db } from '../config';
+import { DB } from '../config';
+import { Stream } from '../models/stream';
+import { Subscriber } from '../models/subscriber';
 
-const mongoUrl = new URL(`mongodb://${db.host}`);
+const mongoUrl = new URL(`mongodb://${DB.host}`);
 
-if (db.authDb) {
-  mongoUrl.username = encodeURIComponent(db.user);
-  mongoUrl.password = encodeURIComponent(db.password);
+if (DB.authDb) {
+  mongoUrl.username = encodeURIComponent(DB.user);
+  mongoUrl.password = encodeURIComponent(DB.password);
 
-  mongoUrl.searchParams.set('authSource', db.authDb);
+  mongoUrl.searchParams.set('authSource', DB.authDb);
 }
-
-const Stream = require('../models/stream');
-const Subscriber = require('../models/subscriber');
 
 (async () => {
   const mongoClient = await MongoClient.connect(mongoUrl.href);
@@ -35,15 +34,15 @@ const Subscriber = require('../models/subscriber');
       app: data.app,
       channel: data.channel,
       serverId: data.id,
-      connectCreated: moment.unix(data.timestamp),
-      connectUpdated: moment.unix(data.stats.timestamp),
+      connectCreated: moment.unix(data.timestamp).toDate(),
+      connectUpdated: moment.unix(data.stats.timestamp).toDate(),
       bytes: data.stats.bytes_in,
       ip: data.stats.streamer_ip,
     });
 
     await stream.save();
 
-    stream.viewersCount = await subscribers.count({
+    stream.totalConnectionsCount = await subscribers.count({
       app: data.app,
       channel: data.channel,
       'stats.timestamp': { $gte: data.timestamp },
@@ -64,8 +63,8 @@ const Subscriber = require('../models/subscriber');
       app: data.app,
       channel: data.channel,
       serverId: data.id,
-      connectCreated: moment.unix(data.timestamp),
-      connectUpdated: moment.unix(data.stats.timestamp),
+      connectCreated: moment.unix(data.timestamp).toDate(),
+      connectUpdated: moment.unix(data.stats.timestamp).toDate(),
       bytes: data.stats.bytes_out,
       ip: data.stats.client_ip,
     });
