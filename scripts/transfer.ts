@@ -4,6 +4,8 @@ import * as moment from 'moment';
 import * as mongoose from 'mongoose';
 
 import { DB } from '../config';
+import { Stream } from '../models/stream';
+import { Subscriber } from '../models/subscriber';
 
 const amsMongoUrl = new URL(`mongodb://${DB.host}`);
 
@@ -61,8 +63,6 @@ mongoose.connect(nodeMongoUrl.href, { useMongoClient: true }, (error) => {
 
   const nodeSubscribers = await amsSubscribers.find().toArray();
 
-  const Subscriber = require('../models/subscriber');
-
   for (const subscriber of nodeSubscribers) {
     const subDoc = new Subscriber({
       app: subscriber.app,
@@ -80,8 +80,6 @@ mongoose.connect(nodeMongoUrl.href, { useMongoClient: true }, (error) => {
   }
 
   const nodeStreams = await amsStreams.find().toArray();
-
-  const Stream = require('../models/stream');
 
   for (const stream of nodeStreams) {
     const streamDoc = new Stream({
