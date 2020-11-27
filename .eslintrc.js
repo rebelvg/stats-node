@@ -10,8 +10,8 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   extends: [
     'eslint:recommended',
-    // 'plugin:@typescript-eslint/eslint-recommended',
-    // 'plugin:@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/eslint-recommended',
+    'plugin:@typescript-eslint/recommended',
   ],
   rules: {
     indent: ['off', 2],
@@ -52,7 +52,9 @@ module.exports = {
       { blankLine: 'always', prev: '*', next: 'return' },
     ],
     'no-return-await': 'error',
-    // '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
     // '@typescript-eslint/explicit-function-return-type': ['error'],
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-unused-vars': 'off',
   },
 };
