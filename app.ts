@@ -15,6 +15,7 @@ import { router as subscribers } from './routes/subscribers';
 import { router as ips } from './routes/ips';
 import { router as users } from './routes/users';
 import { router as admin } from './routes/admin';
+import { router as graphs } from './routes/graphs';
 
 if (!fs.existsSync('logs')) {
   fs.mkdirSync('logs');
@@ -56,6 +57,7 @@ router.use('/subscribers', subscribers.routes());
 router.use('/ips', ips.routes());
 router.use('/users', users.routes());
 router.use('/admin', admin.routes());
+router.use('/graphs', graphs.routes());
 
 app.use(router.routes());
 
