@@ -27,6 +27,7 @@ const totalDurationQuery = [
   {
     $group: {
       _id: '$ips.api.country',
+      totalCount: { $sum: 1 },
       totalDurationSeconds: { $sum: '$duration' },
     },
   },
@@ -47,6 +48,7 @@ const totalDurationQuery = [
   {
     $project: {
       _id: 1,
+      totalCount: 1,
       totalDurationSeconds: 1,
     },
   },
@@ -85,12 +87,12 @@ const topStreamersQuery = [
   },
   {
     $group: {
-      _id: '$userId',
-      totalDuration: {
-        $sum: '$duration',
-      },
       totalCount: {
         $sum: 1,
+      },
+      _id: '$userId',
+      totalDurationSeconds: {
+        $sum: '$duration',
       },
       totalBytes: {
         $sum: '$bytes',
@@ -119,7 +121,7 @@ const topStreamersQuery = [
   },
   {
     $sort: {
-      totalDuration: -1,
+      totalDurationSeconds: -1,
     },
   },
 ];
@@ -162,7 +164,7 @@ const monthlyStatsQuery = [
       week: {
         $week: '$connectCreated',
       },
-      totalDuration: {
+      duration: {
         $sum: '$duration',
       },
     },
@@ -176,8 +178,8 @@ const monthlyStatsQuery = [
       totalCount: {
         $sum: 1,
       },
-      totalDuration: {
-        $sum: '$totalDuration',
+      totalDurationSeconds: {
+        $sum: '$duration',
       },
     },
   },
@@ -222,7 +224,7 @@ const weekDayStatsQuery = [
       week: {
         $week: '$connectCreated',
       },
-      totalDuration: {
+      duration: {
         $sum: '$duration',
       },
     },
@@ -233,8 +235,8 @@ const weekDayStatsQuery = [
       totalCount: {
         $sum: 1,
       },
-      totalDuration: {
-        $sum: '$totalDuration',
+      totalDurationSeconds: {
+        $sum: '$duration',
       },
     },
   },
@@ -278,7 +280,7 @@ const timeOfDayStatsQuery = [
       week: {
         $week: '$connectCreated',
       },
-      totalDuration: {
+      duration: {
         $sum: '$duration',
       },
     },
@@ -289,8 +291,8 @@ const timeOfDayStatsQuery = [
       totalCount: {
         $sum: 1,
       },
-      totalDuration: {
-        $sum: '$totalDuration',
+      totalDurationSeconds: {
+        $sum: '$duration',
       },
     },
   },
