@@ -23,10 +23,24 @@ const BOBER_ID = '5a7430e79b6aa006b6546f81';
 
     const location = ipRecord.api.city || ipRecord.api.message;
 
-    console.log(location);
-
     switch (location) {
-      case 'Kharkiv' || 'private range' || 'reserved range': {
+      case 'Kharkiv': {
+        await streamsCollection.updateMany(
+          { userId: null, ip },
+          { $set: { userId: new ObjectId(REBEL_ID) } },
+        );
+
+        break;
+      }
+      case 'private range': {
+        await streamsCollection.updateMany(
+          { userId: null, ip },
+          { $set: { userId: new ObjectId(REBEL_ID) } },
+        );
+
+        break;
+      }
+      case 'reserved range': {
         await streamsCollection.updateMany(
           { userId: null, ip },
           { $set: { userId: new ObjectId(REBEL_ID) } },
@@ -71,6 +85,37 @@ const BOBER_ID = '5a7430e79b6aa006b6546f81';
       }
     }
   }
+
+  await ipsCollection.updateMany(
+    {
+      $or: [
+        {
+          'api.message': 'private range',
+        },
+        {
+          'api.message': 'reserved range',
+        },
+      ],
+    },
+    {
+      $set: {
+        isLocked: true,
+        'api.as': 'local_network',
+        'api.city': 'Kharkiv',
+        'api.country': 'Ukraine',
+        'api.countryCode': 'UA',
+        'api.isp': 'local_network',
+        'api.lat': 0,
+        'api.lon': 0,
+        'api.org': 'local_network',
+        'api.region': '63',
+        'api.regionName': `Kharkivs'ka Oblast'`,
+        'api.status': 'success',
+        'api.timezone': 'Europe/Kiev',
+        'api.zip': '',
+      },
+    },
+  );
 
   await mongoClient.close();
 })();

@@ -20,6 +20,7 @@ class IpService {
           createdAt: currentTime,
           updatedAt: currentTime,
           apiUpdatedAt: currentTime,
+          isLocked: false,
         } as Partial<IIPModel>,
         { upsert: true },
       );
@@ -31,7 +32,7 @@ class IpService {
       currentTime.valueOf() - ipRecord.apiUpdatedAt.valueOf() >
       30 * 24 * 60 * 60 * 1000;
 
-    if (!isRecordMonthOld) {
+    if (!isRecordMonthOld || ipRecord.isLocked) {
       return;
     }
 

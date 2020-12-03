@@ -24,6 +24,7 @@ export interface IIPModel extends Document {
   createdAt: Date;
   updatedAt: Date;
   apiUpdatedAt: Date;
+  isLocked: boolean;
 }
 
 export const IP = mongoose.model<IIPModel>('IP', schema);

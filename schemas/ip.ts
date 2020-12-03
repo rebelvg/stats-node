@@ -10,6 +10,7 @@ export const schema = new Schema(
     createdAt: { type: Date, required: true, index: true },
     updatedAt: { type: Date, required: true, index: true },
     apiUpdatedAt: { type: Date, required: true, index: true },
+    isLocked: { type: Boolean, required: true },
   },
   {
     retainKeyOrder: true,
