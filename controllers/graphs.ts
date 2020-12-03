@@ -1,5 +1,6 @@
 import * as Router from 'koa-router';
 import * as _ from 'lodash';
+import { hideUserData } from '../helpers/hide-fields';
 
 import { Stream } from '../models/stream';
 import { Subscriber } from '../models/subscriber';
@@ -239,7 +240,7 @@ const weekDayStatsQuery = [
   },
   {
     $sort: {
-      totalCount: -1,
+      _id: 1,
     },
   },
 ];
@@ -295,7 +296,7 @@ const timeOfDayStatsQuery = [
   },
   {
     $sort: {
-      totalCount: -1,
+      _id: 1,
     },
   },
 ];
@@ -315,7 +316,10 @@ export async function graphs(ctx: Router.IRouterContext) {
 
   const avgStatsSubs = await Subscriber.aggregate([...avgStatsQuery]);
 
-  const topStreamers = await Stream.aggregate([...topStreamersQuery]);
+  const topStreamers = await Stream.aggregate([
+    ...topStreamersQuery,
+    { $limit: 5 },
+  ]);
 
   const monthlyStatsStreams = await Stream.aggregate([...monthlyStatsQuery]);
 
@@ -333,12 +337,17 @@ export async function graphs(ctx: Router.IRouterContext) {
     ...timeOfDayStatsQuery,
   ]);
 
+  const topStreamersRes = topStreamers.map((topUser) => ({
+    ...topUser,
+    user: hideUserData(topUser.user, true),
+  }));
+
   ctx.body = {
     totalDurationStreams,
     totalDurationSubs,
     avgStatsStreams,
     avgStatsSubs,
-    topStreamers,
+    topStreamers: topStreamersRes,
     monthlyStatsStreams,
     monthlyStatsSubs,
     dayOfWeekStatsStreams,

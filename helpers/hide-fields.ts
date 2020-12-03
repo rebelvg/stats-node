@@ -16,3 +16,17 @@ export function hideFields(user: IUserModel, obj) {
     }
   });
 }
+
+export function hideUserData(user: IUserModel, shouldHideIp: boolean) {
+  if (shouldHideIp) {
+    _.set(user, 'ipCreated', undefined);
+    _.set(user, 'ipUpdated', undefined);
+  }
+
+  _.set(user, 'googleId', undefined);
+  _.set(user, 'emails', undefined);
+  _.set(user, 'token', undefined);
+  _.set(user, 'streamKey', undefined);
+
+  return user;
+}
