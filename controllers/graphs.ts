@@ -244,18 +244,74 @@ const weekDayStatsQuery = [
   },
 ];
 
+const timeOfDayStatsQuery = [
+  {
+    $project: {
+      year: {
+        $year: '$connectCreated',
+      },
+      month: {
+        $month: '$connectCreated',
+      },
+      day: {
+        $dayOfMonth: '$connectCreated',
+      },
+      hour: {
+        $hour: '$connectCreated',
+      },
+      minutes: {
+        $minute: '$connectCreated',
+      },
+      seconds: {
+        $second: '$connectCreated',
+      },
+      milliseconds: {
+        $millisecond: '$connectCreated',
+      },
+      dayOfYear: {
+        $dayOfYear: '$connectCreated',
+      },
+      dayOfWeek: {
+        $isoDayOfWeek: '$connectCreated',
+      },
+      week: {
+        $week: '$connectCreated',
+      },
+      totalDuration: {
+        $sum: '$duration',
+      },
+    },
+  },
+  {
+    $group: {
+      _id: '$hour',
+      totalCount: {
+        $sum: 1,
+      },
+      totalDuration: {
+        $sum: '$totalDuration',
+      },
+    },
+  },
+  {
+    $sort: {
+      totalCount: -1,
+    },
+  },
+];
+
 export async function graphs(ctx: Router.IRouterContext) {
   const totalDurationStreams = await Stream.aggregate([
     ...totalDurationQuery,
     { $limit: 5 },
   ]);
 
-  const avgStatsStreams = await Stream.aggregate([...avgStatsQuery]);
-
   const totalDurationSubs = await Subscriber.aggregate([
     ...totalDurationQuery,
     { $limit: 5 },
   ]);
+
+  const avgStatsStreams = await Stream.aggregate([...avgStatsQuery]);
 
   const avgStatsSubs = await Subscriber.aggregate([...avgStatsQuery]);
 
@@ -269,15 +325,25 @@ export async function graphs(ctx: Router.IRouterContext) {
 
   const dayOfWeekStatsSubs = await Subscriber.aggregate([...weekDayStatsQuery]);
 
+  const timeOfDayStatsStreams = await Stream.aggregate([
+    ...timeOfDayStatsQuery,
+  ]);
+
+  const timeOfDayStatsSubs = await Subscriber.aggregate([
+    ...timeOfDayStatsQuery,
+  ]);
+
   ctx.body = {
     totalDurationStreams,
-    avgStatsStreams,
     totalDurationSubs,
+    avgStatsStreams,
     avgStatsSubs,
     topStreamers,
     monthlyStatsStreams,
     monthlyStatsSubs,
     dayOfWeekStatsStreams,
     dayOfWeekStatsSubs,
+    timeOfDayStatsStreams,
+    timeOfDayStatsSubs,
   };
 }
