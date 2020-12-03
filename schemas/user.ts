@@ -23,31 +23,31 @@ export const schema = new Schema(
   },
 );
 
-schema.pre('validate', function (
-  this: IUserModel,
-  next: mongoose.HookNextFunction,
-) {
-  if (this.isNew) {
-    this.isAdmin = false;
-    this.isStreamer = false;
-    this.token = uuidv4();
-    this.streamKey = uuidv4();
-  }
+schema.pre(
+  'validate',
+  function (this: IUserModel, next: mongoose.HookNextFunction) {
+    if (this.isNew) {
+      this.isAdmin = false;
+      this.isStreamer = false;
+      this.token = uuidv4();
+      this.streamKey = uuidv4();
+    }
 
-  next();
-});
+    next();
+  },
+);
 
-schema.pre('validate', function (
-  this: IUserModel,
-  next: mongoose.HookNextFunction,
-) {
-  const updatedAt = new Date();
+schema.pre(
+  'validate',
+  function (this: IUserModel, next: mongoose.HookNextFunction) {
+    const updatedAt = new Date();
 
-  if (this.isNew) {
-    this.createdAt = updatedAt;
-  }
+    if (this.isNew) {
+      this.createdAt = updatedAt;
+    }
 
-  this.updatedAt = updatedAt;
+    this.updatedAt = updatedAt;
 
-  next();
-});
+    next();
+  },
+);

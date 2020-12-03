@@ -40,55 +40,57 @@ export const schema = new Schema(
   },
 );
 
-schema.pre('validate', function (
-  this: IStreamModel,
-  next: mongoose.HookNextFunction,
-) {
-  const currentTime = new Date();
+schema.pre(
+  'validate',
+  function (this: IStreamModel, next: mongoose.HookNextFunction) {
+    const currentTime = new Date();
 
-  this.duration = Math.ceil(
-    (this.connectUpdated.valueOf() - this.connectCreated.valueOf()) / 1000,
-  );
+    this.duration = Math.ceil(
+      (this.connectUpdated.valueOf() - this.connectCreated.valueOf()) / 1000,
+    );
 
-  this.bitrate =
-    this.duration > 0 ? Math.ceil((this.bytes * 8) / this.duration / 1024) : 0;
+    this.bitrate =
+      this.duration > 0
+        ? Math.ceil((this.bytes * 8) / this.duration / 1024)
+        : 0;
 
-  if (this.isNew) {
-    const addr = ip6addr.parse(this.ip);
+    if (this.isNew) {
+      const addr = ip6addr.parse(this.ip);
 
-    this.ip =
-      addr.kind() === 'ipv6'
-        ? addr.toString({ format: 'v6' })
-        : addr.toString({ format: 'v4' });
+      this.ip =
+        addr.kind() === 'ipv6'
+          ? addr.toString({ format: 'v6' })
+          : addr.toString({ format: 'v4' });
 
-    this.totalConnectionsCount = 0;
-    this.peakViewersCount = 0;
+      this.totalConnectionsCount = 0;
+      this.peakViewersCount = 0;
 
-    this.createdAt = currentTime;
-  }
+      this.createdAt = currentTime;
+    }
 
-  this.updatedAt = currentTime;
+    this.updatedAt = currentTime;
 
-  next();
-});
+    next();
+  },
+);
 
-schema.pre('save', async function (
-  this: IStreamModel,
-  next: mongoose.HookNextFunction,
-) {
-  const streamViewers = await streamService.countViewers(this);
+schema.pre(
+  'save',
+  async function (this: IStreamModel, next: mongoose.HookNextFunction) {
+    const streamViewers = await streamService.countViewers(this);
 
-  this.totalConnectionsCount = streamViewers.totalConnectionsCount;
-  this.peakViewersCount = streamViewers.peakViewersCount;
+    this.totalConnectionsCount = streamViewers.totalConnectionsCount;
+    this.peakViewersCount = streamViewers.peakViewersCount;
 
-  try {
-    await ipService.upsert(this.ip);
-  } catch (error) {
-    console.log('stream_failed_to_save_ip', error);
-  }
+    try {
+      await ipService.upsert(this.ip);
+    } catch (error) {
+      console.log('stream_failed_to_save_ip', error);
+    }
 
-  return next();
-});
+    return next();
+  },
+);
 
 schema.virtual('isLive').get(function (this: IStreamModel) {
   const stream =

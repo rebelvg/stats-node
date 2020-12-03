@@ -36,49 +36,51 @@ export const schema = new Schema(
   },
 );
 
-schema.pre('validate', function (
-  this: ISubscriberModel,
-  next: mongoose.HookNextFunction,
-) {
-  const updatedAt = new Date();
+schema.pre(
+  'validate',
+  function (this: ISubscriberModel, next: mongoose.HookNextFunction) {
+    const updatedAt = new Date();
 
-  if (this.isNew) {
-    const addr = ip6addr.parse(this.ip);
+    if (this.isNew) {
+      const addr = ip6addr.parse(this.ip);
 
-    this.ip =
-      addr.kind() === 'ipv6'
-        ? addr.toString({ format: 'v6' })
-        : addr.toString({ format: 'v4' });
-  }
+      this.ip =
+        addr.kind() === 'ipv6'
+          ? addr.toString({ format: 'v6' })
+          : addr.toString({ format: 'v4' });
+    }
 
-  this.duration = Math.ceil(
-    (this.connectUpdated.valueOf() - this.connectCreated.valueOf()) / 1000,
-  );
+    this.duration = Math.ceil(
+      (this.connectUpdated.valueOf() - this.connectCreated.valueOf()) / 1000,
+    );
 
-  this.bitrate =
-    this.duration > 0 ? Math.ceil((this.bytes * 8) / this.duration / 1024) : 0;
+    this.bitrate =
+      this.duration > 0
+        ? Math.ceil((this.bytes * 8) / this.duration / 1024)
+        : 0;
 
-  if (this.isNew) {
-    this.createdAt = updatedAt;
-  }
+    if (this.isNew) {
+      this.createdAt = updatedAt;
+    }
 
-  this.updatedAt = updatedAt;
+    this.updatedAt = updatedAt;
 
-  next();
-});
+    next();
+  },
+);
 
-schema.pre('save', async function (
-  this: ISubscriberModel,
-  next: mongoose.HookNextFunction,
-) {
-  try {
-    await ipService.upsert(this.ip);
-  } catch (error) {
-    console.log('subscriber_failed_to_save_ip', error);
-  }
+schema.pre(
+  'save',
+  async function (this: ISubscriberModel, next: mongoose.HookNextFunction) {
+    try {
+      await ipService.upsert(this.ip);
+    } catch (error) {
+      console.log('subscriber_failed_to_save_ip', error);
+    }
 
-  return next();
-});
+    return next();
+  },
+);
 
 schema.virtual('isLive').get(function (this: ISubscriberModel) {
   const subscribers =
