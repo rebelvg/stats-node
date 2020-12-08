@@ -32,5 +32,5 @@ export const NMS = [
 export const API = {
   port: 8000,
   googleCallbackHost: 'http://localhost:8000',
-  googleRedirect: 'http://localhost:3000',
+  googleRedirect: 'http://localhost:3000/login',
 };
