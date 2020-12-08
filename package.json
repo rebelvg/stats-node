@@ -1,7 +1,7 @@
 {
   "name": "stats-node",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "src/index.ts",
   "license": "MIT",
   "scripts": {
     "prepush": "yarn run lint",
