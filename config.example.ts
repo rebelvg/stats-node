@@ -6,6 +6,11 @@ export const DB = {
   password: undefined,
 };
 
+export const GOOGLE_KEYS = {
+  client_id: null,
+  client_secret: null,
+};
+
 export const AMS = [
   {
     name: 'ams1',

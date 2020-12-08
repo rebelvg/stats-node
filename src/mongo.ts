@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 import { MongoClient, Db, Collection } from 'mongodb';
 
-import { DB } from './config';
+import { DB } from '../config';
 
 (mongoose as any).Promise = Promise;
 

@@ -4,8 +4,8 @@ import * as moment from 'moment';
 import * as mongoose from 'mongoose';
 
 import { DB } from '../config';
-import { Stream } from '../models/stream';
-import { Subscriber } from '../models/subscriber';
+import { Stream } from '../src/models/stream';
+import { Subscriber } from '../src/models/subscriber';
 
 const amsMongoUrl = new URL(`mongodb://${DB.host}`);
 
