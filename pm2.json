@@ -2,8 +2,8 @@
   "apps": [
     {
       "name": "stats-node",
-      "interpreter": "none",
-      "script": "yarn",
+      "interpreter": "node",
+      "script": "dist/src/index.js",
       "args": "start",
       "log_date_format": "YYYY-MM-DD HH:mm:ss.SSS Z"
     }

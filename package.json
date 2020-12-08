@@ -8,11 +8,13 @@
     "lint": "eslint . --ext .ts && prettier --list-different \"**/*.{ts,js,json,css,md}\"",
     "lint:fix": "eslint . --ext .ts --fix && prettier --write \"**/*.{ts,js,json,css,md}\"",
     "migrate": "ts-node migrate.ts",
+    "start:prod": "yarn build && node dist/src/index.js",
     "start": "ts-node .",
     "docker": "docker-compose up -d",
     "docker:import": "docker exec mongodb mongorestore",
-    "pm2:setup": "pm2 start pm2.json",
-    "pm2": "yarn install && yarn run migrate && pm2 restart stats-node",
+    "pre:deploy": "yarn install && yarn run migrate && yarn run build",
+    "pm2:setup": "yarn run pre:deploy && pm2 start pm2.json",
+    "pm2": "yarn run pre:deploy && pm2 restart stats-node",
     "build": "tsc"
   },
   "dependencies": {
