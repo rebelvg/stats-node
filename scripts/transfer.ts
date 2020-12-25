@@ -7,22 +7,22 @@ import { DB } from '../config';
 import { Stream } from '../src/models/stream';
 import { Subscriber } from '../src/models/subscriber';
 
-const amsMongoUrl = new URL(`mongodb://${DB.host}`);
+const amsMongoUrl = new URL(`mongodb://${DB.HOST}`);
 
-if (DB.authDb) {
-  amsMongoUrl.username = encodeURIComponent(DB.user);
-  amsMongoUrl.password = encodeURIComponent(DB.password);
+if (DB.AUTH_SOURCE) {
+  amsMongoUrl.username = encodeURIComponent(DB.USER);
+  amsMongoUrl.password = encodeURIComponent(DB.PASSWORD);
 
-  amsMongoUrl.searchParams.set('authSource', DB.authDb);
+  amsMongoUrl.searchParams.set('authSource', DB.AUTH_SOURCE);
 }
 
-const nodeMongoUrl = new URL(`mongodb://${DB.host}`);
+const nodeMongoUrl = new URL(`mongodb://${DB.HOST}`);
 
-if (DB.authDb) {
-  nodeMongoUrl.username = encodeURIComponent(DB.user);
-  nodeMongoUrl.password = encodeURIComponent(DB.password);
+if (DB.AUTH_SOURCE) {
+  nodeMongoUrl.username = encodeURIComponent(DB.USER);
+  nodeMongoUrl.password = encodeURIComponent(DB.PASSWORD);
 
-  nodeMongoUrl.searchParams.set('authSource', DB.authDb);
+  nodeMongoUrl.searchParams.set('authSource', DB.AUTH_SOURCE);
 }
 
 mongoose.connect(nodeMongoUrl.href, { useMongoClient: true }, (error) => {

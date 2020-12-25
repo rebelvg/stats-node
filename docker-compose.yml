@@ -1,9 +1,9 @@
 version: '3.7'
 
 services:
-  mongodb:
+  stats_node_db:
     image: mongo:latest
-    container_name: mongodb
+    container_name: stats_node_db
     environment:
       - MONGO_DATA_DIR=/data/db
       - MONGO_LOG_DIR=/dev/null

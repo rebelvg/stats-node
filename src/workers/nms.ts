@@ -56,9 +56,9 @@ async function getNodeStats(
 }
 
 async function updateStats(nmsConfig: IWorkerConfig) {
-  const { name, apiHost, apiToken } = nmsConfig;
+  const { NAME, API_HOST, API_TOKEN } = nmsConfig;
 
-  const channels = await getNodeStats(apiHost, apiToken);
+  const channels = await getNodeStats(API_HOST, API_TOKEN);
 
   const stats: ILiveStats[0] = {};
 
@@ -77,7 +77,7 @@ async function updateStats(nmsConfig: IWorkerConfig) {
             const subscriberQuery: Partial<ISubscriberModel> = {
               app: subscriber.app,
               channel: subscriber.stream,
-              serverType: name,
+              serverType: NAME,
               serverId: subscriber.clientId,
               connectCreated: subscriber.connectCreated,
             };
@@ -108,7 +108,7 @@ async function updateStats(nmsConfig: IWorkerConfig) {
             const streamQuery: Partial<IStreamModel> = {
               app: channelData.publisher.app,
               channel: channelData.publisher.stream,
-              serverType: name,
+              serverType: NAME,
               serverId: channelData.publisher.clientId,
               connectCreated: channelData.publisher.connectCreated,
             };
@@ -153,11 +153,11 @@ async function runUpdate() {
   await Promise.all(
     NMS.map(async (nmsConfig) => {
       try {
-        const { name } = nmsConfig;
+        const { NAME } = nmsConfig;
 
         const stats = await updateStats(nmsConfig);
 
-        _.set(liveStats, [name], stats);
+        _.set(liveStats, [NAME], stats);
       } catch (error) {
         if (error.code === 'ECONNREFUSED') {
           console.log('nms_update_econnrefused', error.message);

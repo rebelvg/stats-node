@@ -49,9 +49,9 @@ async function getNodeStats(
 }
 
 async function updateStats(amsConfig: IWorkerConfig) {
-  const { name, apiHost, apiToken } = amsConfig;
+  const { NAME, API_HOST, API_TOKEN } = amsConfig;
 
-  const channels = await getNodeStats(apiHost, apiToken);
+  const channels = await getNodeStats(API_HOST, API_TOKEN);
 
   const stats: ILiveStats[0] = {};
 
@@ -70,7 +70,7 @@ async function updateStats(amsConfig: IWorkerConfig) {
             const subscriberQuery: Partial<ISubscriberModel> = {
               app: subscriber.app,
               channel: subscriber.channel,
-              serverType: name,
+              serverType: NAME,
               serverId: subscriber.serverId,
               connectCreated: new Date(subscriber.connectCreated),
             };
@@ -101,7 +101,7 @@ async function updateStats(amsConfig: IWorkerConfig) {
             const streamQuery: Partial<IStreamModel> = {
               app: channelData.publisher.app,
               channel: channelData.publisher.channel,
-              serverType: name,
+              serverType: NAME,
               serverId: channelData.publisher.serverId,
               connectCreated: new Date(channelData.publisher.connectCreated),
             };

@@ -6,7 +6,7 @@ import { DB } from '../config';
 (mongoose as any).Promise = Promise;
 
 export async function connectMongoose() {
-  await mongoose.connect(`mongodb://${DB.host}/${DB.dbName}`, {
+  await mongoose.connect(`mongodb://${DB.HOST}/${DB.NAME}`, {
     useMongoClient: true,
   });
 }
@@ -19,9 +19,9 @@ export interface IMigration {
 let mongoClientDb: Db;
 
 export async function connectMongoDriver(): Promise<MongoClient> {
-  const client = await MongoClient.connect(`mongodb://${DB.host}`);
+  const client = await MongoClient.connect(`mongodb://${DB.HOST}`);
 
-  mongoClientDb = client.db(DB.dbName);
+  mongoClientDb = client.db(DB.NAME);
 
   return client;
 }

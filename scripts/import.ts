@@ -6,13 +6,13 @@ import { DB } from '../config';
 import { Stream } from '../src/models/stream';
 import { Subscriber } from '../src/models/subscriber';
 
-const mongoUrl = new URL(`mongodb://${DB.host}`);
+const mongoUrl = new URL(`mongodb://${DB.HOST}`);
 
-if (DB.authDb) {
-  mongoUrl.username = encodeURIComponent(DB.user);
-  mongoUrl.password = encodeURIComponent(DB.password);
+if (DB.AUTH_SOURCE) {
+  mongoUrl.username = encodeURIComponent(DB.USER);
+  mongoUrl.password = encodeURIComponent(DB.PASSWORD);
 
-  mongoUrl.searchParams.set('authSource', DB.authDb);
+  mongoUrl.searchParams.set('authSource', DB.AUTH_SOURCE);
 }
 
 (async () => {

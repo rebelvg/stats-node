@@ -44,6 +44,6 @@ router.get(
       },
     );
 
-    ctx.redirect(API.googleRedirect + `/?token=${token}`);
+    ctx.redirect(API.GOOGLE_REDIRECT_URL + `/?token=${token}`);
   },
 );

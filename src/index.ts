@@ -19,21 +19,21 @@ process.on('uncaughtException', (error) => {
 });
 
 // remove previous unix socket
-if (typeof API.port === 'string') {
-  if (fs.existsSync(API.port)) {
-    fs.unlinkSync(API.port);
+if (typeof API.PORT === 'string') {
+  if (fs.existsSync(API.PORT)) {
+    fs.unlinkSync(API.PORT);
   }
 }
 
 (async () => {
   await connectMongoose();
 
-  app.listen(API.port, () => {
+  app.listen(API.PORT, () => {
     console.log('http_server_running');
 
     // set unix socket rw rights for nginx
-    if (typeof API.port === 'string') {
-      fs.chmodSync(API.port, '777');
+    if (typeof API.PORT === 'string') {
+      fs.chmodSync(API.PORT, '777');
     }
   });
 })();

@@ -7,9 +7,9 @@ import { API, GOOGLE_KEYS } from '../../config';
 passport.use(
   new Strategy(
     {
-      clientID: GOOGLE_KEYS.client_id,
-      clientSecret: GOOGLE_KEYS.client_secret,
-      callbackURL: `${API.googleCallbackHost}/users/auth/google/callback`,
+      clientID: GOOGLE_KEYS.CLIENT_ID,
+      clientSecret: GOOGLE_KEYS.CLIENT_SECRET,
+      callbackURL: `${API.GOOGLE_CALLBACK_HOST}/users/auth/google/callback`,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {

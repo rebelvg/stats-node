@@ -9,21 +9,21 @@ import { hideFields } from '../helpers/hide-fields';
 
 function findServerByHost(server: string) {
   return _.find(STREAM_SERVERS, (streamServer) =>
-    streamServer.hosts.includes(server),
+    streamServer.HOSTS.includes(server),
   );
 }
 
 function isLive(server: string, app: string, channel: string): boolean {
   const streamServer = findServerByHost(server);
 
-  return !!liveStats?.[streamServer?.name]?.[app]?.[channel]?.publisher;
+  return !!liveStats?.[streamServer?.NAME]?.[app]?.[channel]?.publisher;
 }
 
 function getViewers(server: string, app: string, channel: string): number {
   const streamServer = findServerByHost(server);
 
   return (
-    liveStats?.[streamServer?.name]?.[app]?.[channel]?.subscribers?.length || 0
+    liveStats?.[streamServer?.NAME]?.[app]?.[channel]?.subscribers?.length || 0
   );
 }
 
@@ -31,7 +31,7 @@ function getDuration(server: string, app: string, channel: string): number {
   const streamServer = findServerByHost(server);
 
   return (
-    liveStats?.[streamServer?.name]?.[app]?.[channel]?.publisher?.duration || 0
+    liveStats?.[streamServer?.NAME]?.[app]?.[channel]?.publisher?.duration || 0
   );
 }
 
@@ -39,7 +39,7 @@ function getBitrate(server: string, app: string, channel: string): number {
   const streamServer = findServerByHost(server);
 
   return (
-    liveStats?.[streamServer?.name]?.[app]?.[channel]?.publisher?.bitrate || 0
+    liveStats?.[streamServer?.NAME]?.[app]?.[channel]?.publisher?.bitrate || 0
   );
 }
 
@@ -47,7 +47,7 @@ function getLastBitrate(server: string, app: string, channel: string): number {
   const streamServer = findServerByHost(server);
 
   return (
-    liveStats?.[streamServer?.name]?.[app]?.[channel]?.publisher?.lastBitrate ||
+    liveStats?.[streamServer?.NAME]?.[app]?.[channel]?.publisher?.lastBitrate ||
     0
   );
 }
@@ -56,7 +56,7 @@ function getStartTime(server: string, app: string, channel: string): Date {
   const streamServer = findServerByHost(server);
 
   return (
-    liveStats?.[streamServer?.name]?.[app]?.[channel]?.publisher
+    liveStats?.[streamServer?.NAME]?.[app]?.[channel]?.publisher
       ?.connectCreated || null
   );
 }

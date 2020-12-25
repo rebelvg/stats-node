@@ -18,10 +18,10 @@ export interface ILiveStats {
 }
 
 export interface IWorkerConfig {
-  name: string;
-  hosts: string[];
-  apiHost: string;
-  apiToken: string;
+  NAME: string;
+  HOSTS: string[];
+  API_HOST: string;
+  API_TOKEN: string;
 }
 
 export const STREAM_SERVERS: IWorkerConfig[] = AMS.concat(NMS);

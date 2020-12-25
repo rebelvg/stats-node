@@ -1,36 +1,36 @@
 export const DB = {
-  host: 'localhost',
-  dbName: 'nodestats',
-  authDb: undefined,
-  user: undefined,
-  password: undefined,
+  HOST: 'localhost',
+  NAME: 'nodestats',
+  AUTH_SOURCE: undefined,
+  USER: undefined,
+  PASSWORD: undefined,
 };
 
 export const GOOGLE_KEYS = {
-  client_id: null,
-  client_secret: null,
+  CLIENT_ID: null,
+  CLIENT_SECRET: null,
 };
 
 export const AMS = [
   {
-    name: 'ams1',
-    hosts: ['localhost:11001'],
-    apiHost: 'http://localhost:11001',
-    apiToken: null,
+    NAME: 'ams1',
+    HOSTS: ['ams-host:80'],
+    API_HOST: 'http://ams-host:80',
+    API_TOKEN: null,
   },
 ];
 
 export const NMS = [
   {
-    name: 'nms1',
-    hosts: ['localhost:11002'],
-    apiHost: 'http://localhost:11002',
-    apiToken: null,
+    NAME: 'nms1',
+    HOSTS: ['nms-host:80'],
+    API_HOST: 'http://nms-host:80',
+    API_TOKEN: null,
   },
 ];
 
 export const API = {
-  port: 8000,
-  googleCallbackHost: 'http://localhost:8000',
-  googleRedirect: 'http://localhost:3000/login',
+  PORT: 8000,
+  GOOGLE_CALLBACK_HOST: 'http://localhost:8000',
+  GOOGLE_REDIRECT_URL: 'http://localhost:3000/login',
 };

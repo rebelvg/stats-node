@@ -27,13 +27,6 @@ module.exports = {
     eqeqeq: ['error', 'always'],
     curly: ['error', 'all'],
     'no-multiple-empty-lines': ['error', { max: 1 }],
-    'no-unused-vars': [
-      'error',
-      {
-        args: 'none',
-        varsIgnorePattern: '^_',
-      },
-    ],
     'no-empty': ['error', { allowEmptyCatch: true }],
     'prefer-arrow-callback': ['error'],
     'require-await': 'error',
@@ -55,6 +48,14 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     // '@typescript-eslint/explicit-function-return-type': ['error'],
     '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-unused-vars': 'off',
+    '@typescript-eslint/no-require-imports': ['error'],
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        args: 'none',
+        varsIgnorePattern: '^_',
+      },
+    ],
   },
 };
