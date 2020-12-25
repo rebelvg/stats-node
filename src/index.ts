@@ -6,7 +6,7 @@ import { connectMongoose } from './mongo';
 import './passport';
 import './workers';
 
-import { API } from './config';
+import { API } from '../config';
 
 process.on('unhandledRejection', (reason, p) => {
   throw reason;

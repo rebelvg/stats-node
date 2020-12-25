@@ -2,14 +2,13 @@ import * as passport from 'koa-passport';
 import { Strategy } from 'passport-google-oauth20';
 
 import { User } from '../models/user';
-import * as googleKeys from '../google-keys.json';
-import { API } from '../config';
+import { API, GOOGLE_KEYS } from '../../config';
 
 passport.use(
   new Strategy(
     {
-      clientID: googleKeys.web.client_id,
-      clientSecret: googleKeys.web.client_secret,
+      clientID: GOOGLE_KEYS.client_id,
+      clientSecret: GOOGLE_KEYS.client_secret,
       callbackURL: `${API.googleCallbackHost}/users/auth/google/callback`,
     },
     async (accessToken, refreshToken, profile, done) => {

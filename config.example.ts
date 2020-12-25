@@ -6,6 +6,11 @@ export const DB = {
   password: undefined,
 };
 
+export const GOOGLE_KEYS = {
+  client_id: null,
+  client_secret: null,
+};
+
 export const AMS = [
   {
     name: 'ams1',
@@ -27,5 +32,5 @@ export const NMS = [
 export const API = {
   port: 8000,
   googleCallbackHost: 'http://localhost:8000',
-  googleRedirect: 'http://localhost:3000',
+  googleRedirect: 'http://localhost:3000/login',
 };

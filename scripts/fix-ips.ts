@@ -1,4 +1,4 @@
-import { connectMongoDriver, MongoCollections } from '../mongo';
+import { connectMongoDriver, MongoCollections } from '../src/mongo';
 
 (async () => {
   const mongoClient = await connectMongoDriver();

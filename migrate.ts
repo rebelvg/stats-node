@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-import { connectMongoDriver, MongoCollections } from './mongo';
+import { connectMongoDriver, MongoCollections } from './src/mongo';
 
 async function migrate() {
   const mongoClient = await connectMongoDriver();

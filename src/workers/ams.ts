@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import { Stream, IStreamModel } from '../models/stream';
 import { Subscriber, ISubscriberModel } from '../models/subscriber';
 
-import { AMS } from '../config';
+import { AMS } from '../../config';
 import { IWorkerConfig, ILiveStats, liveStats } from './';
 import { streamService } from '../services/stream';
 

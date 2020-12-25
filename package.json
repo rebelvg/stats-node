@@ -1,7 +1,7 @@
 {
   "name": "stats-node",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "src/index.ts",
   "license": "MIT",
   "scripts": {
     "prepush": "yarn run lint",
@@ -10,11 +10,14 @@
     "lint": "eslint . --ext .ts && yarn run prettier",
     "lint:fix": "eslint . --ext .ts --fix && yarn run prettier:fix",
     "migrate": "ts-node migrate.ts",
+    "start:prod": "yarn build && node dist/src/index.js",
     "start": "ts-node .",
     "docker": "docker-compose up -d",
     "docker:import": "docker exec mongodb mongorestore",
-    "pm2:setup": "pm2 start pm2.json",
-    "pm2": "yarn install && yarn run migrate && pm2 restart stats-node"
+    "pre:deploy": "yarn install && yarn run migrate && yarn run build",
+    "pm2:setup": "yarn run pre:deploy && pm2 start pm2.json",
+    "pm2": "yarn run pre:deploy && pm2 restart stats-node",
+    "build": "tsc"
   },
   "dependencies": {
     "@koa/cors": "^3.1.0",

@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 
-import { connectMongoDriver, MongoCollections } from '../mongo';
+import { connectMongoDriver, MongoCollections } from '../src/mongo';
 
 const REBEL_ID = '5a3a62c866fa07792cfcee67';
 const PYRO_ID = '5a3fb3f666fa07792cfceec2';
