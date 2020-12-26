@@ -8,10 +8,10 @@ services:
       - MONGO_DATA_DIR=/data/db
       - MONGO_LOG_DIR=/dev/null
     volumes:
-      - mongodata:/data/db
+      - stats_node_db:/data/db
       - ./dump:/dump
     ports:
       - 27017:27017
 
 volumes:
-  mongodata:
+  stats_node_db:
