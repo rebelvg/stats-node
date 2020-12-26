@@ -5,8 +5,10 @@ module.exports = {
   },
   parser: '@typescript-eslint/parser',
   parserOptions: {
+    project: './tsconfig.eslint.json',
     ecmaVersion: 2018,
   },
+  ignorePatterns: ['.eslintrc.js'],
   plugins: ['@typescript-eslint'],
   extends: [
     'eslint:recommended',
@@ -44,9 +46,8 @@ module.exports = {
       'error',
       { blankLine: 'always', prev: '*', next: 'return' },
     ],
-    'no-return-await': 'error',
     '@typescript-eslint/no-explicit-any': 'off',
-    // '@typescript-eslint/explicit-function-return-type': ['error'],
+    '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-require-imports': ['error'],
     'no-unused-vars': 'off',
@@ -57,5 +58,7 @@ module.exports = {
         varsIgnorePattern: '^_',
       },
     ],
+    'no-return-await': 'off',
+    '@typescript-eslint/return-await': 'error',
   },
 };
