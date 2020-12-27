@@ -11,8 +11,8 @@ export interface INmsStreamsResponse {
     [channel: string]: {
       publisher: {
         app: string;
-        stream: string;
-        clientId: string;
+        channel: string;
+        connectId: string;
         connectCreated: Date;
         bytes: number;
         ip: string;
@@ -27,8 +27,8 @@ export interface INmsStreamsResponse {
       };
       subscribers: {
         app: string;
-        stream: string;
-        clientId: string;
+        channel: string;
+        connectId: string;
         connectCreated: Date;
         bytes: number;
         ip: string;
@@ -66,8 +66,6 @@ class NmsWorker extends BaseWorker {
         if (channelStats.publisher) {
           publisher = {
             ...channelStats.publisher,
-            channel: channelStats.publisher.stream,
-            connectId: channelStats.publisher.clientId,
           };
         }
 
@@ -75,8 +73,6 @@ class NmsWorker extends BaseWorker {
           publisher,
           subscribers: channelStats.subscribers.map((item) => ({
             ...item,
-            channel: item.stream,
-            connectId: item.clientId,
           })),
         };
       });
