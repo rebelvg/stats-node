@@ -29,6 +29,7 @@ convict.addFormat({
         API_TOKEN: {
           format: String,
           default: null,
+          sensitive: true,
         },
       })
         .load(item)
@@ -76,16 +77,19 @@ const config = convict({
     PASSWORD: {
       format: (value) => (_.isString(value) ? value : null),
       default: null,
+      sensitive: true,
     },
   },
   GOOGLE_OAUTH: {
     CLIENT_ID: {
       format: String,
       default: null,
+      sensitive: true,
     },
     CLIENT_SECRET: {
       format: String,
       default: null,
+      sensitive: true,
     },
   },
   AMS: {
