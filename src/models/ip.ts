@@ -20,6 +20,7 @@ export interface IIPModel extends Document {
     status: string;
     timezone: string;
     zip: string;
+    message: string;
   };
   createdAt: Date;
   updatedAt: Date;

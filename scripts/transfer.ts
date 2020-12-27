@@ -65,10 +65,10 @@ mongoose.connect(nodeMongoUrl.href, { useMongoClient: true }, (error) => {
 
   for (const subscriber of nodeSubscribers) {
     const subDoc = new Subscriber({
+      server: 'ams',
       app: subscriber.app,
       channel: subscriber.channel,
-      serverType: 'ams',
-      serverId: subscriber.id,
+      connectId: subscriber.id,
       connectCreated: moment.unix(subscriber.timestamp).toDate(),
       connectUpdated: moment.unix(subscriber.stats.timestamp).toDate(),
       bytes: subscriber.stats.bytes_out,
@@ -83,10 +83,10 @@ mongoose.connect(nodeMongoUrl.href, { useMongoClient: true }, (error) => {
 
   for (const stream of nodeStreams) {
     const streamDoc = new Stream({
+      server: 'ams',
       app: stream.app,
       channel: stream.channel,
-      serverType: 'ams',
-      serverId: stream.id,
+      connectId: stream.id,
       connectCreated: moment.unix(stream.timestamp).toDate(),
       connectUpdated: moment.unix(stream.stats.timestamp).toDate(),
       bytes: stream.stats.bytes_in,

@@ -13,9 +13,9 @@ export async function up(): Promise<void> {
   for await (const record of cursor) {
     const streamRecords = await streams
       .find({
+        server: record.server,
         app: record.app,
         channel: record.channel,
-        serverType: record.serverType,
         connectUpdated: { $gte: record.connectCreated },
         connectCreated: { $lte: record.connectUpdated },
       })

@@ -33,7 +33,7 @@ if (DB.AUTH_SOURCE) {
     const stream = new Stream({
       app: data.app,
       channel: data.channel,
-      serverId: data.id,
+      connectId: data.id,
       connectCreated: moment.unix(data.timestamp).toDate(),
       connectUpdated: moment.unix(data.stats.timestamp).toDate(),
       bytes: data.stats.bytes_in,
@@ -62,7 +62,7 @@ if (DB.AUTH_SOURCE) {
     const subscriber = new Subscriber({
       app: data.app,
       channel: data.channel,
-      serverId: data.id,
+      connectId: data.id,
       connectCreated: moment.unix(data.timestamp).toDate(),
       connectUpdated: moment.unix(data.stats.timestamp).toDate(),
       bytes: data.stats.bytes_out,

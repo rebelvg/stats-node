@@ -11,10 +11,10 @@ const Schema = mongoose.Schema;
 
 export const schema = new Schema(
   {
+    server: { type: String, required: true },
     app: { type: String, required: true },
     channel: { type: String, required: true },
-    serverType: { type: String, required: true },
-    serverId: { type: String, required: true },
+    connectId: { type: String, required: true },
     connectCreated: { type: Date, required: true, index: true },
     connectUpdated: { type: Date, required: true, index: true },
     bytes: { type: Number, required: true },
@@ -85,7 +85,7 @@ schema.pre(
 
 schema.virtual('isLive').get(function (this: ISubscriberModel) {
   const subscribers =
-    liveStats?.[this.serverType]?.[this.app]?.[this.channel]?.subscribers || [];
+    liveStats?.[this.server]?.[this.app]?.[this.channel]?.subscribers || [];
 
   return !!_.find(subscribers, ['id', this.id]);
 });

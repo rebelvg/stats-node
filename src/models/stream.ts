@@ -5,10 +5,10 @@ import { ObjectId } from 'mongodb';
 import { schema } from '../schemas/stream';
 
 export interface IStreamModel extends Document {
+  server: string;
   app: string;
   channel: string;
-  serverType: string;
-  serverId: string;
+  connectId: string;
   connectCreated: Date;
   connectUpdated: Date;
   bytes: number;

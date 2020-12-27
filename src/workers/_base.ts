@@ -33,8 +33,6 @@ export interface IGenericStreamsResponse {
   };
 }
 
-// todo, rename connectId field, rename serverType field
-
 export abstract class BaseWorker {
   abstract getStats(
     API_HOST: string,
@@ -85,10 +83,10 @@ export abstract class BaseWorker {
 
             if (channelData.publisher) {
               const streamQuery: Partial<IStreamModel> = {
+                server: NAME,
                 app: channelData.publisher.app,
                 channel: channelData.publisher.channel,
-                serverType: NAME,
-                serverId: channelData.publisher.connectId,
+                connectId: channelData.publisher.connectId,
                 connectCreated: channelData.publisher.connectCreated,
               };
 
@@ -119,10 +117,10 @@ export abstract class BaseWorker {
 
             for (const subscriber of channelData.subscribers) {
               const subscriberQuery: Partial<ISubscriberModel> = {
+                server: NAME,
                 app: subscriber.app,
                 channel: subscriber.channel,
-                serverType: NAME,
-                serverId: subscriber.connectId,
+                connectId: subscriber.connectId,
                 connectCreated: subscriber.connectCreated,
               };
 

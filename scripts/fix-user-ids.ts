@@ -1,6 +1,8 @@
 import { ObjectId } from 'mongodb';
 
 import { connectMongoDriver, MongoCollections } from '../src/mongo';
+import { IStreamModel } from '../src/models/stream';
+import { IIPModel } from '../src/models/ip';
 
 const REBEL_ID = '5a3a62c866fa07792cfcee67';
 const PYRO_ID = '5a3fb3f666fa07792cfceec2';
@@ -12,8 +14,10 @@ const OCTOCAT_ID = '5a6f7bc948f63728881611e0';
 (async () => {
   const mongoClient = await connectMongoDriver();
 
-  const streamsCollection = MongoCollections.getCollection('streams');
-  const ipsCollection = MongoCollections.getCollection('ips');
+  const streamsCollection = MongoCollections.getCollection<IStreamModel>(
+    'streams',
+  );
+  const ipsCollection = MongoCollections.getCollection<IIPModel>('ips');
 
   const ipsNoUserId = await streamsCollection.distinct('ip', { userId: null });
 
@@ -88,7 +92,7 @@ const OCTOCAT_ID = '5a6f7bc948f63728881611e0';
           );
         }
 
-        if (ip.incudes('109.229')) {
+        if (ip.includes('109.229')) {
           await streamsCollection.updateMany(
             { userId: null, ip },
             { $set: { userId: new ObjectId(SLOW_ID) } },

@@ -6,16 +6,15 @@ import * as ip6addr from 'ip6addr';
 import { liveStats } from '../workers';
 import { IStreamModel } from '../models/stream';
 import { ipService } from '../services/ip';
-import { streamService } from '../services/stream';
 
 const Schema = mongoose.Schema;
 
 export const schema = new Schema(
   {
+    server: { type: String, required: true },
     app: { type: String, required: true },
     channel: { type: String, required: true },
-    serverType: { type: String, required: true },
-    serverId: { type: String, required: true },
+    connectId: { type: String, required: true },
     connectCreated: { type: Date, required: true, index: true },
     connectUpdated: { type: Date, required: true, index: true },
     bytes: { type: Number, required: true },
@@ -89,7 +88,7 @@ schema.pre(
 
 schema.virtual('isLive').get(function (this: IStreamModel) {
   const stream =
-    liveStats?.[this.serverType]?.[this.app]?.[this.channel]?.publisher || null;
+    liveStats?.[this.server]?.[this.app]?.[this.channel]?.publisher || null;
 
   if (!stream) {
     return false;
