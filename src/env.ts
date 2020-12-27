@@ -27,7 +27,7 @@ convict.addFormat({
         },
       })
         .load(source)
-        .validate();
+        .validate({ strict: true });
     }
   },
 });
