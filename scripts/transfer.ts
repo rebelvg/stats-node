@@ -3,7 +3,7 @@ import { URL } from 'url';
 import * as moment from 'moment';
 import * as mongoose from 'mongoose';
 
-import { DB } from '../config';
+import { DB } from '../src/config';
 import { Stream } from '../src/models/stream';
 import { Subscriber } from '../src/models/subscriber';
 

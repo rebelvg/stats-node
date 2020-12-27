@@ -4,4 +4,4 @@ node_modules/
 logs/
 dump/
 dist/
-config.ts
+/config.json

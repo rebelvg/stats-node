@@ -5,7 +5,7 @@ import { ObjectId } from 'mongodb';
 import { Stream, IStreamModel } from '../models/stream';
 import { Subscriber, ISubscriberModel } from '../models/subscriber';
 
-import { NMS } from '../../config';
+import { NMS } from '../config';
 import { ILiveStats, IWorkerConfig, liveStats } from './';
 import { streamService } from '../services/stream';
 

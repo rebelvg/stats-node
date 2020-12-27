@@ -2,7 +2,7 @@ import { MongoClient } from 'mongodb';
 import { URL } from 'url';
 import * as moment from 'moment';
 
-import { DB } from '../config';
+import { DB } from '../src/config';
 import { Stream } from '../src/models/stream';
 import { Subscriber } from '../src/models/subscriber';
 

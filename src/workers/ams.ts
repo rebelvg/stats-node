@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import { Stream, IStreamModel } from '../models/stream';
 import { Subscriber, ISubscriberModel } from '../models/subscriber';
 
-import { AMS } from '../../config';
+import { AMS } from '../config';
 import { IWorkerConfig, ILiveStats, liveStats } from './';
 import { streamService } from '../services/stream';
 
@@ -146,11 +146,11 @@ async function runUpdate() {
   await Promise.all(
     AMS.map(async (amsConfig) => {
       try {
-        const { name } = amsConfig;
+        const { NAME } = amsConfig;
 
         const stats = await updateStats(amsConfig);
 
-        _.set(liveStats, [name], stats);
+        _.set(liveStats, [NAME], stats);
       } catch (error) {
         if (error.code === 'ECONNREFUSED') {
           console.log('ams_update_econnrefused', error.message);

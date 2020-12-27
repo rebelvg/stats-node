@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 
-import { AMS, NMS } from '../../config';
+import { AMS, NMS } from '../config';
 import { IStreamModel } from '../models/stream';
 import { ISubscriberModel } from '../models/subscriber';
 
