@@ -6,7 +6,7 @@ import { Stream } from '../models/stream';
 import { topStreamersQuery, totalDurationQuery } from './graphs';
 
 export function find(ctx: Router.IRouterContext) {
-  ctx.body;
+  // TODO
 }
 
 export async function graph(ctx: Router.RouterContext) {
