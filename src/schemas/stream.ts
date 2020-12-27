@@ -31,6 +31,8 @@ export const schema = new Schema(
       index: true,
       default: null,
     },
+    apiSource: { type: String, required: false, default: null },
+    apiResponse: { type: Object, required: false, default: null },
     createdAt: { type: Date, required: true, index: true },
     updatedAt: { type: Date, required: true, index: true },
   },

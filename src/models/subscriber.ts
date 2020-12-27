@@ -3,6 +3,8 @@ import { Document } from 'mongoose';
 import { ObjectId } from 'mongodb';
 
 import { schema } from '../schemas/subscriber';
+import { ApiSourceEnum } from './stream';
+import { IGenericStreamsResponse } from '../workers/_base';
 
 export interface ISubscriberModel extends Document {
   server: string;
@@ -18,6 +20,8 @@ export interface ISubscriberModel extends Document {
   bitrate: number;
   userId: ObjectId;
   streamIds: ObjectId[];
+  apiSource: ApiSourceEnum;
+  apiResponse: IGenericStreamsResponse['app']['channel']['subscribers'][0];
   createdAt: Date;
   updatedAt: Date;
   isLive: boolean;

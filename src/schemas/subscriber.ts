@@ -28,6 +28,8 @@ export const schema = new Schema(
       index: true,
       default: null,
     },
+    apiSource: { type: String, required: false, default: null },
+    apiResponse: { type: Object, required: false, default: null },
     streamIds: { type: [Schema.Types.ObjectId], required: true, default: [] },
     createdAt: { type: Date, required: true, index: true },
     updatedAt: { type: Date, required: true, index: true },

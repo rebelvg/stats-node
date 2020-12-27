@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb';
 
 import { ILiveStats, liveStats } from '.';
 import { IWorkerConfig } from '../config';
-import { IStreamModel, Stream } from '../models/stream';
+import { ApiSourceEnum, IStreamModel, Stream } from '../models/stream';
 import { ISubscriberModel, Subscriber } from '../models/subscriber';
 import { streamService } from '../services/stream';
 
@@ -34,6 +34,8 @@ export interface IGenericStreamsResponse {
 }
 
 export abstract class BaseWorker {
+  abstract apiSource: ApiSourceEnum;
+
   abstract getStats(
     API_HOST: string,
     API_TOKEN: string,
@@ -112,6 +114,8 @@ export abstract class BaseWorker {
                 streamRecord.lastBitrate = lastBitrate;
                 streamRecord.bytes = channelData.publisher.bytes;
                 streamRecord.connectUpdated = statsUpdateTime;
+                streamRecord.apiSource = this.apiSource;
+                streamRecord.apiResponse = channelData.publisher;
               }
             }
 
@@ -148,6 +152,9 @@ export abstract class BaseWorker {
                   item.toHexString(),
                 );
               }
+
+              subscriberRecord.apiSource = this.apiSource;
+              subscriberRecord.apiResponse = subscriber;
 
               await subscriberRecord.save();
 

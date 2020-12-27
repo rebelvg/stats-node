@@ -2,10 +2,11 @@ import axios from 'axios';
 import * as _ from 'lodash';
 import { ObjectId } from 'mongodb';
 import { NMS } from '../config';
+import { ApiSourceEnum } from '../models/stream';
 
 import { BaseWorker, IGenericStreamsResponse } from './_base';
 
-interface INmsStreamsResponse {
+export interface INmsStreamsResponse {
   [app: string]: {
     [channel: string]: {
       publisher: {
@@ -39,6 +40,8 @@ interface INmsStreamsResponse {
 }
 
 class NmsWorker extends BaseWorker {
+  apiSource = ApiSourceEnum.NMS;
+
   async getStats(
     host: string,
     token: string,

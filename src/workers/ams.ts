@@ -2,9 +2,10 @@ import axios from 'axios';
 import * as _ from 'lodash';
 
 import { AMS } from '../config';
+import { ApiSourceEnum } from '../models/stream';
 import { BaseWorker, IGenericStreamsResponse } from './_base';
 
-export interface IStreamsResponse {
+export interface IAmsStreamsResponse {
   [app: string]: {
     [channel: string]: {
       publisher: {
@@ -32,12 +33,20 @@ export interface IStreamsResponse {
 }
 
 class AmsWorker extends BaseWorker {
-  async getStats(host: string, token: string) {
-    const { data } = await axios.get<IStreamsResponse>(`${host}/v1/streams`, {
-      headers: {
-        token,
+  apiSource = ApiSourceEnum.AMS;
+
+  async getStats(
+    host: string,
+    token: string,
+  ): Promise<IGenericStreamsResponse> {
+    const { data } = await axios.get<IAmsStreamsResponse>(
+      `${host}/v1/streams`,
+      {
+        headers: {
+          token,
+        },
       },
-    });
+    );
 
     const stats: IGenericStreamsResponse = {};
 
