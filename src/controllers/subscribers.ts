@@ -5,7 +5,7 @@ import * as _ from 'lodash';
 import { Subscriber } from '../models/subscriber';
 import { IP } from '../models/ip';
 import { hideFields } from '../helpers/hide-fields';
-import { subscriberService } from '../services/subscriber';
+import { streamService } from '../services/stream';
 
 export async function findById(ctx: Router.IRouterContext, next: Next) {
   const subscriber = await Subscriber.findById(ctx.params.id).populate([
@@ -16,8 +16,8 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
     throw new Error('subscriber_not_found');
   }
 
-  const streams = await subscriberService
-    .getStreams(subscriber, {})
+  const streams = await streamService
+    .getBySubscriberIds(subscriber.streamIds, {})
     .sort({ connectCreated: 1 })
     .populate(['location']);
 

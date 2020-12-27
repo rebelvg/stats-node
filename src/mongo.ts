@@ -27,8 +27,8 @@ export async function connectMongoDriver(): Promise<MongoClient> {
 }
 
 export class MongoCollections {
-  public static getCollection(name: string): Collection {
-    return mongoClientDb.collection(name);
+  public static getCollection<T>(name: string): Collection<T> {
+    return mongoClientDb.collection<T>(name);
   }
 
   public static get Migrations(): Collection<IMigration> {

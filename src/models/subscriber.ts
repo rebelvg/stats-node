@@ -17,6 +17,7 @@ export interface ISubscriberModel extends Document {
   duration: number;
   bitrate: number;
   userId: ObjectId;
+  streamIds: ObjectId[];
   createdAt: Date;
   updatedAt: Date;
   isLive: boolean;

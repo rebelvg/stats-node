@@ -17,16 +17,6 @@ export interface ILiveStats {
   };
 }
 
-export interface IWorkerConfig {
-  NAME: string;
-  HOSTS: string[];
-  API_HOST: string;
-  API_TOKEN: string;
-}
-
-export const STREAM_SERVERS: IWorkerConfig[] = AMS.concat(NMS);
+export const STREAM_SERVERS = AMS.concat(NMS);
 
 export const liveStats: ILiveStats = {};
-
-import './ams';
-import './nms';

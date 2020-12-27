@@ -1,7 +1,8 @@
+import { IStreamModel } from '../src/models/stream';
 import { MongoCollections } from '../src/mongo';
 
 export async function up(): Promise<void> {
-  const streams = MongoCollections.getCollection('streams');
+  const streams = MongoCollections.getCollection<IStreamModel>('streams');
 
   const cursor = streams.find();
 

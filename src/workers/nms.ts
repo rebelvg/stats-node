@@ -1,15 +1,11 @@
 import axios from 'axios';
 import * as _ from 'lodash';
 import { ObjectId } from 'mongodb';
-
-import { Stream, IStreamModel } from '../models/stream';
-import { Subscriber, ISubscriberModel } from '../models/subscriber';
-
 import { NMS } from '../config';
-import { ILiveStats, IWorkerConfig, liveStats } from './';
-import { streamService } from '../services/stream';
 
-export interface IStreamsResponse {
+import { BaseWorker, IGenericStreamsResponse } from './_base';
+
+interface INmsStreamsResponse {
   [app: string]: {
     [channel: string]: {
       publisher: {
@@ -42,142 +38,60 @@ export interface IStreamsResponse {
   };
 }
 
-async function getNodeStats(
-  host: string,
-  token: string,
-): Promise<IStreamsResponse> {
-  const { data } = await axios.get<IStreamsResponse>(`${host}/api/streams`, {
-    headers: {
-      token,
-    },
-  });
+class NmsWorker extends BaseWorker {
+  async getStats(
+    host: string,
+    token: string,
+  ): Promise<IGenericStreamsResponse> {
+    const { data } = await axios.get<INmsStreamsResponse>(
+      `${host}/api/streams`,
+      {
+        headers: {
+          token,
+        },
+      },
+    );
 
-  return data;
-}
+    const stats: IGenericStreamsResponse = {};
 
-async function updateStats(nmsConfig: IWorkerConfig) {
-  const { NAME, API_HOST, API_TOKEN } = nmsConfig;
+    _.forEach(data, (appStats, appName) => {
+      stats[appName] = {};
 
-  const channels = await getNodeStats(API_HOST, API_TOKEN);
+      _.forEach(appStats, (channelStats, channelName) => {
+        let publisher: IGenericStreamsResponse['app']['channel']['publisher'] = null;
 
-  const stats: ILiveStats[0] = {};
-
-  const statsUpdateTime = new Date();
-
-  await Promise.all(
-    _.map(channels, (channelObjs, appName) => {
-      return Promise.all(
-        _.map(channelObjs, async (channelData, channelName) => {
-          _.set(stats, [appName, channelName], {
-            publisher: null,
-            subscribers: [],
-          });
-
-          for (const subscriber of channelData.subscribers) {
-            const subscriberQuery: Partial<ISubscriberModel> = {
-              app: subscriber.app,
-              channel: subscriber.stream,
-              serverType: NAME,
-              serverId: subscriber.clientId,
-              connectCreated: subscriber.connectCreated,
-            };
-
-            let subscriberObj = await Subscriber.findOne(subscriberQuery);
-
-            if (!subscriberObj) {
-              subscriberQuery.connectUpdated = statsUpdateTime;
-              subscriberQuery.bytes = subscriber.bytes;
-              subscriberQuery.ip = subscriber.ip;
-              subscriberQuery.protocol = subscriber.protocol;
-              subscriberQuery.userId = subscriber.userId;
-
-              subscriberObj = new Subscriber(subscriberQuery);
-            } else {
-              subscriberObj.bytes = subscriber.bytes;
-              subscriberObj.connectUpdated = statsUpdateTime;
-            }
-
-            await subscriberObj.save();
-
-            stats[appName][channelName].subscribers.push(subscriberObj);
-          }
-
-          let streamRecord: IStreamModel = null;
-
-          if (channelData.publisher) {
-            const streamQuery: Partial<IStreamModel> = {
-              app: channelData.publisher.app,
-              channel: channelData.publisher.stream,
-              serverType: NAME,
-              serverId: channelData.publisher.clientId,
-              connectCreated: channelData.publisher.connectCreated,
-            };
-
-            streamRecord = await Stream.findOne(streamQuery);
-
-            if (!streamRecord) {
-              streamQuery.connectUpdated = statsUpdateTime;
-              streamQuery.bytes = channelData.publisher.bytes;
-              streamQuery.ip = channelData.publisher.ip;
-              streamQuery.protocol = 'rtmp';
-              streamQuery.userId = channelData.publisher.userId;
-              streamQuery.lastBitrate = 0;
-
-              streamRecord = new Stream(streamQuery);
-            } else {
-              const lastBitrate = streamService.calculateLastBitrate(
-                channelData.publisher.bytes,
-                streamRecord.bytes,
-                statsUpdateTime,
-                streamRecord.connectUpdated,
-              );
-
-              streamRecord.bytes = channelData.publisher.bytes;
-              streamRecord.connectUpdated = statsUpdateTime;
-              streamRecord.lastBitrate = lastBitrate;
-            }
-
-            await streamRecord.save();
-
-            _.set(stats, [appName, channelName, 'publisher'], streamRecord);
-          }
-        }),
-      );
-    }),
-  );
-
-  return stats;
-}
-
-async function runUpdate() {
-  await Promise.all(
-    NMS.map(async (nmsConfig) => {
-      try {
-        const { NAME } = nmsConfig;
-
-        const stats = await updateStats(nmsConfig);
-
-        _.set(liveStats, [NAME], stats);
-      } catch (error) {
-        if (error.code === 'ECONNREFUSED') {
-          console.log('nms_update_econnrefused', error.message);
-
-          return;
+        if (channelStats.publisher) {
+          publisher = {
+            ...channelStats.publisher,
+            channel: channelStats.publisher.stream,
+            connectId: channelStats.publisher.clientId,
+          };
         }
 
-        console.log('nms_update_error', error);
-      }
-    }),
-  );
+        stats[appName][channelName] = {
+          publisher,
+          subscribers: channelStats.subscribers.map((item) => ({
+            ...item,
+            channel: item.stream,
+            connectId: item.clientId,
+          })),
+        };
+      });
+    });
+
+    return stats;
+  }
 }
 
-(async () => {
+export async function runNmsUpdate() {
   console.log('nms_worker_running');
+
+  const nmsWorker = new NmsWorker();
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    await runUpdate();
+    await nmsWorker.runUpdate(NMS);
 
     await new Promise((resolve) => setTimeout(resolve, 5000));
   }
-})();
+}

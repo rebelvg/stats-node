@@ -28,6 +28,7 @@ export const schema = new Schema(
       index: true,
       default: null,
     },
+    streamIds: { type: [Schema.Types.ObjectId], required: true, default: [] },
     createdAt: { type: Date, required: true, index: true },
     updatedAt: { type: Date, required: true, index: true },
   },

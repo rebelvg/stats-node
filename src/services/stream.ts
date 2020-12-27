@@ -1,31 +1,12 @@
 import * as _ from 'lodash';
 import { DocumentQuery } from 'mongoose';
+import { ObjectId } from 'mongodb';
 
 import { IStreamModel, Stream } from '../models/stream';
-import { ISubscriberModel, Subscriber } from '../models/subscriber';
 import { filterSubscribers } from '../helpers/filter-subscribers';
+import { subscriberService } from './subscriber';
 
 class StreamService {
-  public getSubscribers(
-    streamRecord: IStreamModel,
-    query: any,
-  ): DocumentQuery<ISubscriberModel[], ISubscriberModel> {
-    query = {
-      $and: [
-        {
-          app: streamRecord.app,
-          channel: streamRecord.channel,
-          serverType: streamRecord.serverType,
-          connectUpdated: { $gte: streamRecord.connectCreated },
-          connectCreated: { $lte: streamRecord.connectUpdated },
-        },
-        query,
-      ],
-    };
-
-    return Subscriber.find(query);
-  }
-
   public getRelatedStreams(
     streamRecord: IStreamModel,
     query: any,
@@ -46,8 +27,8 @@ class StreamService {
     return Stream.find(query);
   }
 
-  public async countViewers(streamRecord: IStreamModel) {
-    const subscribers = await this.getSubscribers(streamRecord, {});
+  public async countViewersById(id: ObjectId) {
+    const subscribers = await subscriberService.getByStreamId(id, {});
 
     const totalConnectionsCount = subscribers.length;
     let peakViewersCount = 0;
@@ -80,6 +61,24 @@ class StreamService {
         ((updateTime.valueOf() - updateTimePrev.valueOf()) / 1000) /
         1024,
     );
+  }
+
+  public getBySubscriberIds(
+    streamIds: ObjectId[],
+    params: any,
+  ): DocumentQuery<IStreamModel[], IStreamModel> {
+    const query = {
+      $and: [
+        {
+          _id: {
+            $in: streamIds,
+          },
+        },
+        params,
+      ],
+    };
+
+    return Stream.find(query);
   }
 }
 

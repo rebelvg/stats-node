@@ -1,5 +1,11 @@
 import { env } from './env';
-import { IWorkerConfig } from './workers';
+
+export interface IWorkerConfig {
+  NAME: string;
+  HOSTS: string[];
+  API_HOST: string;
+  API_TOKEN: string;
+}
 
 export const API = {
   PORT: env.API.PORT,

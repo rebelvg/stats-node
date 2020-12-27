@@ -3,10 +3,9 @@ import * as fs from 'fs';
 import { app } from './app';
 import { connectMongoose } from './mongo';
 
-import './passport';
-import './workers';
-
 import { API } from './config';
+import { runAmsUpdate } from './workers/ams';
+import { runNmsUpdate } from './workers/nms';
 
 process.on('unhandledRejection', (reason, p) => {
   throw reason;
@@ -36,4 +35,7 @@ if (typeof API.PORT === 'string') {
       fs.chmodSync(API.PORT, '777');
     }
   });
+
+  runAmsUpdate();
+  runNmsUpdate();
 })();

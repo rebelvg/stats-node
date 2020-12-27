@@ -1,26 +1,21 @@
-import { DocumentQuery } from 'mongoose';
-import { IStreamModel, Stream } from '../models/stream';
-import { ISubscriberModel } from '../models/subscriber';
+import { ObjectId } from 'mongodb';
+
+import { Subscriber } from '../models/subscriber';
 
 class SubscriberService {
-  public getStreams(
-    subscriberRecord: ISubscriberModel,
-    query: any,
-  ): DocumentQuery<IStreamModel[], IStreamModel> {
-    query = {
+  public getByStreamId(id: ObjectId, params: any) {
+    const query = {
       $and: [
         {
-          app: subscriberRecord.app,
-          channel: subscriberRecord.channel,
-          serverType: subscriberRecord.serverType,
-          connectUpdated: { $gte: subscriberRecord.connectCreated },
-          connectCreated: { $lte: subscriberRecord.connectUpdated },
+          streamIds: {
+            $in: [id],
+          },
         },
-        query,
+        params,
       ],
     };
 
-    return Stream.find(query);
+    return Subscriber.find(query);
   }
 }
 

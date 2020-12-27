@@ -5,7 +5,7 @@ import { hideUserData } from '../helpers/hide-fields';
 import { Stream } from '../models/stream';
 import { Subscriber } from '../models/subscriber';
 
-const totalDurationQuery = [
+export const totalDurationQuery = [
   {
     $match: {
       app: 'live',
@@ -57,7 +57,7 @@ const totalDurationQuery = [
   },
 ];
 
-const avgStatsQuery = [
+export const avgStatsQuery = [
   {
     $match: {
       app: 'live',
@@ -79,7 +79,7 @@ const avgStatsQuery = [
   },
 ];
 
-const topStreamersQuery = [
+export const topStreamersQuery = [
   {
     $match: {
       app: 'live',
@@ -323,6 +323,11 @@ export async function graphs(ctx: Router.IRouterContext) {
     { $limit: 5 },
   ]);
 
+  const topStreamersRes = topStreamers.map((topUser) => ({
+    ...topUser,
+    user: hideUserData(topUser.user, true),
+  }));
+
   const monthlyStatsStreams = await Stream.aggregate([...monthlyStatsQuery]);
 
   const monthlyStatsSubs = await Subscriber.aggregate([...monthlyStatsQuery]);
@@ -338,11 +343,6 @@ export async function graphs(ctx: Router.IRouterContext) {
   const timeOfDayStatsSubs = await Subscriber.aggregate([
     ...timeOfDayStatsQuery,
   ]);
-
-  const topStreamersRes = topStreamers.map((topUser) => ({
-    ...topUser,
-    user: hideUserData(topUser.user, true),
-  }));
 
   ctx.body = {
     totalDurationStreams,

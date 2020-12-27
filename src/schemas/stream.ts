@@ -77,11 +77,6 @@ schema.pre(
 schema.pre(
   'save',
   async function (this: IStreamModel, next: mongoose.HookNextFunction) {
-    const streamViewers = await streamService.countViewers(this);
-
-    this.totalConnectionsCount = streamViewers.totalConnectionsCount;
-    this.peakViewersCount = streamViewers.peakViewersCount;
-
     try {
       await ipService.upsert(this.ip);
     } catch (error) {
