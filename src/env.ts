@@ -1,20 +1,25 @@
 import * as convict from 'convict';
+import * as _ from 'lodash';
 
 convict.addFormat({
   name: 'stream-server-config',
-  validate: function (sources) {
-    if (!Array.isArray(sources)) {
+  validate: function (value) {
+    if (!_.isArray(value)) {
       throw new Error('must_be_an_array');
     }
 
-    for (const source of sources) {
+    for (const item of value) {
       convict({
         NAME: {
           format: String,
           default: null,
         },
         HOSTS: {
-          format: Array,
+          format: (value) => {
+            if (!_.every(value, _.isString)) {
+              throw new Error('not_valid_array');
+            }
+          },
           default: null,
         },
         API_HOST: {
@@ -26,7 +31,7 @@ convict.addFormat({
           default: null,
         },
       })
-        .load(source)
+        .load(item)
         .validate({ strict: true });
     }
   },
@@ -35,7 +40,11 @@ convict.addFormat({
 const config = convict({
   API: {
     PORT: {
-      format: 'port',
+      format: (value) => {
+        if (!['string', 'number'].includes(typeof value)) {
+          throw new Error('bad_value_type');
+        }
+      },
       default: null,
     },
     GOOGLE_CALLBACK_HOST: {
@@ -57,15 +66,15 @@ const config = convict({
       default: null,
     },
     AUTH_SOURCE: {
-      format: '*',
+      format: (value) => (_.isString(value) ? value : null),
       default: null,
     },
     USER: {
-      format: '*',
+      format: (value) => (_.isString(value) ? value : null),
       default: null,
     },
     PASSWORD: {
-      format: '*',
+      format: (value) => (_.isString(value) ? value : null),
       default: null,
     },
   },
