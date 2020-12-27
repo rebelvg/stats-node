@@ -1,7 +1,7 @@
 import * as Router from 'koa-router';
 import * as _ from 'lodash';
-import { hideUserData } from '../helpers/hide-fields';
 
+import { hideUserData } from '../helpers/hide-fields';
 import { Stream } from '../models/stream';
 import { Subscriber } from '../models/subscriber';
 
