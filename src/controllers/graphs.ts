@@ -1,9 +1,11 @@
 import * as Router from 'koa-router';
 import * as _ from 'lodash';
+import { ObjectId } from 'mongodb';
 
 import { hideUserData } from '../helpers/hide-fields';
 import { Stream } from '../models/stream';
 import { Subscriber } from '../models/subscriber';
+import { userService } from '../services/user';
 
 export const totalDurationQuery = [
   {
@@ -53,7 +55,9 @@ export const totalDurationQuery = [
     },
   },
   {
-    $sort: { totalDurationSeconds: -1 },
+    $sort: {
+      totalDurationSeconds: -1,
+    },
   },
 ];
 
@@ -126,7 +130,7 @@ export const topStreamersQuery = [
   },
 ];
 
-const monthlyStatsQuery = [
+export const monthlyStatsQuery = [
   {
     $match: {
       app: 'live',
@@ -191,7 +195,7 @@ const monthlyStatsQuery = [
   },
 ];
 
-const weekDayStatsQuery = [
+export const weekDayStatsQuery = [
   {
     $project: {
       year: {
@@ -247,7 +251,7 @@ const weekDayStatsQuery = [
   },
 ];
 
-const timeOfDayStatsQuery = [
+export const timeOfDayStatsQuery = [
   {
     $project: {
       year: {
@@ -303,22 +307,242 @@ const timeOfDayStatsQuery = [
   },
 ];
 
+export const totalDurationSubscribersQuery = [
+  {
+    $match: {
+      app: 'live',
+    },
+  },
+  {
+    $lookup: {
+      from: 'subscribers',
+      localField: '_id',
+      foreignField: 'streamIds',
+      as: 'subscribers',
+    },
+  },
+  {
+    $unwind: {
+      path: '$subscribers',
+    },
+  },
+  {
+    $lookup: {
+      from: 'ips',
+      localField: 'subscribers.ip',
+      foreignField: 'ip',
+      as: 'ips',
+    },
+  },
+  {
+    $unwind: {
+      path: '$ips',
+    },
+  },
+  {
+    $group: {
+      _id: '$ips.api.country',
+      totalCount: { $sum: 1 },
+      totalDurationSeconds: { $sum: '$subscribers.duration' },
+    },
+  },
+  // {
+  //   $match: {
+  //     _id: {
+  //       $ne: null,
+  //     },
+  //   },
+  // },
+  // {
+  //   $addFields: {
+  //     totalDuration: {
+  //       $round: [{ $divide: ['$totalDuration', 60 * 60 * 24] }, 0],
+  //     },
+  //   },
+  // },
+  {
+    $project: {
+      _id: 1,
+      totalCount: 1,
+      totalDurationSeconds: 1,
+    },
+  },
+  {
+    $sort: {
+      totalDurationSeconds: -1,
+    },
+  },
+];
+
+const monthlyStatsSubscribersQuery = [
+  {
+    $match: {
+      app: 'live',
+    },
+  },
+  {
+    $lookup: {
+      from: 'subscribers',
+      localField: '_id',
+      foreignField: 'streamIds',
+      as: 'subscribers',
+    },
+  },
+  {
+    $unwind: {
+      path: '$subscribers',
+    },
+  },
+  {
+    $project: {
+      year: {
+        $year: '$subscribers.connectCreated',
+      },
+      month: {
+        $month: '$subscribers.connectCreated',
+      },
+      day: {
+        $dayOfMonth: '$subscribers.connectCreated',
+      },
+      hour: {
+        $hour: '$subscribers.connectCreated',
+      },
+      minutes: {
+        $minute: '$subscribers.connectCreated',
+      },
+      seconds: {
+        $second: '$subscribers.connectCreated',
+      },
+      milliseconds: {
+        $millisecond: '$subscribers.connectCreated',
+      },
+      dayOfYear: {
+        $dayOfYear: '$subscribers.connectCreated',
+      },
+      dayOfWeek: {
+        $isoDayOfWeek: '$subscribers.connectCreated',
+      },
+      week: {
+        $week: '$subscribers.connectCreated',
+      },
+      duration: {
+        $sum: '$subscribers.duration',
+      },
+    },
+  },
+  {
+    $group: {
+      _id: {
+        year: '$year',
+        month: '$month',
+      },
+      totalCount: {
+        $sum: 1,
+      },
+      totalDurationSeconds: {
+        $sum: '$duration',
+      },
+    },
+  },
+  {
+    $sort: {
+      '_id.year': 1,
+      '_id.month': 1,
+    },
+  },
+];
+
 export async function graphs(ctx: Router.IRouterContext) {
   const totalDurationStreams = await Stream.aggregate([
     ...totalDurationQuery,
     { $limit: 5 },
   ]);
 
-  const totalDurationSubs = await Subscriber.aggregate([
+  const totalDurationSubscribers = await Subscriber.aggregate([
     ...totalDurationQuery,
     { $limit: 5 },
   ]);
 
   const avgStatsStreams = await Stream.aggregate([...avgStatsQuery]);
 
-  const avgStatsSubs = await Subscriber.aggregate([...avgStatsQuery]);
+  const avgStatsSubscribers = await Subscriber.aggregate([...avgStatsQuery]);
+
+  const topStreamersResult = await Stream.aggregate([
+    ...topStreamersQuery,
+    { $limit: 5 },
+  ]);
+
+  const topStreamers = topStreamersResult.map((topUser) => ({
+    ...topUser,
+    user: hideUserData(topUser.user, true),
+  }));
+
+  const monthlyStatsStreams = await Stream.aggregate([...monthlyStatsQuery]);
+
+  const monthlyStatsSubscribers = await Subscriber.aggregate([
+    ...monthlyStatsQuery,
+  ]);
+
+  const dayOfWeekStatsStreams = await Stream.aggregate([...weekDayStatsQuery]);
+
+  const dayOfWeekStatsSubscribers = await Subscriber.aggregate([
+    ...weekDayStatsQuery,
+  ]);
+
+  const timeOfDayStatsStreams = await Stream.aggregate([
+    ...timeOfDayStatsQuery,
+  ]);
+
+  const timeOfDayStatsSubscribers = await Subscriber.aggregate([
+    ...timeOfDayStatsQuery,
+  ]);
+
+  ctx.body = {
+    totalDurationStreams,
+    totalDurationSubscribers,
+    avgStatsStreams,
+    avgStatsSubscribers,
+    topStreamers,
+    monthlyStatsStreams,
+    monthlyStatsSubscribers,
+    dayOfWeekStatsStreams,
+    dayOfWeekStatsSubscribers,
+    timeOfDayStatsStreams,
+    timeOfDayStatsSubscribers,
+  };
+}
+
+export async function graphsById(ctx: Router.RouterContext) {
+  const { id } = ctx.params;
+
+  const userRecord = await userService.getById(id);
+
+  const totalDurationStreams = await Stream.aggregate([
+    {
+      $match: {
+        userId: new ObjectId(id),
+      },
+    },
+    ...totalDurationQuery,
+    { $limit: 5 },
+  ]);
+
+  const totalDurationSubscribers = await Stream.aggregate([
+    {
+      $match: {
+        userId: new ObjectId(id),
+      },
+    },
+    ...totalDurationSubscribersQuery,
+    { $limit: 5 },
+  ]);
 
   const topStreamers = await Stream.aggregate([
+    {
+      $match: {
+        userId: new ObjectId(id),
+      },
+    },
     ...topStreamersQuery,
     { $limit: 5 },
   ]);
@@ -328,33 +552,38 @@ export async function graphs(ctx: Router.IRouterContext) {
     user: hideUserData(topUser.user, true),
   }));
 
-  const monthlyStatsStreams = await Stream.aggregate([...monthlyStatsQuery]);
+  const monthlyStatsStreams = await Stream.aggregate([
+    {
+      $match: {
+        userId: new ObjectId(id),
+      },
+    },
+    ...monthlyStatsQuery,
+  ]);
 
-  const monthlyStatsSubs = await Subscriber.aggregate([...monthlyStatsQuery]);
+  const monthlyStatsSubscribers = await Stream.aggregate([
+    {
+      $match: {
+        userId: new ObjectId(id),
+      },
+    },
+    ...monthlyStatsSubscribersQuery,
+  ]);
 
   const dayOfWeekStatsStreams = await Stream.aggregate([...weekDayStatsQuery]);
-
-  const dayOfWeekStatsSubs = await Subscriber.aggregate([...weekDayStatsQuery]);
 
   const timeOfDayStatsStreams = await Stream.aggregate([
     ...timeOfDayStatsQuery,
   ]);
 
-  const timeOfDayStatsSubs = await Subscriber.aggregate([
-    ...timeOfDayStatsQuery,
-  ]);
-
   ctx.body = {
     totalDurationStreams,
-    totalDurationSubs,
-    avgStatsStreams,
-    avgStatsSubs,
+    totalDurationSubscribers,
     topStreamers: topStreamersRes,
     monthlyStatsStreams,
-    monthlyStatsSubs,
+    monthlyStatsSubscribers,
     dayOfWeekStatsStreams,
-    dayOfWeekStatsSubs,
     timeOfDayStatsStreams,
-    timeOfDayStatsSubs,
+    user: hideUserData(userRecord, true),
   };
 }

@@ -1,7 +1,9 @@
 import * as Router from 'koa-router';
 
-import { graphs } from '../controllers/graphs';
+import { graphs, graphsById } from '../controllers/graphs';
 
 export const router = new Router();
 
 router.get('/', graphs);
+
+router.get('/:id', graphsById);
