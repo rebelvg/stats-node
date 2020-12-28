@@ -6,10 +6,9 @@ Statistics server/api for collecting data from various media servers about strea
 
 ### App Features
 
-- Multiplatform (Win/Mac/Linux)
 - Servers Support
+  - KLPQ Stream Service (based on node-media-server)
   - Adobe Media Server (with stats-node-ams)
-  - KLPQ Media Server (based on node-media-server)
 
 ### API Features
 
@@ -31,7 +30,7 @@ Statistics server/api for collecting data from various media servers about strea
 
 ### Links
 
-- [Node Media Server](https://github.com/rebelvg/stream-service)
+- [KLPQ Stream Service](https://github.com/rebelvg/stream-service)
 - [Adobe Media Server](http://www.adobe.com/products/adobe-media-server-family.html)
 - [Stats Node AMS](https://github.com/rebelvg/stats-node-ams)
 - [Google Plus API](https://console.developers.google.com/apis/library/plus.googleapis.com)
