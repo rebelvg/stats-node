@@ -11,10 +11,10 @@ const Schema = mongoose.Schema;
 
 export const schema = new Schema(
   {
-    server: { type: String, required: true },
-    app: { type: String, required: true },
-    channel: { type: String, required: true },
-    connectId: { type: String, required: true },
+    server: { type: String, required: true, index: true },
+    app: { type: String, required: true, index: true },
+    channel: { type: String, required: true, index: true },
+    connectId: { type: String, required: true, index: true },
     connectCreated: { type: Date, required: true, index: true },
     connectUpdated: { type: Date, required: true, index: true },
     bytes: { type: Number, required: true },
@@ -30,7 +30,12 @@ export const schema = new Schema(
     },
     apiSource: { type: String, required: false, default: null },
     apiResponse: { type: Object, required: false, default: null },
-    streamIds: { type: [Schema.Types.ObjectId], required: true, default: [] },
+    streamIds: {
+      type: [Schema.Types.ObjectId],
+      required: true,
+      default: [],
+      index: true,
+    },
     createdAt: { type: Date, required: true, index: true },
     updatedAt: { type: Date, required: true, index: true },
   },
