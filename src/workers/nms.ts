@@ -20,6 +20,7 @@ export interface INmsStreamsResponse {
         bytes: number;
         ip: string;
         protocol: string;
+        userId: ObjectId;
         audio: {
           audioCodec: number;
           codec: string;
@@ -33,7 +34,6 @@ export interface INmsStreamsResponse {
           size: string;
           fps: number;
         };
-        userId: ObjectId;
       };
       subscribers: {
         app: string;
