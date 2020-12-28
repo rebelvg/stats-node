@@ -21,7 +21,7 @@ export interface ISubscriberModel extends Document {
   userId: ObjectId;
   streamIds: ObjectId[];
   apiSource: ApiSourceEnum;
-  apiResponse: IGenericStreamsResponse['app']['channel']['subscribers'][0];
+  apiResponse: IGenericStreamsResponse['channels'][0]['subscribers'][0];
   createdAt: Date;
   updatedAt: Date;
   isLive: boolean;

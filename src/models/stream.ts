@@ -27,7 +27,7 @@ export interface IStreamModel extends Document {
   peakViewersCount: number;
   userId: ObjectId;
   apiSource: ApiSourceEnum;
-  apiResponse: IGenericStreamsResponse['app']['channel']['publisher'];
+  apiResponse: IGenericStreamsResponse['channels'][0]['publisher'];
   createdAt: Date;
   updatedAt: Date;
   isLive: boolean;
