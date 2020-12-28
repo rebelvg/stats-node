@@ -94,23 +94,11 @@ export function appChannelStats(ctx: Router.IRouterContext, next: Next) {
 export async function channels(ctx: Router.IRouterContext, next: Next) {
   const liveStatsClone = _.cloneDeep(liveStats);
 
-  const liveServers = [];
-
-  await Promise.all(
+  const liveServers = await Promise.all(
     _.map(liveStatsClone, async (serverObj, server) => {
-      const liveServer = {
-        server,
-        apps: [],
-      };
-
-      await Promise.all(
+      const apps = await Promise.all(
         _.map(serverObj, async (appObj, app) => {
-          const liveApp = {
-            app,
-            channels: [],
-          };
-
-          await Promise.all(
+          const channels = await Promise.all(
             _.map(appObj, async (channelObj, channel) => {
               const liveChannel = {
                 channel,
@@ -141,16 +129,24 @@ export async function channels(ctx: Router.IRouterContext, next: Next) {
 
                 liveChannel.subscribers.push(liveSubscriber);
               }
-
-              liveApp.channels.push(liveChannel);
             }),
           );
 
-          liveServer.apps.push(liveApp);
+          const liveApp = {
+            app,
+            channels,
+          };
+
+          return liveApp;
         }),
       );
 
-      liveServers.push(liveServer);
+      const liveServer = {
+        server,
+        apps,
+      };
+
+      return liveServer;
     }),
   );
 
