@@ -2,7 +2,7 @@
 
 ## Overview
 
-Statistics server/API for collecting data from various media servers about streams, streamers and stream viewers.
+Statistics server/api for collecting data from various media servers about streams, streamers and stream viewers.
 
 ### App Features
 
@@ -24,12 +24,13 @@ Statistics server/API for collecting data from various media servers about strea
 - Yarn
 - MongoDB
 - Google Plus API access
+- Docker
 
 ### Links
 
+- [Node Media Server](https://github.com/rebelvg/stream-service)
 - [Adobe Media Server](http://www.adobe.com/products/adobe-media-server-family.html)
 - [Stats Node AMS](https://github.com/rebelvg/stats-node-ams)
-- [Node Media Server](https://github.com/rebelvg/klpq-nms)
 - [Google Plus API](https://console.developers.google.com/apis/library/plus.googleapis.com)
 
 ## Frontend Counterpart
@@ -42,13 +43,14 @@ Statistics server/API for collecting data from various media servers about strea
 
 ```
 yarn install
-node .
+yarn start
 ```
 
 ### PM2 Support
 
 ```
-pm2 start pm2.json
+yarn pm2:setup
+yarn pm2
 ```
 
 ## Live Example
