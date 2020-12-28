@@ -129,6 +129,8 @@ export async function channels(ctx: Router.IRouterContext, next: Next) {
 
                 liveChannel.subscribers.push(liveSubscriber);
               }
+
+              return liveChannel;
             }),
           );
 
