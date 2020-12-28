@@ -20,10 +20,13 @@ Statistics server/api for collecting data from various media servers about strea
 
 ### Requirements
 
-- Node.js >= 8
+- Node.js LTS
 - Yarn
 - MongoDB
 - Google Plus API access
+
+### Dev Requirements
+
 - Docker
 
 ### Links
