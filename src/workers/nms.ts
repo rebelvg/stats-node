@@ -7,22 +7,32 @@ import { ApiSourceEnum } from '../models/stream';
 import { BaseWorker, IGenericStreamsResponse } from './_base';
 
 export interface INmsStreamsResponse {
-  [app: string]: {
-    [channel: string]: {
+  stats: {
+    app: string;
+    channels: {
+      channel: string;
       publisher: {
         app: string;
         channel: string;
         connectId: string;
         connectCreated: Date;
+        connectUpdated: Date;
         bytes: number;
         ip: string;
+        protocol: string;
         audio: {
+          audioCodec: number;
           codec: string;
           profile: string;
           samplerate: number;
           channels: number;
         };
-        video: { codec: string; size: string; fps: number };
+        video: {
+          videoCodec: number;
+          codec: string;
+          size: string;
+          fps: number;
+        };
         userId: ObjectId;
       };
       subscribers: {
@@ -30,13 +40,14 @@ export interface INmsStreamsResponse {
         channel: string;
         connectId: string;
         connectCreated: Date;
+        connectUpdated: Date;
         bytes: number;
         ip: string;
         protocol: string;
         userId: ObjectId;
       }[];
-    };
-  };
+    }[];
+  }[];
 }
 
 class NmsWorker extends BaseWorker {
@@ -45,37 +56,48 @@ class NmsWorker extends BaseWorker {
   async getStats(
     host: string,
     token: string,
-  ): Promise<IGenericStreamsResponse> {
-    const { data } = await axios.get<INmsStreamsResponse>(
-      `${host}/api/streams`,
-      {
-        headers: {
-          token,
-        },
+  ): Promise<IGenericStreamsResponse[]> {
+    const {
+      data: { stats: data },
+    } = await axios.get<INmsStreamsResponse>(`${host}/api/streams`, {
+      headers: {
+        token,
       },
-    );
+    });
 
-    const stats: IGenericStreamsResponse = {};
+    const stats: IGenericStreamsResponse[] = [];
 
-    _.forEach(data, (appStats, appName) => {
-      stats[appName] = {};
+    _.forEach(data, (appStats) => {
+      const { app } = appStats;
 
-      _.forEach(appStats, (channelStats, channelName) => {
-        let publisher: IGenericStreamsResponse['app']['channel']['publisher'] = null;
+      const liveApp: IGenericStreamsResponse = {
+        app,
+        channels: [],
+      };
+
+      _.forEach(appStats.channels, (channelStats) => {
+        const { channel } = channelStats;
+
+        const liveChannel: IGenericStreamsResponse['channels'][0] = {
+          channel,
+          publisher: null,
+          subscribers: [],
+        };
 
         if (channelStats.publisher) {
-          publisher = {
+          liveChannel.publisher = {
             ...channelStats.publisher,
           };
         }
 
-        stats[appName][channelName] = {
-          publisher,
-          subscribers: channelStats.subscribers.map((item) => ({
-            ...item,
-          })),
-        };
+        liveChannel.subscribers = channelStats.subscribers.map((item) => ({
+          ...item,
+        }));
+
+        liveApp.channels.push(liveChannel);
       });
+
+      stats.push(liveApp);
     });
 
     return stats;

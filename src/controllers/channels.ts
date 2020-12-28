@@ -97,23 +97,23 @@ export async function channels(ctx: Router.IRouterContext, next: Next) {
   const liveServers = [];
 
   await Promise.all(
-    _.map(liveStatsClone, async (serverObj, serverName) => {
+    _.map(liveStatsClone, async (serverObj, server) => {
       const liveServer = {
-        serverName,
+        server,
         apps: [],
       };
 
       await Promise.all(
-        _.map(serverObj, async (appObj, appName) => {
+        _.map(serverObj, async (appObj, app) => {
           const liveApp = {
-            appName,
+            app,
             channels: [],
           };
 
           await Promise.all(
-            _.map(appObj, async (channelObj, channelName) => {
+            _.map(appObj, async (channelObj, channel) => {
               const liveChannel = {
-                channelName,
+                channel,
                 publisher: null,
                 subscribers: [],
               };

@@ -8,29 +8,32 @@ import { ISubscriberModel, Subscriber } from '../models/subscriber';
 import { streamService } from '../services/stream';
 
 export interface IGenericStreamsResponse {
-  [app: string]: {
-    [channel: string]: {
-      publisher: {
-        app: string;
-        channel: string;
-        connectId: string;
-        connectCreated: Date;
-        bytes: number;
-        ip: string;
-        userId: ObjectId;
-      };
-      subscribers: {
-        app: string;
-        channel: string;
-        connectId: string;
-        connectCreated: Date;
-        bytes: number;
-        ip: string;
-        protocol: string;
-        userId: ObjectId;
-      }[];
+  app: string;
+  channels: {
+    channel: string;
+    publisher: {
+      app: string;
+      channel: string;
+      connectId: string;
+      connectCreated: Date;
+      connectUpdated: Date;
+      bytes: number;
+      ip: string;
+      protocol: string;
+      userId: ObjectId;
     };
-  };
+    subscribers: {
+      app: string;
+      channel: string;
+      connectId: string;
+      connectCreated: Date;
+      connectUpdated: Date;
+      bytes: number;
+      ip: string;
+      protocol: string;
+      userId: ObjectId;
+    }[];
+  }[];
 }
 
 export abstract class BaseWorker {
@@ -39,7 +42,7 @@ export abstract class BaseWorker {
   abstract getStats(
     API_HOST: string,
     API_TOKEN: string,
-  ): Promise<IGenericStreamsResponse>;
+  ): Promise<IGenericStreamsResponse[]>;
 
   public async runUpdate(NMS: IWorkerConfig[]) {
     await Promise.all(
@@ -73,9 +76,13 @@ export abstract class BaseWorker {
     const statsUpdateTime = new Date();
 
     await Promise.all(
-      _.map(data, (channelObjs, appName) => {
+      _.map(data, (channelObjs) => {
+        const { app: appName } = channelObjs;
+
         return Promise.all(
-          _.map(channelObjs, async (channelData, channelName) => {
+          _.map(channelObjs.channels, async (channelData) => {
+            const { channel: channelName } = channelData;
+
             _.set(stats, [appName, channelName], {
               publisher: null,
               subscribers: [],
@@ -98,7 +105,7 @@ export abstract class BaseWorker {
                 streamQuery.connectUpdated = statsUpdateTime;
                 streamQuery.bytes = channelData.publisher.bytes;
                 streamQuery.ip = channelData.publisher.ip;
-                streamQuery.protocol = 'rtmp';
+                streamQuery.protocol = channelData.publisher.protocol;
                 streamQuery.userId = channelData.publisher.userId;
                 streamQuery.lastBitrate = 0;
 
