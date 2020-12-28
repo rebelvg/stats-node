@@ -42,6 +42,7 @@ Statistics server/api for collecting data from various media servers about strea
 ### Run
 
 ```
+docker-compose up -d
 yarn install
 yarn start
 ```
