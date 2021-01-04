@@ -92,11 +92,15 @@ const config = convict({
       sensitive: true,
     },
   },
-  AMS: {
+  KLPQ_MEDIA_SERVER: {
     format: 'stream-server-config',
     default: null,
   },
-  NMS: {
+  NODE_MEDIA_SERVER: {
+    format: 'stream-server-config',
+    default: null,
+  },
+  ADOBE_MEDIA_SERVER: {
     format: 'stream-server-config',
     default: null,
   },

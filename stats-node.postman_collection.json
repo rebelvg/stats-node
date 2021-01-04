@@ -83,9 +83,9 @@
           }
         ],
         "url": {
-          "raw": "{{stats_node_host}}/channels/legacy/nms1/main",
+          "raw": "{{stats_node_host}}/channels/legacy/localhost/main",
           "host": ["{{stats_node_host}}"],
-          "path": ["channels", "legacy", "nms1", "main"]
+          "path": ["channels", "legacy", "localhost", "main"]
         }
       },
       "response": []
@@ -102,9 +102,9 @@
           }
         ],
         "url": {
-          "raw": "{{stats_node_host}}/channels/nms1/live/main",
+          "raw": "{{stats_node_host}}/channels/localhost/live/main",
           "host": ["{{stats_node_host}}"],
-          "path": ["channels", "nms1", "live", "main"]
+          "path": ["channels", "localhost", "live", "main"]
         }
       },
       "response": []
@@ -121,9 +121,9 @@
           }
         ],
         "url": {
-          "raw": "{{stats_node_host}}/channels/nms1/main",
+          "raw": "{{stats_node_host}}/channels/localhost/main",
           "host": ["{{stats_node_host}}"],
-          "path": ["channels", "nms1", "main"]
+          "path": ["channels", "localhost", "main"]
         }
       },
       "response": []

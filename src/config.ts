@@ -26,6 +26,8 @@ export const GOOGLE_OAUTH = {
   CLIENT_SECRET: env.GOOGLE_OAUTH.CLIENT_SECRET,
 };
 
-export const AMS: IWorkerConfig[] = env.AMS;
+export const KLPQ_MEDIA_SERVER: IWorkerConfig[] = env.KLPQ_MEDIA_SERVER;
 
-export const NMS: IWorkerConfig[] = env.NMS;
+export const NODE_MEDIA_SERVER: IWorkerConfig[] = env.NODE_MEDIA_SERVER;
+
+export const ADOBE_MEDIA_SERVER: IWorkerConfig[] = env.ADOBE_MEDIA_SERVER;

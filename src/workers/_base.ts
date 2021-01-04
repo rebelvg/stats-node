@@ -44,26 +44,37 @@ export abstract class BaseWorker {
     API_TOKEN: string,
   ): Promise<IGenericStreamsResponse[]>;
 
-  public async runUpdate(NMS: IWorkerConfig[]) {
+  public async runUpdate(servers: IWorkerConfig[]) {
     await Promise.all(
-      NMS.map(async (nmsConfig) => {
+      servers.map(async (config) => {
         try {
-          const { NAME } = nmsConfig;
+          const { NAME } = config;
 
-          const stats = await this.readStats(nmsConfig);
+          const stats = await this.readStats(config);
 
           _.set(liveStats, [NAME], stats);
         } catch (error) {
           if (error.code === 'ECONNREFUSED') {
-            console.log('nms_update_econnrefused', error.message);
+            console.log(this.apiSource, 'update_econnrefused', error.message);
 
             return;
           }
 
-          console.log('nms_update_error', error);
+          console.log(this.apiSource, 'update_error', error);
         }
       }),
     );
+  }
+
+  public async run(WORKER_CONFIG: IWorkerConfig[]) {
+    console.log(this.apiSource, 'worker_running');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await this.runUpdate(WORKER_CONFIG);
+
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
   }
 
   private async readStats(config: IWorkerConfig) {

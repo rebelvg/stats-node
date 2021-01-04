@@ -1,12 +1,12 @@
 import axios from 'axios';
 import * as _ from 'lodash';
 import { ObjectId } from 'mongodb';
-import { NMS } from '../config';
+import { KLPQ_MEDIA_SERVER } from '../config';
 import { ApiSourceEnum } from '../models/stream';
 
 import { BaseWorker, IGenericStreamsResponse } from './_base';
 
-export interface INmsStreamsResponse {
+interface IApiResponse {
   stats: {
     app: string;
     channels: {
@@ -50,8 +50,8 @@ export interface INmsStreamsResponse {
   }[];
 }
 
-class NmsWorker extends BaseWorker {
-  apiSource = ApiSourceEnum.NMS;
+class MediaServerWorker extends BaseWorker {
+  apiSource = ApiSourceEnum.KLPQ_MEDIA_SERVER;
 
   async getStats(
     host: string,
@@ -59,7 +59,7 @@ class NmsWorker extends BaseWorker {
   ): Promise<IGenericStreamsResponse[]> {
     const {
       data: { stats: data },
-    } = await axios.get<INmsStreamsResponse>(`${host}/api/streams`, {
+    } = await axios.get<IApiResponse>(`${host}/api/streams`, {
       headers: {
         token,
       },
@@ -104,15 +104,8 @@ class NmsWorker extends BaseWorker {
   }
 }
 
-export async function runNmsUpdate() {
-  console.log('nms_worker_running');
+export async function runUpdate() {
+  const mediaServerWorker = new MediaServerWorker();
 
-  const nmsWorker = new NmsWorker();
-
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    await nmsWorker.runUpdate(NMS);
-
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-  }
+  await mediaServerWorker.run(KLPQ_MEDIA_SERVER);
 }

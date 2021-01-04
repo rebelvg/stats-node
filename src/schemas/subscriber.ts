@@ -32,7 +32,8 @@ export const schema = new Schema(
     apiResponse: { type: Object, required: false, default: null },
     streamIds: {
       type: [Schema.Types.ObjectId],
-      required: true,
+      // disabled required since mongoose 4 expects array to have at least one item
+      // required: true,
       default: [],
       index: true,
     },

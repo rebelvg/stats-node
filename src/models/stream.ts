@@ -6,8 +6,9 @@ import { schema } from '../schemas/stream';
 import { IGenericStreamsResponse } from '../workers/_base';
 
 export enum ApiSourceEnum {
-  AMS = 'ams',
-  NMS = 'nms',
+  KLPQ_MEDIA_SERVER = 'klpq_media_server',
+  NODE_MEDIA_SERVER = 'node_media_server',
+  ADOBE_MEDIA_SERVER = 'adobe_media_server',
 }
 
 export interface IStreamModel extends Document {

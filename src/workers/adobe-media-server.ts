@@ -1,11 +1,11 @@
 import axios from 'axios';
 import * as _ from 'lodash';
 
-import { AMS } from '../config';
+import { ADOBE_MEDIA_SERVER } from '../config';
 import { ApiSourceEnum } from '../models/stream';
 import { BaseWorker, IGenericStreamsResponse } from './_base';
 
-export interface IAmsStreamsResponse {
+interface IApiResponse {
   stats: {
     app: string;
     channels: {
@@ -34,8 +34,8 @@ export interface IAmsStreamsResponse {
   }[];
 }
 
-class AmsWorker extends BaseWorker {
-  apiSource = ApiSourceEnum.AMS;
+class MediaServerWorker extends BaseWorker {
+  apiSource = ApiSourceEnum.ADOBE_MEDIA_SERVER;
 
   async getStats(
     host: string,
@@ -43,7 +43,7 @@ class AmsWorker extends BaseWorker {
   ): Promise<IGenericStreamsResponse[]> {
     const {
       data: { stats: data },
-    } = await axios.get<IAmsStreamsResponse>(`${host}/v1/streams`, {
+    } = await axios.get<IApiResponse>(`${host}/v1/streams`, {
       headers: {
         token,
       },
@@ -90,15 +90,8 @@ class AmsWorker extends BaseWorker {
   }
 }
 
-export async function runAmsUpdate() {
-  console.log('ams_worker_running');
+export async function runUpdate() {
+  const mediaServerWorker = new MediaServerWorker();
 
-  const amsWorker = new AmsWorker();
-
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    await amsWorker.runUpdate(AMS);
-
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-  }
+  await mediaServerWorker.run(ADOBE_MEDIA_SERVER);
 }

@@ -15,19 +15,27 @@
     "CLIENT_ID": null,
     "CLIENT_SECRET": null
   },
-  "AMS": [
+  "KLPQ_MEDIA_SERVER": [
     {
-      "NAME": "ams1",
-      "HOSTS": ["ams-host:80"],
-      "API_HOST": "http://ams-host:80",
+      "NAME": "klpq-media-server",
+      "HOSTS": ["localhost"],
+      "API_HOST": "http://klpq-media-server:80",
       "API_TOKEN": null
     }
   ],
-  "NMS": [
+  "NODE_MEDIA_SERVER": [
     {
-      "NAME": "nms1",
-      "HOSTS": ["nms-host:80"],
-      "API_HOST": "http://nms-host:80",
+      "NAME": "node-media-server",
+      "HOSTS": ["localhost"],
+      "API_HOST": "http://node-media-server:80",
+      "API_TOKEN": null
+    }
+  ],
+  "ADOBE_MEDIA_SERVER": [
+    {
+      "NAME": "adobe-media-server",
+      "HOSTS": ["localhost"],
+      "API_HOST": "http://adobe-media-server:80",
       "API_TOKEN": null
     }
   ]

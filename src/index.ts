@@ -4,8 +4,8 @@ import { app } from './app';
 import { connectMongoose } from './mongo';
 
 import { API } from './config';
-import { runAmsUpdate } from './workers/ams';
-import { runNmsUpdate } from './workers/nms';
+import { runUpdate as runUpdate_kms } from './workers/klpq-media-server';
+import { runUpdate as runUpdate_ams } from './workers/adobe-media-server';
 
 process.on('unhandledRejection', (reason, p) => {
   throw reason;
@@ -36,6 +36,6 @@ if (typeof API.PORT === 'string') {
     }
   });
 
-  runAmsUpdate();
-  runNmsUpdate();
+  runUpdate_kms();
+  runUpdate_ams();
 })();
