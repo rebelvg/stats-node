@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import * as uuidv4 from 'uuid/v4';
+import * as uuid from 'uuid';
 import { IUserModel } from '../models/user';
 
 const Schema = mongoose.Schema;
@@ -29,8 +29,8 @@ schema.pre(
     if (this.isNew) {
       this.isAdmin = false;
       this.isStreamer = false;
-      this.token = uuidv4();
-      this.streamKey = uuidv4();
+      this.token = uuid.v4();
+      this.streamKey = uuid.v4();
     }
 
     next();
