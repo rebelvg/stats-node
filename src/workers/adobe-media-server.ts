@@ -75,10 +75,12 @@ class MediaServerWorker extends BaseWorker {
           };
         }
 
-        liveChannel.subscribers = channelStats.subscribers.map((item) => ({
-          ...item,
-          userId: null,
-        }));
+        liveChannel.subscribers = channelStats.subscribers.map(
+          (subscriber) => ({
+            ...subscriber,
+            userId: null,
+          }),
+        );
 
         liveApp.channels.push(liveChannel);
       });

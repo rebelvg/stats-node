@@ -20,19 +20,21 @@ interface IApiResponse {
         bytes: number;
         ip: string;
         protocol: string;
-        userId: ObjectId;
-        audio: {
-          audioCodec: number;
-          codec: string;
-          profile: string;
-          samplerate: number;
-          channels: number;
-        };
         video: {
-          videoCodec: number;
-          codec: string;
+          codecId: number;
+          codecName: string;
           size: string;
           fps: number;
+        };
+        audio: {
+          codecId: number;
+          codecName: string;
+          profile: string;
+          sampleRate: number;
+          channels: number;
+        };
+        meta: {
+          userId: ObjectId;
         };
       };
       subscribers: {
@@ -44,7 +46,9 @@ interface IApiResponse {
         bytes: number;
         ip: string;
         protocol: string;
-        userId: ObjectId;
+        meta: {
+          userId: ObjectId;
+        };
       }[];
     }[];
   }[];
@@ -87,12 +91,16 @@ class MediaServerWorker extends BaseWorker {
         if (channelStats.publisher) {
           liveChannel.publisher = {
             ...channelStats.publisher,
+            userId: channelStats.publisher.meta.userId,
           };
         }
 
-        liveChannel.subscribers = channelStats.subscribers.map((item) => ({
-          ...item,
-        }));
+        liveChannel.subscribers = channelStats.subscribers.map(
+          (subscriber) => ({
+            ...subscriber,
+            userId: subscriber.meta.userId,
+          }),
+        );
 
         liveApp.channels.push(liveChannel);
       });
