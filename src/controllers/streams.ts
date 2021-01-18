@@ -62,7 +62,7 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
       },
       0,
     ),
-    totalPeakViewers: totalPeakViewers,
+    totalPeakViewers,
     totalIPs: _.chain(subscribers).map('ip').uniq().value().length,
   };
 
@@ -73,11 +73,11 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
   });
 
   ctx.body = {
-    stream: stream,
-    subscribers: subscribers,
-    options: options,
-    info: info,
-    relatedStreams: relatedStreams,
+    stream,
+    subscribers,
+    options,
+    info,
+    relatedStreams,
   };
 }
 
@@ -204,5 +204,5 @@ export async function graph(ctx: Router.IRouterContext, next: Next) {
 
   hideFields(ctx.state.user, stream);
 
-  ctx.body = { stream: stream, events: graph };
+  ctx.body = { stream, events: graph };
 }

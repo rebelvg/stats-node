@@ -32,7 +32,7 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
     ips: paginatedIps.docs,
     options: {
       countries: _.concat(counties, uniqueApiMessages),
-      cities: cities,
+      cities,
       ISPs,
     },
     info: {

@@ -27,7 +27,7 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
     hideFields(ctx.state.user, stream);
   });
 
-  ctx.body = { subscriber: subscriber, streams: streams };
+  ctx.body = { subscriber, streams };
 }
 
 export async function find(ctx: Router.IRouterContext, next: Next) {

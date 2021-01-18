@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 
 convict.addFormat({
   name: 'stream-server-config',
-  validate: function (value) {
+  validate: (value) => {
     if (!_.isArray(value)) {
       throw new Error('must_be_an_array');
     }
