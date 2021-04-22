@@ -3,6 +3,7 @@ import { ObjectId } from 'mongodb';
 
 import { ILiveStats, liveStats } from '.';
 import { IWorkerConfig } from '../config';
+import { logger } from '../helpers/logger';
 import { ApiSourceEnum, IStreamModel, Stream } from '../models/stream';
 import { ISubscriberModel, Subscriber } from '../models/subscriber';
 import { streamService } from '../services/stream';
@@ -55,19 +56,27 @@ export abstract class BaseWorker {
           _.set(liveStats, [NAME], stats);
         } catch (error) {
           if (error.code === 'ECONNREFUSED') {
-            console.log(this.apiSource, 'update_econnrefused', error.message);
+            logger.error('update_econnrefused', {
+              error,
+              source: this.apiSource,
+            });
 
             return;
           }
 
-          console.log(this.apiSource, 'update_error', error);
+          logger.error('update_error', {
+            error,
+            source: this.apiSource,
+          });
         }
       }),
     );
   }
 
   public async run(WORKER_CONFIG: IWorkerConfig[]) {
-    console.log(this.apiSource, 'worker_running');
+    logger.info('worker_running', {
+      source: this.apiSource,
+    });
 
     // eslint-disable-next-line no-constant-condition
     while (true) {

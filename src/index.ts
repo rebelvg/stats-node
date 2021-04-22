@@ -6,15 +6,22 @@ import { connectMongoose } from './mongo';
 import { API } from './config';
 import { runUpdate as runUpdate_kms } from './workers/klpq-media-server';
 import { runUpdate as runUpdate_ams } from './workers/adobe-media-server';
+import { logger } from './helpers/logger';
 
-process.on('unhandledRejection', (reason, p) => {
-  throw reason;
+process.on('unhandledRejection', (error, p) => {
+  logger.fatal('unhandledRejection', {
+    error,
+  });
+
+  throw error;
 });
 
 process.on('uncaughtException', (error) => {
-  console.error('uncaughtException', error);
+  logger.fatal('uncaughtException', {
+    error,
+  });
 
-  process.exit(1);
+  throw error;
 });
 
 // remove previous unix socket
@@ -28,7 +35,7 @@ if (typeof API.PORT === 'string') {
   await connectMongoose();
 
   app.listen(API.PORT, () => {
-    console.log('http_server_running');
+    logger.info('http_server_running');
 
     // set unix socket rw rights for nginx
     if (typeof API.PORT === 'string') {

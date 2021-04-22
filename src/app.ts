@@ -19,6 +19,7 @@ import { router as graphs } from './routes/graphs';
 import { router as streamers } from './routes/streamers';
 
 import './passport';
+import { logger, setLogger } from './helpers/logger';
 
 if (!fs.existsSync('logs')) {
   fs.mkdirSync('logs');
@@ -27,6 +28,8 @@ if (!fs.existsSync('logs')) {
 const logFileStream = fs.createWriteStream('./logs/access.log', { flags: 'a' });
 
 export const app = new Koa();
+
+app.use(setLogger);
 
 app.use(koaMorgan('combined', { immediate: true, stream: logFileStream }));
 app.use(koaMorgan('short', { stream: logFileStream }));
@@ -45,7 +48,9 @@ app.use(async (ctx, next) => {
   try {
     await next();
   } catch (error) {
-    console.log('http_error', error);
+    logger.error('http_error', {
+      error,
+    });
 
     ctx.status = error.status || 500;
     ctx.body = { error: error.message };

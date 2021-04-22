@@ -6,6 +6,7 @@ import * as ip6addr from 'ip6addr';
 import { liveStats } from '../workers';
 import { ISubscriberModel } from '../models/subscriber';
 import { ipService } from '../services/ip';
+import { logger } from '../helpers/logger';
 
 const Schema = mongoose.Schema;
 
@@ -84,7 +85,9 @@ schema.pre(
     try {
       await ipService.upsert(this.ip);
     } catch (error) {
-      console.log('subscriber_failed_to_save_ip', error);
+      logger.error('subscriber_failed_to_save_ip', {
+        error,
+      });
     }
 
     return next();
