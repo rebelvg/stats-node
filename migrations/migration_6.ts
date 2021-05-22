@@ -16,9 +16,8 @@ export async function up(): Promise<void> {
     },
   );
 
-  const subscribers = MongoCollections.getCollection<ISubscriberModel>(
-    'subscribers',
-  );
+  const subscribers =
+    MongoCollections.getCollection<ISubscriberModel>('subscribers');
 
   await subscribers.updateMany(
     {

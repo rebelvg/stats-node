@@ -14,9 +14,8 @@ const REBEL_ID = '5a3a62c866fa07792cfcee67';
 (async () => {
   const mongoClient = await connectMongoDriver();
 
-  const streamsCollection = MongoCollections.getCollection<IStreamModel>(
-    'streams',
-  );
+  const streamsCollection =
+    MongoCollections.getCollection<IStreamModel>('streams');
   const ipsCollection = MongoCollections.getCollection<IIPModel>('ips');
 
   const ipsNoUserId = await streamsCollection.distinct('ip', { userId: null });

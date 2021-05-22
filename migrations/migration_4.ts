@@ -3,9 +3,8 @@ import { ISubscriberModel } from '../src/models/subscriber';
 import { IStreamModel } from '../src/models/stream';
 
 export async function up(): Promise<void> {
-  const subscribers = MongoCollections.getCollection<ISubscriberModel>(
-    'subscribers',
-  );
+  const subscribers =
+    MongoCollections.getCollection<ISubscriberModel>('subscribers');
   const streams = MongoCollections.getCollection<IStreamModel>('streams');
 
   const cursor = subscribers.find();

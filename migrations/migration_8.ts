@@ -5,13 +5,11 @@ import { IStreamModel } from '../src/models/stream';
 import { ChannelTypeEnum, IChannel } from '../src/models/channel';
 
 export async function up(): Promise<void> {
-  const channelsCollection = MongoCollections.getCollection<IChannel>(
-    'channels',
-  );
+  const channelsCollection =
+    MongoCollections.getCollection<IChannel>('channels');
 
-  const streamsCollection = MongoCollections.getCollection<IStreamModel>(
-    'streams',
-  );
+  const streamsCollection =
+    MongoCollections.getCollection<IStreamModel>('streams');
 
   let channelNames: string[] = await streamsCollection.distinct('channel');
 
