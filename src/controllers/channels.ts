@@ -195,4 +195,6 @@ export async function updateChannel(ctx: Router.IRouterContext, next: Next) {
   }
 
   await channelService.setType(id, type);
+
+  ctx.status = 201;
 }
