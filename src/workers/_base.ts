@@ -6,6 +6,7 @@ import { IWorkerConfig } from '../config';
 import { logger } from '../helpers/logger';
 import { ApiSourceEnum, IStreamModel, Stream } from '../models/stream';
 import { ISubscriberModel, Subscriber } from '../models/subscriber';
+import { channelService } from '../services/channel';
 import { streamService } from '../services/stream';
 
 export interface IGenericStreamsResponse {
@@ -198,6 +199,8 @@ export abstract class BaseWorker {
               streamRecord.peakViewersCount = streamViewers.peakViewersCount;
 
               await streamRecord.save();
+
+              await channelService.addChannel(streamRecord.channel);
             }
 
             _.set(stats, [appName, channelName, 'publisher'], streamRecord);

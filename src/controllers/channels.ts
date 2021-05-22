@@ -6,6 +6,9 @@ import { Stream } from '../models/stream';
 import { Subscriber } from '../models/subscriber';
 import { liveStats, STREAM_SERVERS } from '../workers';
 import { hideFields } from '../helpers/hide-fields';
+import { channelService } from '../services/channel';
+import { ChannelTypeEnum } from '../models/channel';
+import { BadRequest } from '../helpers/errors';
 
 function findServerByHost(server: string) {
   return _.find(STREAM_SERVERS, (streamServer) =>
@@ -156,22 +159,40 @@ export async function channels(ctx: Router.IRouterContext, next: Next) {
 }
 
 export async function list(ctx: Router.IRouterContext, next: Next) {
-  const liveChannels = [];
+  const liveChannels: { app: string; channel: string }[] = [];
+
+  const channels = (
+    await channelService.getChannelsByType(ChannelTypeEnum.PUBLIC)
+  ).map((channel) => channel.name);
 
   _.forEach(liveStats, (serverObj) => {
     _.forEach(serverObj, (appObj) => {
       _.forEach(appObj, (channelObj) => {
         if (channelObj.publisher) {
-          liveChannels.push({
-            app: channelObj.publisher.app,
-            channel: channelObj.publisher.channel,
-          });
+          if (channels.includes(channelObj.publisher.channel)) {
+            liveChannels.push({
+              app: channelObj.publisher.app,
+              channel: channelObj.publisher.channel,
+            });
+          }
         }
       });
     });
   });
 
-  const channels = await Stream.distinct('channel');
+  ctx.body = {
+    channels,
+    live: liveChannels,
+  };
+}
 
-  ctx.body = { channels, live: liveChannels };
+export async function updateChannel(ctx: Router.IRouterContext, next: Next) {
+  const { id } = ctx.params;
+  const { type } = ctx.request.body;
+
+  if (!Object.values(ChannelTypeEnum).includes(type)) {
+    throw new BadRequest('bad_type');
+  }
+
+  await channelService.setType(id, type);
 }

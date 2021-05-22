@@ -29,6 +29,19 @@ const logFileStream = fs.createWriteStream('./logs/access.log', { flags: 'a' });
 
 export const app = new Koa();
 
+app.use(async (ctx, next) => {
+  try {
+    await next();
+  } catch (error) {
+    logger.error('http_error', {
+      error,
+    });
+
+    ctx.status = error.status || 500;
+    ctx.body = { error: error.message };
+  }
+});
+
 app.use(setLogger);
 
 app.use(koaMorgan('combined', { immediate: true, stream: logFileStream }));
@@ -43,19 +56,6 @@ app.use(bodyParser({ enableTypes: ['json'] }));
 app.use(readToken);
 
 app.proxy = true;
-
-app.use(async (ctx, next) => {
-  try {
-    await next();
-  } catch (error) {
-    logger.error('http_error', {
-      error,
-    });
-
-    ctx.status = error.status || 500;
-    ctx.body = { error: error.message };
-  }
-});
 
 const router = new Router();
 

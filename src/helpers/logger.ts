@@ -29,7 +29,7 @@ const session = createNamespace(CLS_NAMESPACES.SESSION);
 const writeStream = fs.createWriteStream('./logs/app.log', { flags: 'a' });
 
 export async function setLogger(ctx: Context, next: Next) {
-  await new Promise<void>((resolve) => {
+  await new Promise<void>((resolve, reject) => {
     session.run(async () => {
       const requestId = v4();
       const externalRequestId = ctx.get('x-request-id') || v4();
@@ -44,7 +44,13 @@ export async function setLogger(ctx: Context, next: Next) {
       ctx.set('request-id', requestId);
       ctx.set('x-request-id', externalRequestId);
 
-      await next();
+      try {
+        await next();
+      } catch (error) {
+        reject(error);
+
+        return;
+      }
 
       resolve();
     });
