@@ -18,8 +18,6 @@ export async function up(): Promise<void> {
     .uniq()
     .value();
 
-  console.log(channelNames);
-
   for (const channelName of channelNames) {
     await channelsCollection.insertOne({
       name: channelName,

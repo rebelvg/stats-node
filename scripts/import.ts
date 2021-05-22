@@ -25,7 +25,6 @@ if (DB.AUTH_SOURCE) {
 
   // fs.writeFileSync('streams.json', JSON.stringify(await streams.find().toArray()));
   // fs.writeFileSync('subscribers.json', JSON.stringify(await subscribers.find().toArray()));
-  // console.log('done.');
 
   const cursor = streams.find().sort({ timestamp: 1 }).stream();
 
