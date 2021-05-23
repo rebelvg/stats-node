@@ -6,6 +6,7 @@ import * as passport from 'koa-passport';
 import * as cors from '@koa/cors';
 import * as koaMorgan from 'koa-morgan';
 import * as fs from 'fs';
+import * as koaSession from 'koa-session';
 
 import { readToken } from './middleware/read-token';
 
@@ -41,6 +42,8 @@ app.use(async (ctx, next) => {
     ctx.body = { error: error.message };
   }
 });
+
+app.use(koaSession({ signed: false }, app));
 
 app.use(setLogger);
 

@@ -1,5 +1,8 @@
 import { Next } from 'koa';
 import * as Router from 'koa-router';
+import { ObjectId } from 'mongodb';
+
+import { decodeJwtToken } from '../helpers/jwt';
 import { logger } from '../helpers/logger';
 
 import { User, IUserModel } from '../models/user';
@@ -24,9 +27,11 @@ declare module 'koa-router' {
 
 export async function readToken(ctx: Router.IRouterContext, next: Next) {
   const token = ctx.get('token');
+  const jwtToken = ctx.get('jwt-token');
 
   logger.child({
     token,
+    jwtToken,
   });
 
   if (token) {
@@ -39,6 +44,24 @@ export async function readToken(ctx: Router.IRouterContext, next: Next) {
     logger.child({
       user: user?._id,
     });
+  }
+
+  if (jwtToken) {
+    try {
+      const { userId } = decodeJwtToken(jwtToken);
+
+      const user = await User.findOne({
+        _id: new ObjectId(userId),
+      });
+
+      ctx.state.user = user;
+
+      logger.child({
+        user: user?._id,
+      });
+    } catch (error) {
+      logger.error('jwt_token_error', { error });
+    }
   }
 
   await next();

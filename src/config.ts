@@ -10,7 +10,6 @@ export interface IWorkerConfig {
 export const API = {
   PORT: env.API.PORT,
   GOOGLE_CALLBACK_HOST: env.API.GOOGLE_CALLBACK_HOST,
-  GOOGLE_REDIRECT_URL: env.API.GOOGLE_REDIRECT_URL,
 };
 
 export const DB = {
@@ -31,3 +30,7 @@ export const KLPQ_MEDIA_SERVER: IWorkerConfig[] = env.KLPQ_MEDIA_SERVER;
 export const NODE_MEDIA_SERVER: IWorkerConfig[] = env.NODE_MEDIA_SERVER;
 
 export const ADOBE_MEDIA_SERVER: IWorkerConfig[] = env.ADOBE_MEDIA_SERVER;
+
+export const JWT = {
+  SECRET: env.JWT.SECRET,
+};

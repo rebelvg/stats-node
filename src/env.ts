@@ -52,10 +52,6 @@ const config = convict({
       format: String,
       default: null,
     },
-    GOOGLE_REDIRECT_URL: {
-      format: String,
-      default: null,
-    },
   },
   DB: {
     HOST: {
@@ -103,6 +99,13 @@ const config = convict({
   ADOBE_MEDIA_SERVER: {
     format: 'stream-server-config',
     default: null,
+  },
+  JWT: {
+    SECRET: {
+      format: String,
+      default: null,
+      sensitive: true,
+    },
   },
 });
 

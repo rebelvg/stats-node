@@ -1,8 +1,7 @@
 {
   "API": {
     "PORT": 8000,
-    "GOOGLE_CALLBACK_HOST": "http://localhost:8000",
-    "GOOGLE_REDIRECT_URL": "http://localhost:3000/login"
+    "GOOGLE_CALLBACK_HOST": "http://localhost:8000"
   },
   "DB": {
     "HOST": "localhost",
@@ -38,5 +37,8 @@
       "API_HOST": "http://adobe-media-server:80",
       "API_TOKEN": null
     }
-  ]
+  ],
+  "JWT": {
+    "SECRET": null
+  }
 }

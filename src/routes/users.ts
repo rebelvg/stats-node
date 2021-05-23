@@ -3,9 +3,9 @@ import * as Router from 'koa-router';
 import * as passport from 'koa-passport';
 
 import { isLoggedIn } from '../middleware/is-logged-in';
-import { API } from '../config';
 import { User } from '../models/user';
 import { findById } from '../controllers/users';
+import { encodeJwtToken } from '../helpers/jwt';
 
 export const router = new Router();
 
@@ -17,6 +17,13 @@ router.get('/:id', findById);
 
 router.get(
   '/auth/google',
+  (ctx, next) => {
+    const { redirectUri } = ctx.query;
+
+    ctx.session.redirectUri = decodeURIComponent(redirectUri as string);
+
+    next();
+  },
   passport.authenticate('google', {
     session: false,
     scope: [
@@ -32,7 +39,8 @@ router.get(
   '/auth/google/callback',
   passport.authenticate('google', { session: false }),
   async (ctx: Router.IRouterContext, next: Next) => {
-    const { _id, token, ipCreated } = ctx.state.user;
+    const { _id, ipCreated } = ctx.state.user;
+    const { redirectUri } = ctx.session;
 
     await User.updateOne(
       {
@@ -44,6 +52,10 @@ router.get(
       },
     );
 
-    ctx.redirect(API.GOOGLE_REDIRECT_URL + `/?token=${token}`);
+    const jwtToken = encodeJwtToken({
+      userId: _id,
+    });
+
+    ctx.redirect(`${redirectUri}${jwtToken}`);
   },
 );
