@@ -7,6 +7,7 @@ import * as cors from '@koa/cors';
 import * as koaMorgan from 'koa-morgan';
 import * as fs from 'fs';
 import * as koaSession from 'koa-session';
+import * as uuid from 'uuid';
 
 import { readToken } from './middleware/read-token';
 
@@ -43,7 +44,9 @@ app.use(async (ctx, next) => {
   }
 });
 
-app.use(koaSession({ signed: false }, app));
+app.keys = [uuid.v4()];
+
+app.use(koaSession({ signed: true }, app));
 
 app.use(setLogger);
 
