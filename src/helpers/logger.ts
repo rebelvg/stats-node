@@ -156,7 +156,6 @@ class ClsLogger {
       return;
     }
 
-    clsLogger.log(LogLevel.CHILD, 'child_log', data);
     clsLogger.child(data);
   }
 }
