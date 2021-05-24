@@ -1,5 +1,5 @@
 import { createNamespace } from 'cls-hooked';
-import * as fs from 'fs';
+// import * as fs from 'fs';
 import * as os from 'os';
 import { v4 } from 'uuid';
 import { Context, Next } from 'koa';
@@ -16,6 +16,7 @@ export const NAMESPACE_VALUES = {
 };
 
 enum LogLevel {
+  CHILD = 'child',
   FATAL = 'fatal',
   ERROR = 'error',
   WARN = 'warn',
@@ -26,7 +27,7 @@ enum LogLevel {
 
 const session = createNamespace(CLS_NAMESPACES.SESSION);
 
-const writeStream = fs.createWriteStream('./logs/app.log', { flags: 'a' });
+// const writeStream = fs.createWriteStream('./logs/app.log', { flags: 'a' });
 
 export async function setLogger(ctx: Context, next: Next) {
   await new Promise<void>((resolve, reject) => {
@@ -58,14 +59,14 @@ export async function setLogger(ctx: Context, next: Next) {
 }
 
 class Logger {
-  private data: Record<any, any> = {};
+  private data: Record<string, any> = {};
 
   constructor(
     private requestId: string = null,
     private externalRequestId: string = null,
   ) {}
 
-  public log(level: LogLevel, message: string, data: Record<any, any>) {
+  public log(level: LogLevel, message: string, data: Record<string, any>) {
     const logData = {
       ...this.data,
       ...data,
@@ -92,11 +93,10 @@ class Logger {
 
     process.stdout.write(`${logLine}${os.EOL}`);
 
-    writeStream.write(logLine);
-    writeStream.write(os.EOL);
+    // writeStream.write(`${logLine}${os.EOL}`);
   }
 
-  public child(data: Record<any, any>) {
+  public child(data: Record<string, any>) {
     this.data = {
       ...this.data,
       ...data,
@@ -107,7 +107,7 @@ class Logger {
 class ClsLogger {
   private logger = new Logger();
 
-  private log(level: LogLevel, message: string, data?: Record<any, any>) {
+  private log(level: LogLevel, message: string, data?: Record<string, any>) {
     const loggerInstance: Logger = session.get(
       NAMESPACE_VALUES[CLS_NAMESPACES.SESSION].LOGGER,
     );
@@ -121,42 +121,42 @@ class ClsLogger {
     loggerInstance.log(level, message, data);
   }
 
-  public fatal(message: string, data?: Record<any, any>) {
+  public fatal(message: string, data?: Record<string, any>) {
     this.log(LogLevel.FATAL, message, data);
   }
 
-  public error(message: string, data?: Record<any, any>) {
+  public error(message: string, data?: Record<string, any>) {
     this.log(LogLevel.ERROR, message, data);
   }
 
-  public warn(message: string, data?: Record<any, any>) {
+  public warn(message: string, data?: Record<string, any>) {
     this.log(LogLevel.WARN, message, data);
   }
 
-  public info(message: string, data?: Record<any, any>) {
+  public info(message: string, data?: Record<string, any>) {
     this.log(LogLevel.INFO, message, data);
   }
 
-  public debug(message: string, data?: Record<any, any>) {
+  public debug(message: string, data?: Record<string, any>) {
     this.log(LogLevel.DEBUG, message, data);
   }
 
-  public trace(message: string, data?: Record<any, any>) {
+  public trace(message: string, data?: Record<string, any>) {
     this.log(LogLevel.TRACE, message, data);
   }
 
-  public child(data: Record<any, any>) {
+  public child(data: Record<string, any>) {
     const clsLogger: ClsLogger = session.get(
       NAMESPACE_VALUES[CLS_NAMESPACES.SESSION].LOGGER,
     );
 
     if (!clsLogger) {
-      this.logger.log(LogLevel.TRACE, 'child', data);
+      this.logger.log(LogLevel.CHILD, 'child_log', data);
 
       return;
     }
 
-    clsLogger.log(LogLevel.TRACE, 'child', data);
+    clsLogger.log(LogLevel.CHILD, 'child_log', data);
     clsLogger.child(data);
   }
 }
