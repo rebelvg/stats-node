@@ -6,6 +6,7 @@ import { connectMongoose } from './mongo';
 import { API } from './config';
 import { runUpdate as runUpdate_kms } from './workers/klpq-media-server';
 import { runUpdate as runUpdate_ams } from './workers/adobe-media-server';
+import { runUpdate as runUpdate_nms } from './workers/node-media-server';
 import { logger } from './helpers/logger';
 
 process.on('unhandledRejection', (error, p) => {
@@ -45,4 +46,5 @@ if (typeof API.PORT === 'string') {
 
   runUpdate_kms();
   runUpdate_ams();
+  runUpdate_nms();
 })();

@@ -19,7 +19,7 @@
       "NAME": "klpq-media-server",
       "HOSTS": ["localhost"],
       "API_HOST": "http://klpq-media-server:80",
-      "API_TOKEN": null
+      "API_TOKEN": "example-token"
     }
   ],
   "NODE_MEDIA_SERVER": [
@@ -27,7 +27,7 @@
       "NAME": "node-media-server",
       "HOSTS": ["localhost"],
       "API_HOST": "http://node-media-server:80",
-      "API_TOKEN": null
+      "API_TOKEN": "username:password"
     }
   ],
   "ADOBE_MEDIA_SERVER": [
@@ -35,7 +35,7 @@
       "NAME": "adobe-media-server",
       "HOSTS": ["localhost"],
       "API_HOST": "http://adobe-media-server:80",
-      "API_TOKEN": null
+      "API_TOKEN": "example-token"
     }
   ],
   "JWT": {
