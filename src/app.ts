@@ -36,6 +36,10 @@ app.use(async (ctx, next) => {
     await next();
   } catch (error) {
     logger.error('http_error', {
+      method: ctx.method,
+      href: ctx.href,
+      headers: JSON.stringify(ctx.headers),
+      body: ctx.body,
       error,
     });
 
@@ -77,5 +81,10 @@ router.use('/streamers', streamers.routes());
 app.use(router.routes());
 
 app.use((ctx) => {
-  ctx.throw(404);
+  logger.info('http_not_found', {
+    method: ctx.method,
+    href: ctx.href,
+  });
+
+  ctx.status = 404;
 });
