@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
 import { ObjectId } from 'mongodb';
+import { FilterQuery } from 'mongoose';
 
 import { ILiveStats, liveStats } from '.';
 import { IWorkerConfig } from '../config';
@@ -112,7 +113,7 @@ export abstract class BaseWorker {
             let streamRecord: IStreamModel = null;
 
             if (channelData.publisher) {
-              const streamQuery: Partial<IStreamModel> = {
+              const streamQuery: FilterQuery<IStreamModel> = {
                 server: NAME,
                 app: channelData.publisher.app,
                 channel: channelData.publisher.channel,
@@ -148,7 +149,7 @@ export abstract class BaseWorker {
             }
 
             for (const subscriber of channelData.subscribers) {
-              const subscriberQuery: Partial<ISubscriberModel> = {
+              const subscriberQuery: FilterQuery<ISubscriberModel> = {
                 server: NAME,
                 app: subscriber.app,
                 channel: subscriber.channel,

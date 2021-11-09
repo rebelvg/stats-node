@@ -3,13 +3,7 @@
     "PORT": 8000,
     "GOOGLE_CALLBACK_HOST": "http://localhost:8000"
   },
-  "DB": {
-    "HOST": "localhost",
-    "NAME": "nodestats",
-    "AUTH_SOURCE": null,
-    "USER": null,
-    "PASSWORD": null
-  },
+  "DB_URI": "mongodb://USERNAME:PASSWORD@HOST/DATABASE",
   "GOOGLE_OAUTH": {
     "CLIENT_ID": null,
     "CLIENT_SECRET": null

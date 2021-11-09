@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { FilterQuery } from 'mongoose';
 
 import { IIPModel, IP } from '../models/ip';
 
@@ -14,7 +15,7 @@ class IpService {
       const { data } = await axios.get(`${apiLink}/${ip}`);
 
       await IP.updateOne(
-        { ip } as Partial<IIPModel>,
+        { ip } as FilterQuery<IIPModel>,
         {
           api: data,
           createdAt: currentTime,
@@ -39,7 +40,7 @@ class IpService {
     const { data } = await axios.get(`${apiLink}/${ip}`);
 
     await IP.updateOne(
-      { _id: ipRecord._id } as Partial<IIPModel>,
+      { _id: ipRecord._id } as FilterQuery<IIPModel>,
       {
         api: data,
         updatedAt: currentTime,

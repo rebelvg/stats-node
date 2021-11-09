@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { DocumentQuery } from 'mongoose';
+import { Query } from 'mongoose';
 import { ObjectId } from 'mongodb';
 
 import { IStreamModel, Stream } from '../models/stream';
@@ -10,7 +10,7 @@ class StreamService {
   public getRelatedStreams(
     streamRecord: IStreamModel,
     query: any,
-  ): DocumentQuery<IStreamModel[], IStreamModel> {
+  ): Query<IStreamModel[], IStreamModel> {
     query = {
       $and: [
         {
@@ -66,7 +66,7 @@ class StreamService {
   public getBySubscriberIds(
     streamIds: ObjectId[],
     params: any,
-  ): DocumentQuery<IStreamModel[], IStreamModel> {
+  ): Query<IStreamModel[], IStreamModel> {
     const query = {
       $and: [
         {

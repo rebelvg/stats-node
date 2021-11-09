@@ -53,28 +53,9 @@ const config = convict({
       default: null,
     },
   },
-  DB: {
-    HOST: {
-      format: String,
-      default: null,
-    },
-    NAME: {
-      format: String,
-      default: null,
-    },
-    AUTH_SOURCE: {
-      format: (value) => (_.isString(value) ? value : null),
-      default: null,
-    },
-    USER: {
-      format: (value) => (_.isString(value) ? value : null),
-      default: null,
-    },
-    PASSWORD: {
-      format: (value) => (_.isString(value) ? value : null),
-      default: null,
-      sensitive: true,
-    },
+  DB_URI: {
+    format: String,
+    default: null,
   },
   GOOGLE_OAUTH: {
     CLIENT_ID: {

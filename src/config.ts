@@ -12,13 +12,7 @@ export const API = {
   GOOGLE_CALLBACK_HOST: env.API.GOOGLE_CALLBACK_HOST,
 };
 
-export const DB = {
-  HOST: env.DB.HOST,
-  NAME: env.DB.NAME,
-  AUTH_SOURCE: env.DB.AUTH_SOURCE,
-  USER: env.DB.USER,
-  PASSWORD: env.DB.PASSWORD,
-};
+export const DB_URI: string = env.DB_URI;
 
 export const GOOGLE_OAUTH = {
   CLIENT_ID: env.GOOGLE_OAUTH.CLIENT_ID,
