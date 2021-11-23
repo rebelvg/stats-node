@@ -41,6 +41,7 @@ app.use(async (ctx, next) => {
       headers: JSON.stringify(ctx.headers),
       body: ctx.body,
       error,
+      ips: ctx.ips,
     });
 
     ctx.status = error.status || 500;
@@ -84,6 +85,7 @@ app.use((ctx) => {
   logger.info('http_not_found', {
     method: ctx.method,
     href: ctx.href,
+    ips: ctx.ips,
   });
 
   ctx.status = 404;
