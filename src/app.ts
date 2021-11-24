@@ -41,7 +41,6 @@ app.use(async (ctx, next) => {
       headers: JSON.stringify(ctx.headers),
       body: ctx.body,
       error,
-      ips: ctx.ips,
     });
 
     ctx.status = error.status || 500;

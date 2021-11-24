@@ -34,8 +34,9 @@ export async function setLogger(ctx: Context, next: Next) {
     session.run(async () => {
       const requestId = v4();
       const externalRequestId = ctx.get('x-request-id') || v4();
+      const ips = ctx.ips;
 
-      const loggerInstance = new Logger(requestId, externalRequestId);
+      const loggerInstance = new Logger({ requestId, externalRequestId, ips });
 
       session.set(
         NAMESPACE_VALUES[CLS_NAMESPACES.SESSION].LOGGER,
@@ -62,8 +63,15 @@ class Logger {
   private data: Record<string, any> = {};
 
   constructor(
-    private requestId: string = null,
-    private externalRequestId: string = null,
+    private config: {
+      requestId?: string;
+      externalRequestId?: string;
+      ips?: string[];
+    } = {
+      requestId: null,
+      externalRequestId: null,
+      ips: [],
+    },
   ) {}
 
   public log(level: LogLevel, message: string, data: Record<string, any>) {
@@ -84,8 +92,9 @@ class Logger {
 
     const logLine = JSON.stringify({
       level,
-      requestId: this.requestId,
-      externalRequestId: this.externalRequestId,
+      requestId: this.config.requestId,
+      externalRequestId: this.config.externalRequestId,
+      ips: this.config.ips,
       message,
       date: new Date(),
       data: logData,
