@@ -42,10 +42,7 @@ export interface IGenericStreamsResponse {
 export abstract class BaseWorker {
   abstract apiSource: ApiSourceEnum;
 
-  abstract getStats(
-    API_HOST: string,
-    API_TOKEN: string,
-  ): Promise<IGenericStreamsResponse[]>;
+  abstract getStats(config: IWorkerConfig): Promise<IGenericStreamsResponse[]>;
 
   public async runUpdate(servers: IWorkerConfig[]) {
     await Promise.all(
@@ -89,9 +86,9 @@ export abstract class BaseWorker {
   }
 
   private async readStats(config: IWorkerConfig) {
-    const { NAME, API_HOST, API_TOKEN } = config;
+    const { NAME } = config;
 
-    const data = await this.getStats(API_HOST, API_TOKEN);
+    const data = await this.getStats(config);
 
     const stats: ILiveStats[0] = {};
 

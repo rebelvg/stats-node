@@ -3,7 +3,12 @@ import * as _ from 'lodash';
 import { shouldHideFields } from './should-hide-fields';
 import { IUserModel } from '../models/user';
 
-const paths = [['ip'], ['location', 'ip'], ['location', 'api', 'query']];
+const paths = [
+  ['ip'],
+  ['location', 'ip'],
+  ['location', 'api', 'query'],
+  ['apiResponse', 'ip'],
+];
 
 export function hideFields(user: IUserModel, obj) {
   if (!shouldHideFields(user)) {

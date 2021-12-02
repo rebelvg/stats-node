@@ -9,6 +9,7 @@ export enum ApiSourceEnum {
   KLPQ_MEDIA_SERVER = 'klpq_media_server',
   NODE_MEDIA_SERVER = 'node_media_server',
   ADOBE_MEDIA_SERVER = 'adobe_media_server',
+  ENCODE_SERVICE = 'encode_service',
 }
 
 export interface IStreamModel extends Document {

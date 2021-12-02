@@ -159,7 +159,7 @@ export async function channels(ctx: Router.IRouterContext, next: Next) {
 }
 
 export async function list(ctx: Router.IRouterContext, next: Next) {
-  const liveChannels: { app: string; channel: string }[] = [];
+  const liveChannels: { app: string; channel: string; protocol: string }[] = [];
 
   const channels = (
     await channelService.getChannelsByType(ChannelTypeEnum.PUBLIC)
@@ -173,6 +173,7 @@ export async function list(ctx: Router.IRouterContext, next: Next) {
             liveChannels.push({
               app: channelObj.publisher.app,
               channel: channelObj.publisher.channel,
+              protocol: channelObj.publisher.protocol,
             });
           }
         }

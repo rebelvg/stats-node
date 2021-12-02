@@ -16,8 +16,16 @@ convict.addFormat({
         },
         HOSTS: {
           format: (value) => {
+            if (!_.isArray(value)) {
+              throw new Error('not_array');
+            }
+
             if (!_.every(value, _.isString)) {
               throw new Error('not_valid_array');
+            }
+
+            if (value.length === 0) {
+              throw new Error('no_hosts');
             }
           },
           default: null,
@@ -78,6 +86,10 @@ const config = convict({
     default: null,
   },
   ADOBE_MEDIA_SERVER: {
+    format: 'stream-server-config',
+    default: null,
+  },
+  ENCODE_SERVICE: {
     format: 'stream-server-config',
     default: null,
   },

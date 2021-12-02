@@ -25,6 +25,8 @@ export const NODE_MEDIA_SERVER: IWorkerConfig[] = env.NODE_MEDIA_SERVER;
 
 export const ADOBE_MEDIA_SERVER: IWorkerConfig[] = env.ADOBE_MEDIA_SERVER;
 
+export const ENCODE_SERVICE: IWorkerConfig[] = env.ENCODE_SERVICE;
+
 export const JWT = {
   SECRET: env.JWT.SECRET,
 };

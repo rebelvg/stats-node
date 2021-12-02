@@ -32,6 +32,14 @@
       "API_TOKEN": "example-token"
     }
   ],
+  "ENCODE_SERVICE": [
+    {
+      "NAME": "encode-service",
+      "HOSTS": ["localhost"],
+      "API_HOST": "http://encode-service:80",
+      "API_TOKEN": "example-token"
+    }
+  ],
   "JWT": {
     "SECRET": null
   }
