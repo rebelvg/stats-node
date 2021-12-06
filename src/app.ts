@@ -39,7 +39,7 @@ app.use(async (ctx, next) => {
       method: ctx.method,
       href: ctx.href,
       headers: JSON.stringify(ctx.headers),
-      body: ctx.body,
+      body: ctx.request.body,
       error,
     });
 
