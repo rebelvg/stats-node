@@ -31,7 +31,15 @@ class ChannelService {
   }
 
   public async getChannels(): Promise<IChannelModel[]> {
-    const channels = await Channel.find();
+    const channels = await Channel.find(
+      {},
+      {},
+      {
+        sort: {
+          createdAt: 1,
+        },
+      },
+    );
 
     return channels;
   }
