@@ -11,8 +11,6 @@ interface IApiResponse {
     channels: {
       channel: string;
       publisher: {
-        app: string;
-        channel: string;
         connectId: string;
         connectCreated: Date;
         connectUpdated: Date;
@@ -21,8 +19,6 @@ interface IApiResponse {
         protocol: string;
       };
       subscribers: {
-        app: string;
-        channel: string;
         connectId: string;
         connectCreated: Date;
         connectUpdated: Date;

@@ -10,8 +10,6 @@ interface IApiResponse {
   [app: string]: {
     [channel: string]: {
       publisher: {
-        app: string;
-        stream: string;
         clientId: string;
         connectCreated: Date;
         bytes: number;
@@ -32,8 +30,6 @@ interface IApiResponse {
         };
       };
       subscribers: {
-        app: string;
-        stream: string;
         clientId: string;
         connectCreated: Date;
         bytes: number;
@@ -77,11 +73,10 @@ class MediaServerWorker extends BaseWorker {
         };
 
         if (channelStats.publisher) {
-          const { stream, clientId, ...publisher } = channelStats.publisher;
+          const { clientId, ...publisher } = channelStats.publisher;
 
           liveChannel.publisher = {
             ...publisher,
-            channel: stream,
             connectId: clientId,
             protocol: 'rtmp',
             connectUpdated,
@@ -90,10 +85,10 @@ class MediaServerWorker extends BaseWorker {
         }
 
         liveChannel.subscribers = channelStats.subscribers.map(
-          ({ stream, clientId, ...subscriber }) => {
+          ({ clientId, ...subscriber }) => {
             return {
               ...subscriber,
-              channel: stream,
+              channel: channelName,
               connectId: clientId,
               connectUpdated,
               userId: null,

@@ -68,8 +68,6 @@ class MediaServerWorker extends BaseWorker {
         if (channelStats.publisher) {
           liveChannel.publisher = {
             ...channelStats.publisher,
-            app,
-            channel: channelStats.channel,
             ip: (request as IncomingMessage).socket.remoteAddress,
             userId: null,
           };
@@ -78,8 +76,6 @@ class MediaServerWorker extends BaseWorker {
         liveChannel.subscribers = channelStats.subscribers.map(
           (subscriber) => ({
             ...subscriber,
-            app,
-            channel: channelStats.channel,
             userId: null,
           }),
         );

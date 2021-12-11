@@ -15,8 +15,6 @@ export interface IGenericStreamsResponse {
   channels: {
     channel: string;
     publisher: {
-      app: string;
-      channel: string;
       connectId: string;
       connectCreated: Date;
       connectUpdated: Date;
@@ -26,8 +24,6 @@ export interface IGenericStreamsResponse {
       userId: ObjectId;
     };
     subscribers: {
-      app: string;
-      channel: string;
       connectId: string;
       connectCreated: Date;
       connectUpdated: Date;
@@ -90,6 +86,14 @@ export abstract class BaseWorker {
 
     const data = await this.getStats(config);
 
+    _.forEach(data, (channelObjs) => {
+      channelObjs.app = channelObjs.app.toLowerCase();
+
+      _.forEach(channelObjs.channels, (channelData) => {
+        channelData.channel = channelData.channel.toLowerCase();
+      });
+    });
+
     const stats: ILiveStats[0] = {};
 
     const statsUpdateTime = new Date();
@@ -112,8 +116,8 @@ export abstract class BaseWorker {
             if (channelData.publisher) {
               const streamQuery: FilterQuery<IStreamModel> = {
                 server: NAME,
-                app: channelData.publisher.app,
-                channel: channelData.publisher.channel,
+                app: appName,
+                channel: channelName,
                 connectId: channelData.publisher.connectId,
                 connectCreated: channelData.publisher.connectCreated,
               };
@@ -148,8 +152,8 @@ export abstract class BaseWorker {
             for (const subscriber of channelData.subscribers) {
               const subscriberQuery: FilterQuery<ISubscriberModel> = {
                 server: NAME,
-                app: subscriber.app,
-                channel: subscriber.channel,
+                app: appName,
+                channel: channelName,
                 connectId: subscriber.connectId,
                 connectCreated: subscriber.connectCreated,
               };
