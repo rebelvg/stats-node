@@ -1,5 +1,5 @@
 import { createNamespace } from 'cls-hooked';
-// import * as fs from 'fs';
+import * as fs from 'fs';
 import * as os from 'os';
 import { v4 } from 'uuid';
 import { Context, Next } from 'koa';
@@ -27,7 +27,7 @@ enum LogLevel {
 
 const session = createNamespace(CLS_NAMESPACES.SESSION);
 
-// const writeStream = fs.createWriteStream('./logs/app.log', { flags: 'a' });
+const writeStream = fs.createWriteStream('./logs/app.log', { flags: 'a' });
 
 export async function setLogger(ctx: Context, next: Next) {
   await new Promise<void>((resolve, reject) => {
@@ -102,7 +102,7 @@ class Logger {
 
     process.stdout.write(`${logLine}${os.EOL}`);
 
-    // writeStream.write(`${logLine}${os.EOL}`);
+    writeStream.write(`${logLine}${os.EOL}`);
   }
 
   public child(data: Record<string, any>) {
