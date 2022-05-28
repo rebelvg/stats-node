@@ -33,8 +33,6 @@ export async function up(): Promise<void> {
       break;
     }
 
-    console.log(channelRecord.name, streamRecord.connectCreated);
-
     await channelsCollection.updateOne(
       {
         _id: channelRecord._id,
@@ -46,6 +44,4 @@ export async function up(): Promise<void> {
       },
     );
   }
-
-  throw 1;
 }
