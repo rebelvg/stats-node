@@ -33,9 +33,7 @@ class ChannelService {
       {},
       {},
       {
-        sort: {
-          createdAt: 1,
-        },
+        sort: { channelCreatedAt: -1 },
       },
     );
 
