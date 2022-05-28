@@ -16,7 +16,14 @@ async function migrate() {
 
   const { Migrations } = MongoCollections;
 
-  const files = fs.readdirSync('./migrations');
+  const files = fs
+    .readdirSync('./migrations')
+    .sort((firstElement, secondElement) => {
+      const [, firstId] = firstElement.split('_');
+      const [, secondId] = secondElement.split('_');
+
+      return parseInt(firstId) - parseInt(secondId);
+    });
 
   const migrationNames: string[] = await Migrations.distinct('name', {});
 

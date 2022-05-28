@@ -1,15 +1,18 @@
 import * as _ from 'lodash';
 
 import { MongoCollections } from '../src/mongo';
-import { IStreamModel } from '../src/models/stream';
-import { ChannelTypeEnum, IChannel } from '../src/models/channel';
+import { ChannelTypeEnum } from '../src/models/channel';
 
 export async function up(): Promise<void> {
   const channelsCollection =
-    MongoCollections.getCollection<IChannel>('channels');
+    MongoCollections.getCollection<{
+      name: string;
+      type: string;
+      createdAt: Date;
+      updatedAt: Date;
+    }>('channels');
 
-  const streamsCollection =
-    MongoCollections.getCollection<IStreamModel>('streams');
+  const streamsCollection = MongoCollections.getCollection<null>('streams');
 
   let channelNames: string[] = await streamsCollection.distinct('channel');
 

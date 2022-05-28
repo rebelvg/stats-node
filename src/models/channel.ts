@@ -11,6 +11,7 @@ export enum ChannelTypeEnum {
 export interface IChannel {
   name: string;
   type: ChannelTypeEnum;
+  channelCreatedAt: Date;
   createdAt: Date;
   updatedAt: Date;
 }
