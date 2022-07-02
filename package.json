@@ -9,7 +9,7 @@
     "lint": "eslint . && yarn run prettier && yarn tsc --project tsconfig.eslint.json",
     "lint:fix": "eslint . --fix && yarn run prettier:fix",
     "migrate": "ts-node migrate.ts",
-    "start:prod": "node dist/index.js",
+    "start:prod": "yarn run migrate && node dist/index.js",
     "start": "ts-node src/index.ts",
     "docker:import": "docker exec stats_node_db mongorestore",
     "pre:deploy": "yarn install && yarn run migrate && yarn run build",
