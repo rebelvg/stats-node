@@ -5,3 +5,5 @@ logs/
 dump/
 dist/
 /config.json
+!config.example.json
+config.*.json
