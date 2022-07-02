@@ -1,5 +1,6 @@
 import * as convict from 'convict';
 import * as _ from 'lodash';
+import { Buffer } from 'buffer';
 
 convict.addFormat({
   name: 'stream-server-config',
@@ -102,7 +103,15 @@ const config = convict({
   },
 });
 
-config.loadFile([process.cwd() + '/config.json']);
+if (process.env.CONFIG_BASE64) {
+  config.load(
+    JSON.parse(
+      Buffer.from(process.env.CONFIG_BASE64, 'base64').toString('utf-8'),
+    ),
+  );
+} else {
+  config.loadFile([process.cwd() + '/config.json']);
+}
 
 config.validate({ allowed: 'strict' });
 
