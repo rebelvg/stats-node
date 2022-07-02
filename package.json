@@ -10,7 +10,6 @@
     "lint:fix": "eslint . --fix && yarn run prettier:fix",
     "migrate": "ts-node migrate.ts",
     "start:prod": "node dist/index.js",
-    "start:env": "cross-env CONFIG_BASE64=0 ts-node src/index.ts",
     "start": "ts-node src/index.ts",
     "docker:import": "docker exec stats_node_db mongorestore",
     "pre:deploy": "yarn install && yarn run migrate && yarn run build",
