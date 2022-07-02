@@ -12,7 +12,7 @@
     "start:prod": "yarn run migrate && node dist/index.js",
     "start": "ts-node src/index.ts",
     "docker:import": "docker exec stats_node_db mongorestore",
-    "pre:deploy": "yarn install && yarn run migrate && yarn run build",
+    "pre:deploy": "yarn install && yarn run build && yarn run migrate",
     "pm2:setup": "yarn run pre:deploy && pm2 start pm2.json",
     "pm2": "yarn run pre:deploy && pm2 restart stats-node",
     "build": "tsc"
