@@ -8,7 +8,7 @@
     "prettier:fix": "prettier \"**/*\" --write --ignore-unknown",
     "lint": "eslint . && yarn run prettier && yarn tsc --project tsconfig.eslint.json",
     "lint:fix": "eslint . --fix && yarn run prettier:fix",
-    "migrate": "ts-node migrate.ts",
+    "migrate": "node --require ts-node/register migrate.ts",
     "start:prod": "yarn run migrate && node dist/index.js",
     "start": "ts-node src/index.ts",
     "docker:import": "docker exec stats_node_db mongorestore",
