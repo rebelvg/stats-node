@@ -37,6 +37,7 @@ export interface IGenericStreamsResponse {
 
 export abstract class BaseWorker {
   abstract apiSource: ApiSourceEnum;
+  private requestCount = 0;
 
   abstract getStats(config: IWorkerConfig): Promise<IGenericStreamsResponse[]>;
 
@@ -84,7 +85,21 @@ export abstract class BaseWorker {
   private async readStats(config: IWorkerConfig) {
     const { NAME } = config;
 
-    const data = await this.getStats(config);
+    let data: IGenericStreamsResponse[] = [];
+
+    try {
+      data = await this.getStats(config);
+    } catch (error) {
+      this.requestCount++;
+
+      if (this.requestCount > 10) {
+        this.requestCount = 0;
+
+        return {};
+      }
+
+      throw error;
+    }
 
     _.forEach(data, (channelObjs) => {
       channelObjs.app = channelObjs.app.toLowerCase();
