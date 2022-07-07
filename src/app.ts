@@ -31,6 +31,8 @@ const logFileStream = fs.createWriteStream('./logs/access.log', { flags: 'a' });
 
 export const app = new Koa();
 
+app.proxy = true;
+
 app.use(async (ctx, next) => {
   try {
     await next();
@@ -65,8 +67,6 @@ koaQs(app);
 app.use(bodyParser({ enableTypes: ['json'] }));
 app.use(readToken);
 
-app.proxy = true;
-
 const router = new Router();
 
 router.use('/channels', channels.routes());
@@ -85,6 +85,7 @@ app.use((ctx) => {
     method: ctx.method,
     href: ctx.href,
     ips: ctx.ips,
+    ip: ctx.ip,
   });
 
   ctx.status = 404;
