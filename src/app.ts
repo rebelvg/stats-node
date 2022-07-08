@@ -27,7 +27,7 @@ if (!fs.existsSync('logs')) {
   fs.mkdirSync('logs');
 }
 
-const logFileStream = fs.createWriteStream('./logs/access.log', { flags: 'a' });
+// const logFileStream = fs.createWriteStream('./logs/access.log', { flags: 'a' });
 
 export const app = new Koa();
 
@@ -56,8 +56,8 @@ app.use(koaSession({ signed: true }, app));
 
 app.use(setLogger);
 
-app.use(koaMorgan('combined', { immediate: true, stream: logFileStream }));
-app.use(koaMorgan('short', { stream: logFileStream }));
+app.use(koaMorgan('combined', { immediate: true, stream: process.stdout }));
+app.use(koaMorgan('short', { stream: process.stdout }));
 app.use(cors());
 
 app.use(passport.initialize());
