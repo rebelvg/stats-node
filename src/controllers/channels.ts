@@ -171,26 +171,36 @@ export async function list(ctx: Router.IRouterContext, next: Next) {
     await channelService.getChannelsByType(ChannelTypeEnum.PUBLIC)
   ).map((channel) => channel.name);
 
+  console.log(liveStats);
+
   await Promise.all(
     _.map(liveStats, (serverObj) => {
-      return _.map(serverObj, (appObj) => {
-        return _.map(appObj, async (channelObj) => {
-          if (channelObj.publisher) {
-            if (channels.includes(channelObj.publisher.channel)) {
-              const userRecord = await userService.getById(
-                channelObj.publisher.userId.toString(),
-              );
+      return Promise.all(
+        _.map(serverObj, (appObj) => {
+          return Promise.all(
+            _.map(appObj, async (channelObj) => {
+              if (channelObj.publisher) {
+                if (channels.includes(channelObj.publisher.channel)) {
+                  console.log(channelObj.publisher);
 
-              liveChannels.push({
-                app: channelObj.publisher.app,
-                channel: channelObj.publisher.channel,
-                protocol: channelObj.publisher.protocol,
-                name: userRecord?.name || null,
-              });
-            }
-          }
-        });
-      });
+                  const userRecord = await userService.getById(
+                    channelObj.publisher.userId?.toString(),
+                  );
+
+                  console.log(userRecord);
+
+                  liveChannels.push({
+                    app: channelObj.publisher.app,
+                    channel: channelObj.publisher.channel,
+                    protocol: channelObj.publisher.protocol,
+                    name: userRecord?.name || null,
+                  });
+                }
+              }
+            }),
+          );
+        }),
+      );
     }),
   );
 
