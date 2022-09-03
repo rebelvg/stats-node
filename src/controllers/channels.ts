@@ -9,6 +9,7 @@ import { hideFields } from '../helpers/hide-fields';
 import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';
 import { BadRequest } from '../helpers/errors';
+import { userService } from '../services/user';
 
 function findServerByHost(server: string) {
   return _.find(STREAM_SERVERS, (streamServer) =>
@@ -159,27 +160,39 @@ export async function channels(ctx: Router.IRouterContext, next: Next) {
 }
 
 export async function list(ctx: Router.IRouterContext, next: Next) {
-  const liveChannels: { app: string; channel: string; protocol: string }[] = [];
+  const liveChannels: {
+    app: string;
+    channel: string;
+    protocol: string;
+    name: string;
+  }[] = [];
 
   const channels = (
     await channelService.getChannelsByType(ChannelTypeEnum.PUBLIC)
   ).map((channel) => channel.name);
 
-  _.forEach(liveStats, (serverObj) => {
-    _.forEach(serverObj, (appObj) => {
-      _.forEach(appObj, (channelObj) => {
-        if (channelObj.publisher) {
-          if (channels.includes(channelObj.publisher.channel)) {
-            liveChannels.push({
-              app: channelObj.publisher.app,
-              channel: channelObj.publisher.channel,
-              protocol: channelObj.publisher.protocol,
-            });
+  await Promise.all(
+    _.map(liveStats, (serverObj) => {
+      return _.map(serverObj, (appObj) => {
+        return _.map(appObj, async (channelObj) => {
+          if (channelObj.publisher) {
+            if (channels.includes(channelObj.publisher.channel)) {
+              const userRecord = await userService.getById(
+                channelObj.publisher.userId.toString(),
+              );
+
+              liveChannels.push({
+                app: channelObj.publisher.app,
+                channel: channelObj.publisher.channel,
+                protocol: channelObj.publisher.protocol,
+                name: userRecord?.name || null,
+              });
+            }
           }
-        }
+        });
       });
-    });
-  });
+    }),
+  );
 
   ctx.body = {
     channels,
