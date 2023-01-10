@@ -21,7 +21,7 @@
     "@koa/cors": "^3.1.0",
     "axios": "^0.21.1",
     "cls-hooked": "^4.2.2",
-    "convict": "^6.0.0",
+    "convict": "^6.2.4",
     "ip6addr": "^0.2.3",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.6.2",
