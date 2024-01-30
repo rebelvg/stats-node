@@ -58,4 +58,4 @@ yarn pm2
 
 ## Live Example
 
-> http://stats.klpq.men/streams
+> http://stats.klpq.io/streams
