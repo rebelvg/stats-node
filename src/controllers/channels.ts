@@ -171,8 +171,6 @@ export async function list(ctx: Router.IRouterContext, next: Next) {
     await channelService.getChannelsByType(ChannelTypeEnum.PUBLIC)
   ).map((channel) => channel.name);
 
-  console.log(liveStats);
-
   await Promise.all(
     _.map(liveStats, (serverObj) => {
       return Promise.all(
@@ -181,13 +179,9 @@ export async function list(ctx: Router.IRouterContext, next: Next) {
             _.map(appObj, async (channelObj) => {
               if (channelObj.publisher) {
                 if (channels.includes(channelObj.publisher.channel)) {
-                  console.log(channelObj.publisher);
-
                   const userRecord = await userService.getById(
                     channelObj.publisher.userId?.toString(),
                   );
-
-                  console.log(userRecord);
 
                   liveChannels.push({
                     app: channelObj.publisher.app,
