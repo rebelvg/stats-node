@@ -612,9 +612,21 @@ export async function graphsById(ctx: Router.RouterContext) {
     ...monthlyStatsSubscribersQuery,
   ]);
 
-  const dayOfWeekStatsStreams = await Stream.aggregate([...weekDayStatsQuery]);
+  const dayOfWeekStatsStreams = await Stream.aggregate([
+    {
+      $match: {
+        userId: new ObjectId(id),
+      },
+    },
+    ...weekDayStatsQuery,
+  ]);
 
   const timeOfDayStatsStreams = await Stream.aggregate([
+    {
+      $match: {
+        userId: new ObjectId(id),
+      },
+    },
     ...timeOfDayStatsQuery,
   ]);
 
