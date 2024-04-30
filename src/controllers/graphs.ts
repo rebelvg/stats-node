@@ -7,6 +7,23 @@ import { Stream } from '../models/stream';
 import { Subscriber } from '../models/subscriber';
 import { userService } from '../services/user';
 
+const cachedGraphs: {
+  all: {
+    value: Record<string, unknown>;
+    lastUpdateDate: Date;
+  };
+  ids: Map<
+    string,
+    {
+      value: Record<string, unknown>;
+      lastUpdateDate: Date;
+    }
+  >;
+} = {
+  all: null,
+  ids: new Map(),
+};
+
 export const totalDurationQuery = [
   {
     $match: {
@@ -453,6 +470,15 @@ const monthlyStatsSubscribersQuery = [
 ];
 
 export async function graphs(ctx: Router.IRouterContext) {
+  if (
+    Date.now() <
+    cachedGraphs.all?.lastUpdateDate.getTime() + 24 * 60 * 60 * 1000
+  ) {
+    ctx.body = cachedGraphs.all.value;
+
+    return;
+  }
+
   const totalDurationStreams = await Stream.aggregate([
     ...totalDurationQuery,
     { $limit: 5 },
@@ -497,7 +523,7 @@ export async function graphs(ctx: Router.IRouterContext) {
     ...timeOfDayStatsQuery,
   ]);
 
-  ctx.body = {
+  const body = {
     totalDurationStreams,
     totalDurationSubscribers,
     avgStatsStreams,
@@ -510,10 +536,26 @@ export async function graphs(ctx: Router.IRouterContext) {
     timeOfDayStatsStreams,
     timeOfDayStatsSubscribers,
   };
+
+  ctx.body = body;
+
+  cachedGraphs.all = {
+    value: body,
+    lastUpdateDate: new Date(),
+  };
 }
 
 export async function graphsById(ctx: Router.RouterContext) {
   const { id } = ctx.params;
+
+  if (
+    Date.now() <
+    cachedGraphs.ids[id]?.lastUpdateDate.getTime() + 24 * 60 * 60 * 1000
+  ) {
+    ctx.body = cachedGraphs.ids[id].value;
+
+    return;
+  }
 
   const userRecord = await userService.getById(id);
 
@@ -576,7 +618,7 @@ export async function graphsById(ctx: Router.RouterContext) {
     ...timeOfDayStatsQuery,
   ]);
 
-  ctx.body = {
+  const body = {
     totalDurationStreams,
     totalDurationSubscribers,
     topStreamers: topStreamersRes,
@@ -585,5 +627,12 @@ export async function graphsById(ctx: Router.RouterContext) {
     dayOfWeekStatsStreams,
     timeOfDayStatsStreams,
     user: hideUserData(userRecord, true),
+  };
+
+  ctx.body = body;
+
+  cachedGraphs.ids[id] = {
+    value: body,
+    lastUpdateDate: new Date(),
   };
 }
