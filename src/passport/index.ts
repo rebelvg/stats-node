@@ -18,18 +18,15 @@ passport.use(
         });
 
         if (user) {
-          user.emails = profile.emails;
-          user.name = profile.displayName;
-
-          await user.save();
-
           return done(null, user);
         }
 
+        const firstName =
+          profile.displayName.split(' ')[0] ?? 'NO_DISPLAY_NAME';
+
         const newUser = await User.create({
           googleId: profile.id,
-          emails: profile.emails,
-          name: profile.displayName,
+          name: firstName,
         });
 
         return done(null, newUser);

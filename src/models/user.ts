@@ -5,10 +5,6 @@ import { schema } from '../schemas/user';
 
 export interface IUserModel extends Document {
   googleId: string;
-  emails: {
-    value: string;
-    type?: string;
-  }[];
   name: string;
   ipCreated: string;
   ipUpdated: string;
