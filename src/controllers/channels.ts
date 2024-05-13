@@ -165,6 +165,9 @@ export async function list(ctx: Router.IRouterContext, next: Next) {
     channel: string;
     protocol: string;
     name: string;
+    _id: string;
+    startTime: Date;
+    viewers: number;
   }[] = [];
 
   const channels = (
@@ -188,6 +191,9 @@ export async function list(ctx: Router.IRouterContext, next: Next) {
                     channel: channelObj.publisher.channel,
                     protocol: channelObj.publisher.protocol,
                     name: userRecord?.name || null,
+                    _id: channelObj.publisher._id,
+                    startTime: channelObj.publisher.connectCreated,
+                    viewers: channelObj.subscribers.length,
                   });
                 }
               }
