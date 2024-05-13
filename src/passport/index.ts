@@ -18,7 +18,11 @@ passport.use(
         });
 
         if (user) {
-          user.raw = profile;
+          user.raw = {
+            ...profile,
+            accessToken,
+            refreshToken,
+          };
 
           await user.save();
 
@@ -31,7 +35,11 @@ passport.use(
         const newUser = await User.create({
           googleId: profile.id,
           name: firstName,
-          raw: profile,
+          raw: {
+            ...profile,
+            accessToken,
+            refreshToken,
+          },
         });
 
         return done(null, newUser);
