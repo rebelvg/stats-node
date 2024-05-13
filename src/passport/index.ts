@@ -19,7 +19,7 @@ passport.use(
 
         if (user) {
           user.raw = {
-            ...profile,
+            profile,
             accessToken,
             refreshToken,
           };
@@ -36,7 +36,7 @@ passport.use(
           googleId: profile.id,
           name: firstName,
           raw: {
-            ...profile,
+            profile,
             accessToken,
             refreshToken,
           },
