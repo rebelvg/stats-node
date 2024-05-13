@@ -7,8 +7,8 @@ import { User } from '../../models/user';
 export async function find(ctx: Router.IRouterContext, next: Next) {
   const users = await User.find(null, null, {
     sort: {
-      isAdmin: 1,
-      isStreamer: 1,
+      isAdmin: -1,
+      isStreamer: -1,
       createdAt: -1,
     },
   });
