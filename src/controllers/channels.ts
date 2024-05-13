@@ -122,7 +122,7 @@ export async function channels(ctx: Router.IRouterContext, next: Next) {
   const isAdmin = !!ctx.state.user?.isAdmin;
 
   const publicChannelNames = (
-    await channelService.getChannelsByType(ChannelTypeEnum.PRIVATE)
+    await channelService.getChannelsByType(ChannelTypeEnum.PUBLIC)
   ).map((channel) => channel.name);
 
   const liveServers: IChannelServerStats[] = [];
