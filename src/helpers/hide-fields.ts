@@ -31,6 +31,7 @@ export function hideUserData(user: IUserModel, shouldHideIp: boolean) {
   _.set(user, 'googleId', undefined);
   _.set(user, 'token', undefined);
   _.set(user, 'streamKey', undefined);
+  _.set(user, 'raw', undefined);
 
   return user;
 }

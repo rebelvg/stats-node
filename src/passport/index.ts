@@ -12,23 +12,26 @@ passport.use(
       callbackURL: `${API.GOOGLE_CALLBACK_HOST}/users/auth/google/callback`,
     },
     async (accessToken, refreshToken, profile, done) => {
-      console.log(profile);
-
       try {
         const user = await User.findOne({
           googleId: profile.id,
         });
 
         if (user) {
+          user.raw = profile;
+
+          await user.save();
+
           return done(null, user);
         }
 
         const firstName =
-          profile.displayName.split(' ')[0] ?? 'NO_DISPLAY_NAME';
+          profile.displayName?.split(' ')[0] ?? 'NO_DISPLAY_NAME';
 
         const newUser = await User.create({
           googleId: profile.id,
           name: firstName,
+          raw: profile,
         });
 
         return done(null, newUser);

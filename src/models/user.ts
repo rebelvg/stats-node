@@ -14,6 +14,8 @@ export interface IUserModel extends Document {
   streamKey: string;
   createdAt: Date;
   updatedAt: Date;
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  raw: Object;
 }
 
 export const User = mongoose.model<IUserModel>('User', schema);

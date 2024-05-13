@@ -15,6 +15,7 @@ export const schema = new Schema({
   streamKey: { type: String, required: true, unique: true, index: true },
   createdAt: { type: Date, required: true, index: true },
   updatedAt: { type: Date, required: true, index: true },
+  raw: { type: Object, required: false },
 });
 
 schema.pre('validate', function (this: IUserModel, next) {
