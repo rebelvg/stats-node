@@ -113,118 +113,114 @@ export abstract class BaseWorker {
 
     const statsUpdateTime = new Date();
 
-    await Promise.all(
-      _.map(data, (channelObjs) => {
-        const { app: appName } = channelObjs;
+    for (const channelObjs of data) {
+      const { app: appName } = channelObjs;
 
-        return Promise.all(
-          _.map(channelObjs.channels, async (channelData) => {
-            const { channel: channelName } = channelData;
+      for (const channelData of channelObjs.channels) {
+        const { channel: channelName } = channelData;
 
-            _.set(stats, [appName, channelName], {
-              publisher: null,
-              subscribers: [],
-            });
+        _.set(stats, [appName, channelName], {
+          publisher: null,
+          subscribers: [],
+        });
 
-            let streamRecord: IStreamModel = null;
+        let streamRecord: IStreamModel = null;
 
-            if (channelData.publisher) {
-              const streamQuery: FilterQuery<IStreamModel> = {
-                server: NAME,
-                app: appName,
-                channel: channelName,
-                connectId: channelData.publisher.connectId,
-                connectCreated: channelData.publisher.connectCreated,
-              };
+        if (channelData.publisher) {
+          const streamQuery: FilterQuery<IStreamModel> = {
+            server: NAME,
+            app: appName,
+            channel: channelName,
+            connectId: channelData.publisher.connectId,
+            connectCreated: channelData.publisher.connectCreated,
+          };
 
-              streamRecord = await Stream.findOne(streamQuery);
+          streamRecord = await Stream.findOne(streamQuery);
 
-              if (!streamRecord) {
-                streamQuery.connectUpdated = statsUpdateTime;
-                streamQuery.bytes = channelData.publisher.bytes;
-                streamQuery.ip = channelData.publisher.ip;
-                streamQuery.protocol = channelData.publisher.protocol;
-                streamQuery.userId = channelData.publisher.userId;
-                streamQuery.lastBitrate = 0;
+          if (!streamRecord) {
+            streamQuery.connectUpdated = statsUpdateTime;
+            streamQuery.bytes = channelData.publisher.bytes;
+            streamQuery.ip = channelData.publisher.ip;
+            streamQuery.protocol = channelData.publisher.protocol;
+            streamQuery.userId = channelData.publisher.userId;
+            streamQuery.lastBitrate = 0;
 
-                streamRecord = new Stream(streamQuery);
-              } else {
-                const lastBitrate = streamService.calculateLastBitrate(
-                  channelData.publisher.bytes,
-                  streamRecord.bytes,
-                  statsUpdateTime,
-                  streamRecord.connectUpdated,
-                );
+            streamRecord = new Stream(streamQuery);
+          } else {
+            const lastBitrate = streamService.calculateLastBitrate(
+              channelData.publisher.bytes,
+              streamRecord.bytes,
+              statsUpdateTime,
+              streamRecord.connectUpdated,
+            );
 
-                streamRecord.lastBitrate = lastBitrate;
-                streamRecord.bytes = channelData.publisher.bytes;
-                streamRecord.connectUpdated = statsUpdateTime;
-                streamRecord.apiSource = this.apiSource;
-                streamRecord.apiResponse = channelData.publisher;
-              }
-            }
+            streamRecord.lastBitrate = lastBitrate;
+            streamRecord.bytes = channelData.publisher.bytes;
+            streamRecord.connectUpdated = statsUpdateTime;
+            streamRecord.apiSource = this.apiSource;
+            streamRecord.apiResponse = channelData.publisher;
+          }
+        }
 
-            for (const subscriber of channelData.subscribers) {
-              const subscriberQuery: FilterQuery<ISubscriberModel> = {
-                server: NAME,
-                app: appName,
-                channel: channelName,
-                connectId: subscriber.connectId,
-                connectCreated: subscriber.connectCreated,
-              };
+        for (const subscriber of channelData.subscribers) {
+          const subscriberQuery: FilterQuery<ISubscriberModel> = {
+            server: NAME,
+            app: appName,
+            channel: channelName,
+            connectId: subscriber.connectId,
+            connectCreated: subscriber.connectCreated,
+          };
 
-              let subscriberRecord = await Subscriber.findOne(subscriberQuery);
+          let subscriberRecord = await Subscriber.findOne(subscriberQuery);
 
-              if (!subscriberRecord) {
-                subscriberQuery.connectUpdated = statsUpdateTime;
-                subscriberQuery.bytes = subscriber.bytes;
-                subscriberQuery.ip = subscriber.ip;
-                subscriberQuery.protocol = subscriber.protocol;
-                subscriberQuery.userId = subscriber.userId;
+          if (!subscriberRecord) {
+            subscriberQuery.connectUpdated = statsUpdateTime;
+            subscriberQuery.bytes = subscriber.bytes;
+            subscriberQuery.ip = subscriber.ip;
+            subscriberQuery.protocol = subscriber.protocol;
+            subscriberQuery.userId = subscriber.userId;
 
-                subscriberRecord = new Subscriber(subscriberQuery);
-              } else {
-                subscriberRecord.bytes = subscriber.bytes;
-                subscriberRecord.connectUpdated = statsUpdateTime;
-              }
+            subscriberRecord = new Subscriber(subscriberQuery);
+          } else {
+            subscriberRecord.bytes = subscriber.bytes;
+            subscriberRecord.connectUpdated = statsUpdateTime;
+          }
 
-              if (streamRecord) {
-                const streamIds = subscriberRecord.streamIds;
+          if (streamRecord) {
+            const streamIds = subscriberRecord.streamIds;
 
-                streamIds.push(streamRecord._id);
+            streamIds.push(streamRecord._id);
 
-                subscriberRecord.streamIds = _.uniqBy(streamIds, (item) =>
-                  item.toHexString(),
-                );
-              }
+            subscriberRecord.streamIds = _.uniqBy(streamIds, (item) =>
+              item.toHexString(),
+            );
+          }
 
-              subscriberRecord.apiSource = this.apiSource;
-              subscriberRecord.apiResponse = subscriber;
+          subscriberRecord.apiSource = this.apiSource;
+          subscriberRecord.apiResponse = subscriber;
 
-              await subscriberRecord.save();
+          await subscriberRecord.save();
 
-              stats[appName][channelName].subscribers.push(subscriberRecord);
-            }
+          stats[appName][channelName].subscribers.push(subscriberRecord);
+        }
 
-            if (streamRecord) {
-              const streamViewers = await streamService.countViewersById(
-                streamRecord._id,
-              );
+        if (streamRecord) {
+          const streamViewers = await streamService.countViewersById(
+            streamRecord._id,
+          );
 
-              streamRecord.totalConnectionsCount =
-                streamViewers.totalConnectionsCount;
-              streamRecord.peakViewersCount = streamViewers.peakViewersCount;
+          streamRecord.totalConnectionsCount =
+            streamViewers.totalConnectionsCount;
+          streamRecord.peakViewersCount = streamViewers.peakViewersCount;
 
-              await streamRecord.save();
+          await streamRecord.save();
 
-              await channelService.addChannel(streamRecord.channel);
-            }
+          await channelService.addChannel(streamRecord.channel);
+        }
 
-            _.set(stats, [appName, channelName, 'publisher'], streamRecord);
-          }),
-        );
-      }),
-    );
+        _.set(stats, [appName, channelName, 'publisher'], streamRecord);
+      }
+    }
 
     return stats;
   }

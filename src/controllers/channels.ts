@@ -11,60 +11,6 @@ import { ChannelTypeEnum } from '../models/channel';
 import { BadRequest } from '../helpers/errors';
 import { userService } from '../services/user';
 
-function findServerByHost(server: string) {
-  return _.find(STREAM_SERVERS, (streamServer) =>
-    streamServer.HOSTS.includes(server),
-  );
-}
-
-function isLive(server: string, app: string, channel: string): boolean {
-  const streamServer = findServerByHost(server);
-
-  return !!liveStats?.[streamServer?.NAME]?.[app]?.[channel]?.publisher;
-}
-
-function getViewers(server: string, app: string, channel: string): number {
-  const streamServer = findServerByHost(server);
-
-  return (
-    liveStats?.[streamServer?.NAME]?.[app]?.[channel]?.subscribers?.length || 0
-  );
-}
-
-function getDuration(server: string, app: string, channel: string): number {
-  const streamServer = findServerByHost(server);
-
-  return (
-    liveStats?.[streamServer?.NAME]?.[app]?.[channel]?.publisher?.duration || 0
-  );
-}
-
-function getBitrate(server: string, app: string, channel: string): number {
-  const streamServer = findServerByHost(server);
-
-  return (
-    liveStats?.[streamServer?.NAME]?.[app]?.[channel]?.publisher?.bitrate || 0
-  );
-}
-
-function getLastBitrate(server: string, app: string, channel: string): number {
-  const streamServer = findServerByHost(server);
-
-  return (
-    liveStats?.[streamServer?.NAME]?.[app]?.[channel]?.publisher?.lastBitrate ||
-    0
-  );
-}
-
-function getStartTime(server: string, app: string, channel: string): Date {
-  const streamServer = findServerByHost(server);
-
-  return (
-    liveStats?.[streamServer?.NAME]?.[app]?.[channel]?.publisher
-      ?.connectCreated || null
-  );
-}
-
 function appChannelStatsBase(server: string, app: string, channel: string) {
   const channelStats = {
     isLive: false,
@@ -72,15 +18,31 @@ function appChannelStatsBase(server: string, app: string, channel: string) {
     duration: 0,
     bitrate: 0,
     lastBitrate: 0,
+    _id: null,
     startTime: null,
   };
 
-  channelStats.isLive = isLive(server, app, channel);
-  channelStats.viewers = getViewers(server, app, channel);
-  channelStats.duration = getDuration(server, app, channel);
-  channelStats.bitrate = getBitrate(server, app, channel);
-  channelStats.lastBitrate = getLastBitrate(server, app, channel);
-  channelStats.startTime = getStartTime(server, app, channel);
+  const streamServer = _.find(STREAM_SERVERS, (streamServer) =>
+    streamServer.HOSTS.includes(server),
+  );
+
+  if (!streamServer) {
+    return channelStats;
+  }
+
+  const channelRecord = liveStats[streamServer.NAME]?.[app]?.[channel];
+
+  if (!channelRecord) {
+    return channelStats;
+  }
+
+  channelStats.isLive = !!channelRecord.publisher;
+  channelStats.viewers = channelRecord.subscribers?.length || 0;
+  channelStats.duration = channelRecord.publisher?.duration || 0;
+  channelStats.bitrate = channelRecord.publisher?.bitrate || 0;
+  channelStats.lastBitrate = channelRecord.publisher?.lastBitrate || 0;
+  channelStats._id = channelRecord.publisher?.connectCreated || null;
+  channelStats.startTime = channelRecord.publisher?.connectCreated || null;
 
   return channelStats;
 }
@@ -95,72 +57,211 @@ export function appChannelStats(ctx: Router.IRouterContext, next: Next) {
   ctx.body = channelStats;
 }
 
+interface IChannelServerStats {
+  server: string;
+  apps: {
+    app: string;
+    channels: {
+      channel: string;
+      publisher: {
+        server: string;
+        app: string;
+        channel: string;
+        connectId: string;
+        connectCreated: Date;
+        connectUpdated: Date;
+        bytes: number;
+        ip: string;
+        protocol: string;
+        lastBitrate: number;
+        userId: string | null;
+        _id: string;
+        totalConnectionsCount: number;
+        peakViewersCount: number;
+        duration: number;
+        bitrate: number;
+        createdAt: Date;
+        updatedAt: Date;
+        isLive: boolean;
+        location: {
+          countryCode: string;
+          city: string;
+        };
+        userName: string | null;
+      } | null;
+      subscribers: {
+        server: string;
+        app: string;
+        channel: string;
+        connectId: string;
+        connectCreated: Date;
+        connectUpdated: Date;
+        bytes: number;
+        ip: string;
+        protocol: string;
+        userId: string | null;
+        streamIds: string[];
+        _id: string;
+        duration: number;
+        bitrate: number;
+        createdAt: Date;
+        updatedAt: Date;
+        isLive: boolean;
+        location: {
+          countryCode: string;
+          city: string;
+        };
+      }[];
+    }[];
+  }[];
+}
+
 export async function channels(ctx: Router.IRouterContext, next: Next) {
   const liveStatsClone = _.cloneDeep(liveStats);
 
-  const liveServers = await Promise.all(
-    _.map(liveStatsClone, async (serverObj, server) => {
-      const apps = await Promise.all(
-        _.map(serverObj, async (appObj, app) => {
-          const channels = await Promise.all(
-            _.map(appObj, async (channelObj, channel) => {
-              const liveChannel = {
-                channel,
-                publisher: null,
-                subscribers: [],
-              };
+  const isAdmin = !!ctx.state.user?.isAdmin;
 
-              if (channelObj.publisher) {
-                const livePublisher = channelObj.publisher;
+  const publicChannelNames = (
+    await channelService.getChannelsByType(ChannelTypeEnum.PRIVATE)
+  ).map((channel) => channel.name);
 
-                await Stream.populate(livePublisher, {
-                  path: 'location',
-                });
+  const liveServers: IChannelServerStats[] = [];
 
-                hideFields(ctx.state.user, livePublisher);
+  for (const server in liveStatsClone) {
+    const serverObj = liveStatsClone[server];
 
-                liveChannel.publisher = channelObj.publisher;
-              }
+    if (!serverObj) {
+      continue;
+    }
 
-              for (const subscriberObj of channelObj.subscribers) {
-                const liveSubscriber = subscriberObj;
+    const liveServer = {
+      server,
+      apps: [],
+    };
 
-                await Subscriber.populate(liveSubscriber, {
-                  path: 'location',
-                });
+    for (const app in serverObj) {
+      const appObj = serverObj[app];
 
-                hideFields(ctx.state.user, liveSubscriber);
+      if (!appObj) {
+        continue;
+      }
 
-                liveChannel.subscribers.push(liveSubscriber);
-              }
+      const channels: IChannelServerStats['apps'][0]['channels'] = [];
 
-              return liveChannel;
-            }),
+      for (const channel in appObj) {
+        const channelObj = appObj[channel];
+
+        if (!isAdmin) {
+          if (!publicChannelNames.includes(channel)) {
+            continue;
+          }
+        }
+
+        const liveChannel: IChannelServerStats['apps'][0]['channels'][0] = {
+          channel,
+          publisher: null,
+          subscribers: [],
+        };
+
+        if (channelObj.publisher) {
+          const livePublisher = channelObj.publisher;
+
+          await Stream.populate(livePublisher, {
+            path: 'location',
+          });
+
+          hideFields(ctx.state.user, livePublisher);
+
+          const userRecord = await userService.getById(
+            channelObj.publisher.userId?.toString(),
           );
 
-          const liveApp = {
-            app,
-            channels,
+          liveChannel.publisher = {
+            server: livePublisher.server,
+            app: livePublisher.app,
+            channel: livePublisher.channel,
+            connectId: livePublisher.connectId,
+            connectCreated: livePublisher.connectCreated,
+            connectUpdated: livePublisher.connectUpdated,
+            bytes: livePublisher.bytes,
+            ip: livePublisher.ip,
+            protocol: livePublisher.protocol,
+            lastBitrate: livePublisher.lastBitrate,
+            userId: livePublisher.userId?.toString() || null,
+            _id: livePublisher._id,
+            totalConnectionsCount: livePublisher.totalConnectionsCount,
+            peakViewersCount: livePublisher.peakViewersCount,
+            duration: livePublisher.duration,
+            bitrate: livePublisher.bitrate,
+            createdAt: livePublisher.createdAt,
+            updatedAt: livePublisher.updatedAt,
+            isLive: livePublisher.isLive,
+            location: {
+              countryCode: livePublisher?.location?.api?.countryCode || null,
+              city: livePublisher?.location?.api?.city || null,
+            },
+            userName: userRecord?.name || null,
           };
+        }
 
-          return liveApp;
-        }),
-      );
+        for (const subscriberObj of channelObj.subscribers) {
+          const liveSubscriber = subscriberObj;
 
-      const liveServer = {
-        server,
-        apps,
+          await Subscriber.populate(liveSubscriber, {
+            path: 'location',
+          });
+
+          hideFields(ctx.state.user, liveSubscriber);
+
+          liveChannel.subscribers.push({
+            server: liveSubscriber.server,
+            app: liveSubscriber.app,
+            channel: liveSubscriber.channel,
+            connectId: liveSubscriber.connectId,
+            connectCreated: liveSubscriber.connectCreated,
+            connectUpdated: liveSubscriber.connectUpdated,
+            bytes: liveSubscriber.bytes,
+            ip: liveSubscriber.ip,
+            protocol: liveSubscriber.protocol,
+            userId: liveSubscriber.userId?.toString() || null,
+            streamIds: liveSubscriber.streamIds.map((e) => e.toString()),
+            _id: liveSubscriber._id,
+            duration: liveSubscriber.duration,
+            bitrate: liveSubscriber.bitrate,
+            createdAt: liveSubscriber.createdAt,
+            updatedAt: liveSubscriber.updatedAt,
+            isLive: liveSubscriber.isLive,
+            location: {
+              countryCode: liveSubscriber?.location?.api?.countryCode || null,
+              city: liveSubscriber?.location?.api?.city || null,
+            },
+          });
+        }
+
+        channels.push(liveChannel);
+      }
+
+      const liveApp = {
+        app,
+        channels,
       };
 
-      return liveServer;
-    }),
-  );
+      if (liveApp.channels.length > 0) {
+        liveServer.apps.push(liveApp);
+      }
+    }
+
+    if (liveServer.apps.length > 0) {
+      liveServers.push(liveServer);
+    }
+  }
 
   ctx.body = { live: liveServers };
 }
 
 export async function list(ctx: Router.IRouterContext, next: Next) {
   const liveChannels: {
+    server: string;
     app: string;
     channel: string;
     protocol: string;
@@ -175,7 +276,7 @@ export async function list(ctx: Router.IRouterContext, next: Next) {
   ).map((channel) => channel.name);
 
   await Promise.all(
-    _.map(liveStats, (serverObj) => {
+    _.map(liveStats, (serverObj, serverName) => {
       return Promise.all(
         _.map(serverObj, (appObj) => {
           return Promise.all(
@@ -187,6 +288,7 @@ export async function list(ctx: Router.IRouterContext, next: Next) {
                   );
 
                   liveChannels.push({
+                    server: serverName,
                     app: channelObj.publisher.app,
                     channel: channelObj.publisher.channel,
                     protocol: channelObj.publisher.protocol,

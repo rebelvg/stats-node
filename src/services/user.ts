@@ -6,6 +6,10 @@ import { IFindStreamers } from './interfaces/user';
 
 class UserService {
   public getById(id: string) {
+    if (!id) {
+      return null;
+    }
+
     return User.findOne({
       _id: new ObjectId(id),
     });

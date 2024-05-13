@@ -1,4 +1,5 @@
 import * as mongoose from 'mongoose';
+import { IChannelModel } from '../models/channel';
 
 const Schema = mongoose.Schema;
 
@@ -17,3 +18,15 @@ export const schema = new Schema(
   },
   { timestamps: true },
 );
+
+schema.pre('validate', function (this: IChannelModel, next) {
+  const currentTime = new Date();
+
+  if (this.isNew) {
+    this.createdAt = currentTime;
+  }
+
+  this.updatedAt = currentTime;
+
+  next();
+});

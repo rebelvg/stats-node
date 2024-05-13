@@ -5,6 +5,7 @@ import { ObjectId } from 'mongodb';
 import { schema } from '../schemas/subscriber';
 import { ApiSourceEnum } from './stream';
 import { IGenericStreamsResponse } from '../workers/_base';
+import { IIPModel } from './ip';
 
 export interface ISubscriberModel extends Document {
   server: string;
@@ -25,6 +26,7 @@ export interface ISubscriberModel extends Document {
   createdAt: Date;
   updatedAt: Date;
   isLive: boolean;
+  location?: IIPModel;
 }
 
 export const Subscriber = mongoose.model<ISubscriberModel>(

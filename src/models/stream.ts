@@ -4,6 +4,7 @@ import { ObjectId } from 'mongodb';
 
 import { schema } from '../schemas/stream';
 import { IGenericStreamsResponse } from '../workers/_base';
+import { IIPModel } from './ip';
 
 export enum ApiSourceEnum {
   KLPQ_MEDIA_SERVER = 'klpq_media_server',
@@ -33,6 +34,7 @@ export interface IStreamModel extends Document {
   createdAt: Date;
   updatedAt: Date;
   isLive: boolean;
+  location?: IIPModel;
 }
 
 export const Stream = mongoose.model<IStreamModel>('Stream', schema);

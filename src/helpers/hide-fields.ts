@@ -7,6 +7,7 @@ const paths = [
   ['ip'],
   ['location', 'ip'],
   ['location', 'api', 'query'],
+  ['location', 'api', 'city'],
   ['apiResponse', 'ip'],
 ];
 
