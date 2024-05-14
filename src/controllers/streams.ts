@@ -8,6 +8,8 @@ import { hideFields } from '../helpers/hide-fields';
 import { filterSubscribers } from '../helpers/filter-subscribers';
 import { streamService } from '../services/stream';
 import { subscriberService } from '../services/subscriber';
+import { channelService } from '../services/channel';
+import { ChannelTypeEnum } from '../models/channel';
 
 export async function findById(ctx: Router.IRouterContext, next: Next) {
   const stream = await Stream.findById(ctx.params.id).populate(['location']);
@@ -82,10 +84,34 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
 }
 
 export async function find(ctx: Router.IRouterContext, next: Next) {
+  const isAdmin = !!ctx.state.user?.isAdmin;
+
+  if (!isAdmin) {
+    const publicChannelNames = (
+      await channelService.getChannelsByType(ChannelTypeEnum.PUBLIC)
+    ).map((channel) => channel.name);
+
+    if (ctx.queryObj.$and) {
+      ctx.queryObj.$and.push({
+        channel: {
+          $in: publicChannelNames,
+        },
+      });
+    } else {
+      ctx.queryObj.$and = [
+        {
+          channel: {
+            $in: publicChannelNames,
+          },
+        },
+      ];
+    }
+  }
+
   const paginatedStreams = await Stream.paginate(ctx.queryObj, {
     sort: _.isEmpty(ctx.sortObj) ? { connectCreated: -1 } : ctx.sortObj,
-    page: parseInt(ctx.query.page as string),
-    limit: parseInt(ctx.query.limit as string),
+    page: parseInt(ctx.query.page as string) || 1,
+    limit: parseInt(ctx.query.limit as string) || 20,
     populate: ['location'],
   });
 

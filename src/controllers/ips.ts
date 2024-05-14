@@ -19,8 +19,8 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
 export async function find(ctx: Router.IRouterContext, next: Next) {
   const paginatedIps = await IP.paginate(ctx.queryObj, {
     sort: _.isEmpty(ctx.sortObj) ? { createdAt: -1 } : ctx.sortObj,
-    page: parseInt(ctx.query.page as string),
-    limit: parseInt(ctx.query.limit as string),
+    page: parseInt(ctx.query.page as string) || 1,
+    limit: parseInt(ctx.query.limit as string) || 20,
   });
 
   const counties = await IP.distinct('api.country', ctx.queryObj);
