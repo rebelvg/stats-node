@@ -60,7 +60,7 @@ export async function readToken(ctx: Router.IRouterContext, next: Next) {
         user: user?._id,
       });
     } catch (error) {
-      logger.error('jwt_token_error', { href: ctx.href, jwtToken, error });
+      logger.warn('jwt_token_warn', { href: ctx.href, jwtToken, error });
     }
   }
 

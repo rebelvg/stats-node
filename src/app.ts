@@ -37,13 +37,20 @@ app.use(async (ctx, next) => {
   try {
     await next();
   } catch (error) {
-    logger.error('http_error', {
+    const logBody = {
       method: ctx.method,
       href: ctx.href,
       headers: JSON.stringify(ctx.headers),
       body: ctx.request.body,
+      status: error.status,
       error,
-    });
+    };
+
+    if (error.status) {
+      logger.warn('http_warn', logBody);
+    } else {
+      logger.error('http_error', logBody);
+    }
 
     ctx.status = error.status || 500;
     ctx.body = { error: error.message };
