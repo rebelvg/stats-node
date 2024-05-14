@@ -251,9 +251,7 @@ export async function channels(ctx: Router.IRouterContext, next: Next) {
       }
     }
 
-    if (liveServer.apps.length > 0) {
-      liveServers.push(liveServer);
-    }
+    liveServers.push(liveServer);
   }
 
   ctx.body = { live: liveServers };
