@@ -8,6 +8,7 @@ import { hideFields } from '../helpers/hide-fields';
 import { streamService } from '../services/stream';
 import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';
+import { IChannelServerStats } from './channels';
 
 export async function findById(ctx: Router.IRouterContext, next: Next) {
   const subscriber = await Subscriber.findById(ctx.params.id).populate([
@@ -88,7 +89,29 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
   });
 
   ctx.body = {
-    subscribers: paginatedSubscribers.docs,
+    subscribers: paginatedSubscribers.docs.map((subscriber) => {
+      return {
+        server: subscriber.server,
+        app: subscriber.app,
+        channel: subscriber.channel,
+        connectId: subscriber.connectId,
+        connectCreated: subscriber.connectCreated,
+        connectUpdated: subscriber.connectUpdated,
+        bytes: subscriber.bytes,
+        ip: subscriber.ip,
+        protocol: subscriber.protocol,
+        userId: subscriber.userId?.toString() || null,
+        streamIds: subscriber.streamIds.map((e) => e.toString()),
+        _id: subscriber._id,
+        duration: subscriber.duration,
+        bitrate: subscriber.bitrate,
+        createdAt: subscriber.createdAt,
+        updatedAt: subscriber.updatedAt,
+        isLive: subscriber.isLive,
+        countryCode: subscriber?.location?.api?.countryCode || null,
+        city: subscriber?.location?.api?.city || null,
+      } as IChannelServerStats['apps'][0]['channels'][0]['subscribers'][0];
+    }),
     options: {
       apps: await Subscriber.distinct('app', ctx.queryObj),
       channels: await Subscriber.distinct('channel', ctx.queryObj),

@@ -57,7 +57,7 @@ export function appChannelStats(ctx: Router.IRouterContext, next: Next) {
   ctx.body = channelStats;
 }
 
-interface IChannelServerStats {
+export interface IChannelServerStats {
   server: string;
   apps: {
     app: string;
@@ -83,10 +83,8 @@ interface IChannelServerStats {
         createdAt: Date;
         updatedAt: Date;
         isLive: boolean;
-        location: {
-          countryCode: string;
-          city: string;
-        };
+        countryCode: string | null;
+        city: string | null;
         userName: string | null;
       } | null;
       subscribers: {
@@ -107,10 +105,8 @@ interface IChannelServerStats {
         createdAt: Date;
         updatedAt: Date;
         isLive: boolean;
-        location: {
-          countryCode: string;
-          city: string;
-        };
+        countryCode: string | null;
+        city: string | null;
       }[];
     }[];
   }[];
@@ -196,10 +192,8 @@ export async function channels(ctx: Router.IRouterContext, next: Next) {
             createdAt: livePublisher.createdAt,
             updatedAt: livePublisher.updatedAt,
             isLive: livePublisher.isLive,
-            location: {
-              countryCode: livePublisher?.location?.api?.countryCode || null,
-              city: livePublisher?.location?.api?.city || null,
-            },
+            countryCode: livePublisher?.location?.api?.countryCode || null,
+            city: livePublisher?.location?.api?.city || null,
             userName: userRecord?.name || null,
           };
         }
@@ -231,10 +225,8 @@ export async function channels(ctx: Router.IRouterContext, next: Next) {
             createdAt: liveSubscriber.createdAt,
             updatedAt: liveSubscriber.updatedAt,
             isLive: liveSubscriber.isLive,
-            location: {
-              countryCode: liveSubscriber?.location?.api?.countryCode || null,
-              city: liveSubscriber?.location?.api?.city || null,
-            },
+            countryCode: liveSubscriber?.location?.api?.countryCode || null,
+            city: liveSubscriber?.location?.api?.city || null,
           });
         }
 

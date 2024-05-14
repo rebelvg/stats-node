@@ -10,6 +10,8 @@ import { streamService } from '../services/stream';
 import { subscriberService } from '../services/subscriber';
 import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';
+import { IChannelServerStats } from './channels';
+import { userService } from '../services/user';
 
 export async function findById(ctx: Router.IRouterContext, next: Next) {
   const stream = await Stream.findById(ctx.params.id).populate(['location']);
@@ -144,8 +146,46 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
     hideFields(ctx.state.user, stream);
   });
 
+  const userMap = await userService.getMapByIds(
+    paginatedStreams.docs
+      .map((stream) => stream.userId?.toString())
+      .filter(Boolean),
+  );
+
+  const streams: IChannelServerStats['apps'][0]['channels'][0]['publisher'][] =
+    await Promise.all(
+      paginatedStreams.docs.map((stream) => {
+        const userRecord = userMap[stream.userId?.toString()] || null;
+
+        return {
+          server: stream.server,
+          app: stream.app,
+          channel: stream.channel,
+          connectId: stream.connectId,
+          connectCreated: stream.connectCreated,
+          connectUpdated: stream.connectUpdated,
+          bytes: stream.bytes,
+          ip: stream.ip,
+          protocol: stream.protocol,
+          lastBitrate: stream.lastBitrate,
+          userId: stream.userId?.toString() || null,
+          _id: stream._id,
+          totalConnectionsCount: stream.totalConnectionsCount,
+          peakViewersCount: stream.peakViewersCount,
+          duration: stream.duration,
+          bitrate: stream.bitrate,
+          createdAt: stream.createdAt,
+          updatedAt: stream.updatedAt,
+          isLive: stream.isLive,
+          countryCode: stream?.location?.api?.countryCode || null,
+          city: stream?.location?.api?.city || null,
+          userName: userRecord?.name || null,
+        };
+      }),
+    );
+
   ctx.body = {
-    streams: paginatedStreams.docs,
+    streams,
     options: {
       apps: await Stream.distinct('app', ctx.queryObj),
       channels: await Stream.distinct('channel', ctx.queryObj),
