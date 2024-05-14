@@ -76,12 +76,105 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
     hideFields(ctx.state.user, subscriber);
   });
 
+  _.forEach(relatedStreams, (stream) => {
+    hideFields(ctx.state.user, stream);
+  });
+
+  const userRecord = await userService.getById(stream.userId?.toString());
+
+  const streamResponse: IChannelServerStats['apps'][0]['channels'][0]['publisher'] =
+    {
+      server: stream.server,
+      app: stream.app,
+      channel: stream.channel,
+      connectId: stream.connectId,
+      connectCreated: stream.connectCreated,
+      connectUpdated: stream.connectUpdated,
+      bytes: stream.bytes,
+      ip: stream.ip,
+      protocol: stream.protocol,
+      lastBitrate: stream.lastBitrate,
+      userId: stream.userId?.toString() || null,
+      _id: stream._id,
+      totalConnectionsCount: stream.totalConnectionsCount,
+      peakViewersCount: stream.peakViewersCount,
+      duration: stream.duration,
+      bitrate: stream.bitrate,
+      createdAt: stream.createdAt,
+      updatedAt: stream.updatedAt,
+      isLive: stream.isLive,
+      countryCode: stream?.location?.api?.countryCode || null,
+      city: stream?.location?.api?.city || null,
+      userName: userRecord?.name || null,
+    };
+
+  const subscribersResponse: IChannelServerStats['apps'][0]['channels'][0]['subscribers'][0][] =
+    subscribers.map((subscriber) => {
+      return {
+        server: subscriber.server,
+        app: subscriber.app,
+        channel: subscriber.channel,
+        connectId: subscriber.connectId,
+        connectCreated: subscriber.connectCreated,
+        connectUpdated: subscriber.connectUpdated,
+        bytes: subscriber.bytes,
+        ip: subscriber.ip,
+        protocol: subscriber.protocol,
+        userId: subscriber.userId?.toString() || null,
+        streamIds: subscriber.streamIds.map((e) => e.toString()),
+        _id: subscriber._id,
+        duration: subscriber.duration,
+        bitrate: subscriber.bitrate,
+        createdAt: subscriber.createdAt,
+        updatedAt: subscriber.updatedAt,
+        isLive: subscriber.isLive,
+        countryCode: subscriber?.location?.api?.countryCode || null,
+        city: subscriber?.location?.api?.city || null,
+      };
+    });
+
+  const userMap = await userService.getMapByIds(
+    relatedStreams.map((stream) => stream.userId?.toString()).filter(Boolean),
+  );
+
+  const relatedStreamsResponse: IChannelServerStats['apps'][0]['channels'][0]['publisher'][] =
+    await Promise.all(
+      relatedStreams.map((stream) => {
+        const userRecord = userMap[stream.userId?.toString()] || null;
+
+        return {
+          server: stream.server,
+          app: stream.app,
+          channel: stream.channel,
+          connectId: stream.connectId,
+          connectCreated: stream.connectCreated,
+          connectUpdated: stream.connectUpdated,
+          bytes: stream.bytes,
+          ip: stream.ip,
+          protocol: stream.protocol,
+          lastBitrate: stream.lastBitrate,
+          userId: stream.userId?.toString() || null,
+          _id: stream._id,
+          totalConnectionsCount: stream.totalConnectionsCount,
+          peakViewersCount: stream.peakViewersCount,
+          duration: stream.duration,
+          bitrate: stream.bitrate,
+          createdAt: stream.createdAt,
+          updatedAt: stream.updatedAt,
+          isLive: stream.isLive,
+          countryCode: stream?.location?.api?.countryCode || null,
+          city: stream?.location?.api?.city || null,
+          userName: userRecord?.name || null,
+        };
+      }),
+    );
+
   ctx.body = {
-    stream,
-    subscribers,
+    stream: streamResponse,
+    subscribers: subscribersResponse,
     options,
     info,
-    relatedStreams,
+    relatedStreams: relatedStreamsResponse,
   };
 }
 
@@ -268,7 +361,5 @@ export async function graph(ctx: Router.IRouterContext, next: Next) {
 
   graph = _.sortBy(graph, ['time']);
 
-  hideFields(ctx.state.user, stream);
-
-  ctx.body = { stream, events: graph };
+  ctx.body = { events: graph };
 }
