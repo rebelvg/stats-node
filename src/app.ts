@@ -63,7 +63,7 @@ app.use(koaSession({ signed: true }, app));
 
 app.use(setLogger);
 
-app.use(koaMorgan('combined', { immediate: true, stream: process.stdout }));
+// app.use(koaMorgan('combined', { immediate: true, stream: process.stdout }));
 app.use(koaMorgan('short', { stream: process.stdout }));
 app.use(cors());
 
