@@ -3,7 +3,7 @@ import * as jsonwebtoken from 'jsonwebtoken';
 import { JWT } from '../config';
 
 interface IJwtPayload {
-  _v1: 'v1';
+  _v: 'v1';
   userId: string;
 }
 
@@ -12,7 +12,7 @@ export function encodeJwtToken(data: Partial<IJwtPayload>) {
     {
       _v: 'v1',
       ...data,
-    },
+    } as IJwtPayload,
     JWT.SECRET,
     { expiresIn: '60d' },
   );
@@ -21,7 +21,7 @@ export function encodeJwtToken(data: Partial<IJwtPayload>) {
 export function decodeJwtToken(jwtToken: string) {
   const data = jsonwebtoken.verify(jwtToken, JWT.SECRET, {}) as IJwtPayload;
 
-  if (data._v1 !== 'v1') {
+  if (data._v !== 'v1') {
     throw new Error('old_token');
   }
 
