@@ -59,3 +59,23 @@ router.get(
     ctx.redirect(`${redirectUri}${jwtToken}`);
   },
 );
+
+router.get(
+  '/validate',
+  isLoggedIn,
+  (ctx: Router.IRouterContext, next: Next) => {
+    ctx.body = {};
+  },
+);
+
+router.get('/refresh', isLoggedIn, (ctx: Router.IRouterContext, next: Next) => {
+  const { _id } = ctx.state.user;
+
+  const jwtToken = encodeJwtToken({
+    userId: _id,
+  });
+
+  ctx.body = {
+    jwtToken,
+  };
+});
