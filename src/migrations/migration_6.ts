@@ -1,7 +1,7 @@
 import { Db } from 'mongodb';
 
 export async function up(mongoClient: Db): Promise<void> {
-  const streams = mongoClient.collection<{}>('streams');
+  const streams = mongoClient.collection<Record<string, unknown>>('streams');
 
   await streams.updateMany(
     {
@@ -14,7 +14,8 @@ export async function up(mongoClient: Db): Promise<void> {
     },
   );
 
-  const subscribers = mongoClient.collection<{}>('subscribers');
+  const subscribers =
+    mongoClient.collection<Record<string, unknown>>('subscribers');
 
   await subscribers.updateMany(
     {

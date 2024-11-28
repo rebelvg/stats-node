@@ -10,7 +10,9 @@ export async function up(mongoClient: Db): Promise<void> {
     updatedAt: Date;
   }>('channels');
 
-  const streamsCollection = mongoClient.collection<{}>('streams');
+  const streamsCollection = mongoClient.collection<{ channel: string }>(
+    'streams',
+  );
 
   let channelNames: string[] = await streamsCollection.distinct('channel');
 

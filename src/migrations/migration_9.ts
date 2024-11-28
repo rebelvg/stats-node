@@ -3,8 +3,10 @@ import * as _ from 'lodash';
 import { Db } from 'mongodb';
 
 export async function up(mongoClient: Db): Promise<void> {
-  const streamsCollection = mongoClient.collection<{}>('streams');
-  const subscribersCollection = mongoClient.collection<{}>('subscribers');
+  const streamsCollection =
+    mongoClient.collection<Record<string, unknown>>('streams');
+  const subscribersCollection =
+    mongoClient.collection<Record<string, unknown>>('subscribers');
 
   await streamsCollection.createIndex(
     {
