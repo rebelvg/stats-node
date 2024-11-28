@@ -1,9 +1,7 @@
-import { MongoCollections } from '../src/mongo';
-import { ISubscriberModel } from '../src/models/subscriber';
-import { IStreamModel } from '../src/models/stream';
+import { Db } from 'mongodb';
 
-export async function up(): Promise<void> {
-  const streams = MongoCollections.getCollection<IStreamModel>('streams');
+export async function up(mongoClient: Db): Promise<void> {
+  const streams = mongoClient.collection<{}>('streams');
 
   await streams.updateMany(
     {
@@ -27,8 +25,7 @@ export async function up(): Promise<void> {
     },
   );
 
-  const subscribers =
-    MongoCollections.getCollection<ISubscriberModel>('subscribers');
+  const subscribers = mongoClient.collection<{}>('subscribers');
 
   await subscribers.updateMany(
     {

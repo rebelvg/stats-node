@@ -4,5 +4,5 @@
     "noEmit": true
   },
   "exclude": ["./dist"],
-  "include": ["."]
+  "include": ["./src/**/*"]
 }

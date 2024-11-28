@@ -1,11 +1,8 @@
 import * as fs from 'fs';
 import * as mongoose from 'mongoose';
+import * as path from 'path';
 
-import {
-  connectMongoDriver,
-  connectMongoose,
-  MongoCollections,
-} from './src/mongo';
+import { connectMongoDriver, connectMongoose, MongoCollections } from './mongo';
 
 async function migrate() {
   console.log('running_migrations');
@@ -17,7 +14,7 @@ async function migrate() {
   const { Migrations } = MongoCollections;
 
   const files = fs
-    .readdirSync('./migrations')
+    .readdirSync('./src/migrations')
     .sort((firstElement, secondElement) => {
       const [, firstId] = firstElement.split('_');
       const [, secondId] = secondElement.split('_');
@@ -36,9 +33,9 @@ async function migrate() {
 
     console.log('running_migration', fileName);
 
-    const { up } = await import(`./migrations/${fileName}`);
+    const { up } = await import(path.resolve(`./src/migrations/${fileName}`));
 
-    await up();
+    await up(mongoClient.db());
 
     await Migrations.insertOne({
       name: fileName,

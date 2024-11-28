@@ -1,11 +1,16 @@
-import { MongoCollections } from '../src/mongo';
-import { ISubscriberModel } from '../src/models/subscriber';
-import { IStreamModel } from '../src/models/stream';
+import { Db, ObjectId } from 'mongodb';
 
-export async function up(): Promise<void> {
-  const subscribers =
-    MongoCollections.getCollection<ISubscriberModel>('subscribers');
-  const streams = MongoCollections.getCollection<IStreamModel>('streams');
+export async function up(mongoClient: Db): Promise<void> {
+  const subscribers = mongoClient.collection<{
+    server: string;
+    app: string;
+    channel: string;
+    connectCreated: Date;
+    connectUpdated: Date;
+  }>('subscribers');
+  const streams = mongoClient.collection<{
+    streamIds: ObjectId[];
+  }>('streams');
 
   const cursor = subscribers.find();
 

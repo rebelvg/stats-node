@@ -1,10 +1,11 @@
 import * as _ from 'lodash';
 
-import { MongoCollections } from '../src/mongo';
-import { IUserModel } from '../src/models/user';
+import { Db } from 'mongodb';
 
-export async function up(): Promise<void> {
-  const usersCollection = MongoCollections.getCollection<IUserModel>('users');
+export async function up(mongoClient: Db): Promise<void> {
+  const usersCollection = mongoClient.collection<{
+    name: string;
+  }>('users');
 
   const userRecords = await usersCollection.find().toArray();
 

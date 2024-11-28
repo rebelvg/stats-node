@@ -1,14 +1,14 @@
 import * as _ from 'lodash';
 
-import { MongoCollections } from '../src/mongo';
-import { IStreamModel } from '../src/models/stream';
-import { IChannelModel } from '../src/models/channel';
+import { Db } from 'mongodb';
 
-export async function up(): Promise<void> {
-  const channelsCollection =
-    MongoCollections.getCollection<IChannelModel>('channels');
-  const streamsCollection =
-    MongoCollections.getCollection<IStreamModel>('streams');
+export async function up(mongoClient: Db): Promise<void> {
+  const channelsCollection = mongoClient.collection<{
+    name: string;
+  }>('channels');
+  const streamsCollection = mongoClient.collection<{
+    connectCreated: Date;
+  }>('streams');
 
   const cursor = channelsCollection.find();
 

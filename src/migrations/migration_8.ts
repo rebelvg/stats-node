@@ -1,17 +1,16 @@
 import * as _ from 'lodash';
 
-import { MongoCollections } from '../src/mongo';
-import { ChannelTypeEnum } from '../src/models/channel';
+import { Db } from 'mongodb';
 
-export async function up(): Promise<void> {
-  const channelsCollection = MongoCollections.getCollection<{
+export async function up(mongoClient: Db): Promise<void> {
+  const channelsCollection = mongoClient.collection<{
     name: string;
     type: string;
     createdAt: Date;
     updatedAt: Date;
   }>('channels');
 
-  const streamsCollection = MongoCollections.getCollection<null>('streams');
+  const streamsCollection = mongoClient.collection<{}>('streams');
 
   let channelNames: string[] = await streamsCollection.distinct('channel');
 
@@ -23,7 +22,7 @@ export async function up(): Promise<void> {
   for (const channelName of channelNames) {
     await channelsCollection.insertOne({
       name: channelName,
-      type: ChannelTypeEnum.PRIVATE,
+      type: 'PRIVATE',
       createdAt: new Date(),
       updatedAt: new Date(),
     });
