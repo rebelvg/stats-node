@@ -7,7 +7,7 @@ import { findById } from '../controllers/users';
 import { encodeJwtToken } from '../helpers/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import { API, GOOGLE_OAUTH } from '../config';
-import { google } from 'googleapis';
+import * as google from 'googleapis/build/src/apis/oauth2';
 
 export const router = new Router();
 
