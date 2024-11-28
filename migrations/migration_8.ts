@@ -4,13 +4,12 @@ import { MongoCollections } from '../src/mongo';
 import { ChannelTypeEnum } from '../src/models/channel';
 
 export async function up(): Promise<void> {
-  const channelsCollection =
-    MongoCollections.getCollection<{
-      name: string;
-      type: string;
-      createdAt: Date;
-      updatedAt: Date;
-    }>('channels');
+  const channelsCollection = MongoCollections.getCollection<{
+    name: string;
+    type: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }>('channels');
 
   const streamsCollection = MongoCollections.getCollection<null>('streams');
 
