@@ -24,7 +24,7 @@ const cachedGraphs: {
   ids: new Map(),
 };
 
-export const totalDurationQuery = [
+export const totalDurationQuery: any = [
   {
     $match: {
       app: 'live',
@@ -100,7 +100,7 @@ export const avgStatsQuery = [
   },
 ];
 
-export const topStreamersQuery = [
+export const topStreamersQuery: any = [
   {
     $match: {
       app: 'live',
@@ -147,7 +147,7 @@ export const topStreamersQuery = [
   },
 ];
 
-export const monthlyStatsQuery = [
+export const monthlyStatsQuery: any = [
   {
     $match: {
       app: 'live',
@@ -212,7 +212,7 @@ export const monthlyStatsQuery = [
   },
 ];
 
-export const weekDayStatsQuery = [
+export const weekDayStatsQuery: any = [
   {
     $project: {
       year: {
@@ -268,7 +268,7 @@ export const weekDayStatsQuery = [
   },
 ];
 
-export const timeOfDayStatsQuery = [
+export const timeOfDayStatsQuery: any = [
   {
     $project: {
       year: {
@@ -324,7 +324,7 @@ export const timeOfDayStatsQuery = [
   },
 ];
 
-export const totalDurationSubscribersQuery = [
+export const totalDurationSubscribersQuery: any = [
   {
     $match: {
       app: 'live',
@@ -391,7 +391,7 @@ export const totalDurationSubscribersQuery = [
   },
 ];
 
-const monthlyStatsSubscribersQuery = [
+const monthlyStatsSubscribersQuery: any = [
   {
     $match: {
       app: 'live',

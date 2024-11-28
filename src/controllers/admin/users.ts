@@ -27,7 +27,7 @@ export async function update(ctx: Router.IRouterContext, next: Next) {
     throw Error('user_not_found');
   }
 
-  _.forEach(ctx.request.body, (value, key) => {
+  _.forEach(ctx.request.body as any[], (value, key) => {
     user[key] = value;
   });
 

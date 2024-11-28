@@ -304,7 +304,7 @@ export async function list(ctx: Router.IRouterContext, next: Next) {
 
 export async function updateChannel(ctx: Router.IRouterContext, next: Next) {
   const { id } = ctx.params;
-  const { type } = ctx.request.body;
+  const { type } = ctx.request.body as { type: ChannelTypeEnum };
 
   if (!Object.values(ChannelTypeEnum).includes(type)) {
     throw new BadRequest('bad_type');
