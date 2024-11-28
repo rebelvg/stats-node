@@ -2,6 +2,14 @@ import * as _ from 'lodash';
 
 import { IUserModel } from '../models/user';
 
-export function shouldHideFields(user: IUserModel) {
-  return !user?.isAdmin || true;
+export function shouldHideFields(user: IUserModel | null): boolean {
+  if (!user) {
+    return true;
+  }
+
+  if (!user.isAdmin) {
+    return true;
+  }
+
+  return false;
 }
