@@ -31,7 +31,7 @@
     "koa-ctx-paginate": "^0.0.6",
     "koa-morgan": "^1.0.1",
     "koa-qs": "^3.0.0",
-    "koa-router": "^10.0.0",
+    "koa-router": "^13.0.1",
     "koa-session": "^6.2.0",
     "locutus": "^2.0.11",
     "lodash": "^4.17.4",
@@ -52,9 +52,8 @@
     "@types/koa-session": "^5.10.3",
     "@types/locutus": "^0.0.6",
     "@types/lodash": "^4.14.150",
-    "@types/mongoose": "^5.11.97",
     "@types/mongoose-paginate": "^5.0.10",
-    "@types/node": "^14.14.7",
+    "@types/node": "^20.0.0",
     "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^4.7.0",
     "@typescript-eslint/parser": "^4.7.0",
@@ -63,7 +62,7 @@
     "husky": "^1.2.1",
     "prettier": "^2.2.1",
     "source-map-support": "^0.5.21",
-    "ts-node": "^9.0.0",
+    "ts-node": "^10.9.2",
     "typescript": "^4.0.5"
   }
 }
