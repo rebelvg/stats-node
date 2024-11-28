@@ -30,7 +30,6 @@
     "koa-bodyparser": "^4.2.1",
     "koa-ctx-paginate": "^0.0.6",
     "koa-morgan": "^1.0.1",
-    "koa-pagination": "^4.0.0",
     "koa-qs": "^3.0.0",
     "koa-router": "^10.0.0",
     "koa-session": "^6.2.0",
