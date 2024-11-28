@@ -2,7 +2,6 @@ import * as Koa from 'koa';
 import * as bodyParser from 'koa-bodyparser';
 import * as Router from 'koa-router';
 import * as koaQs from 'koa-qs';
-import * as passport from 'koa-passport';
 import * as cors from '@koa/cors';
 import * as koaMorgan from 'koa-morgan';
 import * as fs from 'fs';
@@ -20,7 +19,6 @@ import { router as admin } from './routes/admin';
 import { router as graphs } from './routes/graphs';
 import { router as streamers } from './routes/streamers';
 
-import './passport';
 import { logger, setLogger } from './helpers/logger';
 
 if (!fs.existsSync('logs')) {
@@ -66,8 +64,6 @@ app.use(setLogger);
 // app.use(koaMorgan('combined', { immediate: true, stream: process.stdout }));
 app.use(koaMorgan('short', { stream: process.stdout }));
 app.use(cors());
-
-app.use(passport.initialize());
 
 koaQs(app);
 
