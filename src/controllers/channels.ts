@@ -41,7 +41,7 @@ function appChannelStatsBase(server: string, app: string, channel: string) {
   channelStats.duration = channelRecord.publisher?.duration || 0;
   channelStats.bitrate = channelRecord.publisher?.bitrate || 0;
   channelStats.lastBitrate = channelRecord.publisher?.lastBitrate || 0;
-  channelStats._id = channelRecord.publisher?.connectCreated || null;
+  channelStats._id = channelRecord.publisher?.connectCreated.getTime() || null;
   channelStats.startTime = channelRecord.publisher?.connectCreated || null;
 
   return channelStats;
