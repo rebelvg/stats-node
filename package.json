@@ -25,7 +25,7 @@
     "google-auth-library": "^9.15.0",
     "googleapis": "^144.0.0",
     "ip6addr": "^0.2.3",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "koa": "^2.6.2",
     "koa-bodyparser": "^4.2.1",
     "koa-ctx-paginate": "^0.0.6",
