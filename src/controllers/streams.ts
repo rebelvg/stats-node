@@ -31,10 +31,11 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
     .populate(['location']);
 
   const options = {
-    countries: _.concat(
-      _.chain(subscribers).map('location.api.country').compact().uniq().value(),
-      _.chain(subscribers).map('location.api.message').compact().uniq().value(),
-    ),
+    countries: _
+      .concat
+      // _.chain(subscribers).map('location.api.country').compact().uniq().value(),
+      // _.chain(subscribers).map('location.api.message').compact().uniq().value(),
+      (),
     protocols: _.chain(subscribers).map('protocol').uniq().value(),
   };
 
@@ -91,7 +92,6 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
       connectCreated: stream.connectCreated,
       connectUpdated: stream.connectUpdated,
       bytes: stream.bytes,
-      ip: stream.ip,
       protocol: stream.protocol,
       lastBitrate: stream.lastBitrate,
       userId: stream.userId?.toString() || null,
@@ -103,9 +103,13 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
       createdAt: stream.createdAt,
       updatedAt: stream.updatedAt,
       isLive: stream.isLive,
-      countryCode: stream?.location?.api?.countryCode || null,
-      city: stream?.location?.api?.city || null,
       userName: userRecord?.name || null,
+      ip: null,
+      countryCode: null,
+      city: null,
+      // ip: stream.ip,
+      // countryCode: stream?.location?.api?.countryCode || null,
+      // city: stream?.location?.api?.city || null,
     };
 
   const subscribersResponse: IChannelServerStats['apps'][0]['channels'][0]['subscribers'][0][] =
@@ -235,8 +239,8 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
   ]);
 
   const uniqueIPs = await Stream.distinct('ip', ctx.queryObj);
-  const uniqueCountries = await IP.distinct('api.country');
-  const uniqueApiMessages = await IP.distinct('api.message');
+  const _uniqueCountries = await IP.distinct('api.country');
+  const _uniqueApiMessages = await IP.distinct('api.message');
 
   _.forEach(paginatedStreams.docs, (stream) => {
     hideFields(ctx.state.user, stream);
@@ -288,7 +292,7 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
     options: {
       apps: await Stream.distinct('app', ctx.queryObj),
       channels: await Stream.distinct('channel', ctx.queryObj),
-      countries: _.concat(uniqueCountries, uniqueApiMessages),
+      countries: [],
       protocols: await Stream.distinct('protocol', ctx.queryObj),
     },
     info: {

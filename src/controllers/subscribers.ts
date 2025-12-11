@@ -147,8 +147,8 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
   ]);
 
   const uniqueIPs = await Subscriber.distinct('ip', ctx.queryObj);
-  const uniqueCountries = await IP.distinct('api.country');
-  const uniqueApiMessages = await IP.distinct('api.message');
+  const _uniqueCountries = await IP.distinct('api.country');
+  const _uniqueApiMessages = await IP.distinct('api.message');
 
   _.forEach(paginatedSubscribers.docs, (subscriber) => {
     hideFields(ctx.state.user, subscriber);
@@ -187,7 +187,7 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
     options: {
       apps: await Subscriber.distinct('app', ctx.queryObj),
       channels: await Subscriber.distinct('channel', ctx.queryObj),
-      countries: _.concat(uniqueCountries, uniqueApiMessages),
+      countries: [],
       protocols: await Subscriber.distinct('protocol', ctx.queryObj),
     },
     info: {
