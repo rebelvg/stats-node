@@ -479,12 +479,12 @@ export async function graphs(ctx: Router.IRouterContext) {
     return;
   }
 
-  const totalDurationStreams = await Stream.aggregate([
+  const _totalDurationStreams = await Stream.aggregate([
     ...totalDurationQuery,
     { $limit: 5 },
   ]);
 
-  const totalDurationSubscribers = await Subscriber.aggregate([
+  const _totalDurationSubscribers = await Subscriber.aggregate([
     ...totalDurationQuery,
     { $limit: 5 },
   ]);
@@ -524,8 +524,8 @@ export async function graphs(ctx: Router.IRouterContext) {
   ]);
 
   const body = {
-    totalDurationStreams,
-    totalDurationSubscribers,
+    totalDurationStreams: [],
+    totalDurationSubscribers: [],
     avgStatsStreams,
     avgStatsSubscribers,
     topStreamers,
