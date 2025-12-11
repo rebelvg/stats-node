@@ -1,17 +1,10 @@
-version: '3.7'
-
 services:
-  stats_node_db:
-    image: mongo:latest
-    container_name: stats_node_db
+  mongo:
+    image: mongo:7.0.11
     environment:
       - MONGO_DATA_DIR=/data/db
       - MONGO_LOG_DIR=/dev/null
     volumes:
-      - stats_node_db:/data/db
-      - ./dump:/dump
+      - ./.dump:/dump
     ports:
       - 27017:27017
-
-volumes:
-  stats_node_db:

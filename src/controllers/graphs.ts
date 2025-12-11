@@ -559,7 +559,7 @@ export async function graphsById(ctx: Router.RouterContext) {
 
   const userRecord = await userService.getById(id);
 
-  const totalDurationStreams = await Stream.aggregate([
+  const _totalDurationStreams = await Stream.aggregate([
     {
       $match: {
         userId: new ObjectId(id),
@@ -569,7 +569,7 @@ export async function graphsById(ctx: Router.RouterContext) {
     { $limit: 5 },
   ]);
 
-  const totalDurationSubscribers = await Stream.aggregate([
+  const _totalDurationSubscribers = await Stream.aggregate([
     {
       $match: {
         userId: new ObjectId(id),
@@ -631,8 +631,8 @@ export async function graphsById(ctx: Router.RouterContext) {
   ]);
 
   const body = {
-    totalDurationStreams,
-    totalDurationSubscribers,
+    totalDurationStreams: [],
+    totalDurationSubscribers: [],
     topStreamers: topStreamersRes,
     monthlyStatsStreams,
     monthlyStatsSubscribers,

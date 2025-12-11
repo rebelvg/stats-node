@@ -40,7 +40,6 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
       connectCreated: subscriber.connectCreated,
       connectUpdated: subscriber.connectUpdated,
       bytes: subscriber.bytes,
-      ip: subscriber.ip,
       protocol: subscriber.protocol,
       userId: subscriber.userId?.toString() || null,
       streamIds: subscriber.streamIds.map((e) => e.toString()),
@@ -50,8 +49,12 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
       createdAt: subscriber.createdAt,
       updatedAt: subscriber.updatedAt,
       isLive: subscriber.isLive,
-      countryCode: subscriber?.location?.api?.countryCode || null,
-      city: subscriber?.location?.api?.city || null,
+      ip: null,
+      countryCode: null,
+      city: null,
+      // ip: subscriber.ip,
+      // countryCode: subscriber?.location?.api?.countryCode || null,
+      // city: subscriber?.location?.api?.city || null,
     };
 
   const userMap = await userService.getMapByIds(
@@ -71,7 +74,6 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
           connectCreated: stream.connectCreated,
           connectUpdated: stream.connectUpdated,
           bytes: stream.bytes,
-          ip: stream.ip,
           protocol: stream.protocol,
           lastBitrate: stream.lastBitrate,
           userId: stream.userId?.toString() || null,
@@ -83,9 +85,13 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
           createdAt: stream.createdAt,
           updatedAt: stream.updatedAt,
           isLive: stream.isLive,
-          countryCode: stream?.location?.api?.countryCode || null,
-          city: stream?.location?.api?.city || null,
           userName: userRecord?.name || null,
+          ip: null,
+          countryCode: null,
+          city: null,
+          // ip: stream.ip,
+          // countryCode: stream?.location?.api?.countryCode || null,
+          // city: stream?.location?.api?.city || null,
         };
       }),
     );
@@ -158,7 +164,6 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
         connectCreated: subscriber.connectCreated,
         connectUpdated: subscriber.connectUpdated,
         bytes: subscriber.bytes,
-        ip: subscriber.ip,
         protocol: subscriber.protocol,
         userId: subscriber.userId?.toString() || null,
         streamIds: subscriber.streamIds.map((e) => e.toString()),
@@ -168,8 +173,12 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
         createdAt: subscriber.createdAt,
         updatedAt: subscriber.updatedAt,
         isLive: subscriber.isLive,
-        countryCode: subscriber?.location?.api?.countryCode || null,
-        city: subscriber?.location?.api?.city || null,
+        ip: null,
+        countryCode: null,
+        city: null,
+        // ip: subscriber.ip,
+        // countryCode: subscriber?.location?.api?.countryCode || null,
+        // city: subscriber?.location?.api?.city || null,
       };
     });
 

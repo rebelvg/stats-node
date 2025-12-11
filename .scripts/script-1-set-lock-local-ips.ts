@@ -30,7 +30,7 @@ import { connectMongoDriver, MongoCollections } from '../src/mongo';
         'api.region': '63',
         'api.regionName': 'Local Network',
         'api.status': 'success',
-        'api.timezone': 'Europe/Kiev',
+        'api.timezone': 'Europe/Kyiv',
         'api.zip': '',
       },
     },

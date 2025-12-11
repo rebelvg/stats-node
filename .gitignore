@@ -2,8 +2,9 @@
 .idea/
 node_modules/
 logs/
-dump/
 dist/
 /config.json
 !config.example.json
 config.*.json
+.dump/*
+!.dump/.gitkeep
