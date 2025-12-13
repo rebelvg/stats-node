@@ -11,26 +11,6 @@ convict.addFormat({
 
     for (const item of value) {
       convict({
-        NAME: {
-          format: String,
-          default: null,
-        },
-        HOSTS: {
-          format: (value) => {
-            if (!_.isArray(value)) {
-              throw new Error('not_array');
-            }
-
-            if (!_.every(value, _.isString)) {
-              throw new Error('not_valid_array');
-            }
-
-            if (value.length === 0) {
-              throw new Error('no_hosts');
-            }
-          },
-          default: null,
-        },
         API_HOST: {
           format: String,
           default: null,

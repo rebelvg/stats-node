@@ -42,6 +42,9 @@ class MediaServerWorker extends BaseWorker {
     const {
       request,
       data: { stats: data },
+    }: {
+      request?: IncomingMessage;
+      data: IApiResponse;
     } = await axios.get<IApiResponse>(
       `${config.API_HOST}/api/stats/${this.host}`,
     );
@@ -68,7 +71,7 @@ class MediaServerWorker extends BaseWorker {
         if (channelStats.publisher) {
           liveChannel.publisher = {
             ...channelStats.publisher,
-            ip: (request as IncomingMessage).socket.remoteAddress,
+            ip: request.socket.remoteAddress,
             userId: null,
           };
         }
@@ -93,7 +96,9 @@ class MediaServerWorker extends BaseWorker {
 export async function runUpdate() {
   await Promise.all(
     KLPQ_MEDIA_SERVER.map(async (config) => {
-      const mediaServerWorker = new MediaServerWorker(config.HOSTS[0]);
+      const NAME = new URL(config.API_HOST).host;
+
+      const mediaServerWorker = new MediaServerWorker(NAME);
 
       await mediaServerWorker.run(ENCODE_SERVICE);
     }),

@@ -1,8 +1,6 @@
 import { env } from './env';
 
 export interface IWorkerConfig {
-  NAME: string;
-  HOSTS: string[];
   API_HOST: string;
   API_TOKEN: string;
 }

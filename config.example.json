@@ -10,34 +10,26 @@
   },
   "KLPQ_MEDIA_SERVER": [
     {
-      "NAME": "klpq-media-server",
-      "HOSTS": ["localhost"],
       "API_HOST": "http://klpq-media-server:80",
-      "API_TOKEN": "example-token"
+      "API_TOKEN": "token"
     }
   ],
   "NODE_MEDIA_SERVER": [
     {
-      "NAME": "node-media-server",
-      "HOSTS": ["localhost"],
       "API_HOST": "http://node-media-server:80",
       "API_TOKEN": "username:password"
     }
   ],
   "ADOBE_MEDIA_SERVER": [
     {
-      "NAME": "adobe-media-server",
-      "HOSTS": ["localhost"],
       "API_HOST": "http://adobe-media-server:80",
-      "API_TOKEN": "example-token"
+      "API_TOKEN": "token"
     }
   ],
   "ENCODE_SERVICE": [
     {
-      "NAME": "encode-service",
-      "HOSTS": ["localhost"],
       "API_HOST": "http://encode-service:80",
-      "API_TOKEN": "example-token"
+      "API_TOKEN": "token"
     }
   ],
   "JWT": {

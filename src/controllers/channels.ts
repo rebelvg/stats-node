@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 
 import { Stream } from '../models/stream';
 import { Subscriber } from '../models/subscriber';
-import { liveStats, STREAM_SERVERS } from '../workers';
+import { liveStats } from '../workers';
 import { hideFields } from '../helpers/hide-fields';
 import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';
@@ -22,15 +22,7 @@ function appChannelStatsBase(server: string, app: string, channel: string) {
     startTime: null,
   };
 
-  const streamServer = _.find(STREAM_SERVERS, (streamServer) =>
-    streamServer.HOSTS.includes(server),
-  );
-
-  if (!streamServer) {
-    return channelStats;
-  }
-
-  const channelRecord = liveStats[streamServer.NAME]?.[app]?.[channel];
+  const channelRecord = liveStats[server]?.[app]?.[channel];
 
   if (!channelRecord) {
     return channelStats;

@@ -45,7 +45,9 @@ export abstract class BaseWorker {
     await Promise.all(
       servers.map(async (config) => {
         try {
-          const { NAME } = config;
+          const { API_HOST } = config;
+
+          const NAME = new URL(API_HOST).host;
 
           const stats = await this.readStats(config);
 
@@ -83,7 +85,9 @@ export abstract class BaseWorker {
   }
 
   private async readStats(config: IWorkerConfig) {
-    const { NAME } = config;
+    const { API_HOST } = config;
+
+    const NAME = new URL(API_HOST).host;
 
     let data: IGenericStreamsResponse[] = [];
 
