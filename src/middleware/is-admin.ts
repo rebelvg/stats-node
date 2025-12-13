@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import Router from 'koa-router';
+import Router from '@koa/router';
 import { Forbidden, Unauthorized } from '../helpers/errors';
 
 export function isAdmin(ctx: Router.IRouterContext, next: Next) {

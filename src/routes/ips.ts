@@ -1,4 +1,4 @@
-import Router from 'koa-router';
+import Router from '@koa/router';
 import * as koaPaginate from 'koa-ctx-paginate';
 
 import { findById, find } from '../controllers/ips';

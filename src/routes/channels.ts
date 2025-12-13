@@ -1,4 +1,4 @@
-import Router from 'koa-router';
+import Router from '@koa/router';
 
 import { appChannelStats, channels, list } from '../controllers/channels';
 import { isAdmin } from '../middleware/is-admin';

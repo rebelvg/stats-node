@@ -1,10 +1,10 @@
 import { Next } from 'koa';
-import Router from 'koa-router';
+import Router from '@koa/router';
 import _ from 'lodash';
 
 const allowedPaths = ['api.country', 'api.city', 'api.isp'];
 
-declare module 'koa-router' {
+declare module '@koa/router' {
   export interface IRouterContext {
     sortObj: any;
   }

@@ -1,4 +1,4 @@
-import Router from 'koa-router';
+import Router from '@koa/router';
 
 import { find, update } from '../../controllers/admin/users';
 

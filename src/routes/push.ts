@@ -1,4 +1,4 @@
-import Router from 'koa-router';
+import Router from '@koa/router';
 import { z } from 'zod';
 import _ from 'lodash';
 

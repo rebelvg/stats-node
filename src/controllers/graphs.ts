@@ -1,4 +1,4 @@
-import Router from 'koa-router';
+import Router from '@koa/router';
 import _ from 'lodash';
 import { ObjectId } from 'mongodb';
 

@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import Router from 'koa-router';
+import Router from '@koa/router';
 import { ObjectId } from 'mongodb';
 
 import { decodeJwtToken } from '../helpers/jwt';
@@ -16,7 +16,7 @@ declare module 'koa' {
   }
 }
 
-declare module 'koa-router' {
+declare module '@koa/router' {
   export interface IRouterContext {
     state: {
       user: IUserModel;

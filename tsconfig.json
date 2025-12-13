@@ -15,5 +15,6 @@
     "noEmitOnError": true,
     "outDir": "./dist"
   },
+  "exclude": ["./dist", "./.scripts"],
   "include": ["./src/**/*"]
 }

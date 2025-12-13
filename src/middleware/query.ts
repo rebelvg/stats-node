@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import Router from 'koa-router';
+import Router from '@koa/router';
 import _ from 'lodash';
 import * as moment from 'moment';
 import { strtotime } from 'locutus/php/datetime';
@@ -7,7 +7,7 @@ import { strtotime } from 'locutus/php/datetime';
 import { IP } from '../models/ip';
 import { shouldHideFields } from '../helpers/should-hide-fields';
 
-declare module 'koa-router' {
+declare module '@koa/router' {
   export interface IRouterContext {
     queryObj: any;
   }
