@@ -3,7 +3,7 @@ import * as mongoosePaginate from 'mongoose-paginate';
 import * as _ from 'lodash';
 import * as ip6addr from 'ip6addr';
 
-import { liveStats } from '../workers';
+import { LIVE_STATS_CACHE } from '../workers';
 import { ISubscriberModel } from '../models/subscriber';
 import { ipService } from '../services/ip';
 import { logger } from '../helpers/logger';
@@ -83,7 +83,8 @@ schema.pre('save', async function (this: ISubscriberModel, next) {
 
 schema.virtual('isLive').get(function (this: ISubscriberModel) {
   const subscribers =
-    liveStats?.[this.server]?.[this.app]?.[this.channel]?.subscribers || [];
+    LIVE_STATS_CACHE?.[this.server]?.[this.app]?.[this.channel]?.subscribers ||
+    [];
 
   return !!_.find(subscribers, ['id', this.id]);
 });

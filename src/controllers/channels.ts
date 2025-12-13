@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 
 import { Stream } from '../models/stream';
 import { Subscriber } from '../models/subscriber';
-import { liveStats } from '../workers';
+import { LIVE_STATS_CACHE } from '../workers';
 import { hideFields } from '../helpers/hide-fields';
 import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';
@@ -22,7 +22,7 @@ function appChannelStatsBase(server: string, app: string, channel: string) {
     startTime: null,
   };
 
-  const channelRecord = liveStats[server]?.[app]?.[channel];
+  const channelRecord = LIVE_STATS_CACHE[server]?.[app]?.[channel];
 
   if (!channelRecord) {
     return channelStats;
@@ -105,7 +105,7 @@ export interface IChannelServerStats {
 }
 
 export async function channels(ctx: Router.IRouterContext, next: Next) {
-  const liveStatsClone = _.cloneDeep(liveStats);
+  const liveStatsClone = _.cloneDeep(LIVE_STATS_CACHE);
 
   const isAdmin = !!ctx.state.user?.isAdmin;
 
@@ -258,7 +258,7 @@ export async function list(ctx: Router.IRouterContext, next: Next) {
   ).map((channel) => channel.name);
 
   await Promise.all(
-    _.map(liveStats, (serverObj, serverName) => {
+    _.map(LIVE_STATS_CACHE, (serverObj, serverName) => {
       return Promise.all(
         _.map(serverObj, (appObj) => {
           return Promise.all(

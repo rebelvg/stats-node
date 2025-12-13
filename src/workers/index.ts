@@ -16,4 +16,4 @@ export interface ILiveStats {
   };
 }
 
-export const liveStats: ILiveStats = {};
+export const LIVE_STATS_CACHE: ILiveStats = {};

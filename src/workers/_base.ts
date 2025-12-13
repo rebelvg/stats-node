@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import { ObjectId } from 'mongodb';
 import { FilterQuery } from 'mongoose';
 
-import { ILiveStats, liveStats } from '.';
+import { ILiveStats, LIVE_STATS_CACHE } from '.';
 import { IWorkerConfig } from '../config';
 import { logger } from '../helpers/logger';
 import { ApiSourceEnum, IStreamModel, Stream } from '../models/stream';
@@ -51,7 +51,7 @@ export abstract class BaseWorker {
 
           const stats = await this.readStats(config);
 
-          _.set(liveStats, [NAME], stats);
+          _.set(LIVE_STATS_CACHE, [NAME], stats);
         } catch (error) {
           if (error.code === 'ECONNREFUSED') {
             logger.error('update_econnrefused', {
@@ -84,27 +84,7 @@ export abstract class BaseWorker {
     }
   }
 
-  private async readStats(config: IWorkerConfig) {
-    const { API_HOST } = config;
-
-    const NAME = new URL(API_HOST).host;
-
-    let data: IGenericStreamsResponse[] = [];
-
-    try {
-      data = await this.getStats(config);
-    } catch (error) {
-      this.requestCount++;
-
-      if (this.requestCount > 10) {
-        this.requestCount = 0;
-
-        return {};
-      }
-
-      throw error;
-    }
-
+  public async processStats(data: IGenericStreamsResponse[], NAME: string) {
     _.forEach(data, (channelObjs) => {
       channelObjs.app = channelObjs.app.toLowerCase();
 
@@ -227,5 +207,29 @@ export abstract class BaseWorker {
     }
 
     return stats;
+  }
+
+  private async readStats(config: IWorkerConfig) {
+    const { API_HOST } = config;
+
+    let data: IGenericStreamsResponse[] = [];
+
+    try {
+      data = await this.getStats(config);
+    } catch (error) {
+      this.requestCount++;
+
+      if (this.requestCount > 10) {
+        this.requestCount = 0;
+
+        return {};
+      }
+
+      throw error;
+    }
+
+    const NAME = new URL(API_HOST).host;
+
+    return this.processStats(data, NAME);
   }
 }

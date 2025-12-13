@@ -3,7 +3,7 @@ import * as mongoosePaginate from 'mongoose-paginate';
 import * as _ from 'lodash';
 import * as ip6addr from 'ip6addr';
 
-import { liveStats } from '../workers';
+import { LIVE_STATS_CACHE } from '../workers';
 import { IStreamModel } from '../models/stream';
 import { ipService } from '../services/ip';
 import { logger } from '../helpers/logger';
@@ -80,7 +80,8 @@ schema.pre('save', async function (this: IStreamModel, next) {
 
 schema.virtual('isLive').get(function (this: IStreamModel) {
   const stream =
-    liveStats?.[this.server]?.[this.app]?.[this.channel]?.publisher || null;
+    LIVE_STATS_CACHE?.[this.server]?.[this.app]?.[this.channel]?.publisher ||
+    null;
 
   if (!stream) {
     return false;
