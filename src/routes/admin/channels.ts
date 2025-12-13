@@ -1,4 +1,4 @@
-import * as Router from 'koa-router';
+import Router from 'koa-router';
 import { updateChannel } from '../../controllers/channels';
 import { channelService } from '../../services/channel';
 

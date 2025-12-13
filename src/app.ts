@@ -1,11 +1,11 @@
-import * as Koa from 'koa';
-import * as bodyParser from 'koa-bodyparser';
-import * as Router from 'koa-router';
-import * as koaQs from 'koa-qs';
-import * as cors from '@koa/cors';
-import * as koaMorgan from 'koa-morgan';
+import Koa from 'koa';
+import bodyParser from 'koa-bodyparser';
+import Router from 'koa-router';
+import koaQs from 'koa-qs';
+import cors from '@koa/cors';
+import koaMorgan from 'koa-morgan';
 import * as fs from 'fs';
-import * as koaSession from 'koa-session';
+import koaSession from 'koa-session';
 import * as uuid from 'uuid';
 
 import { readToken } from './middleware/read-token';

@@ -10,6 +10,9 @@
     "incremental": false,
     "diagnostics": true,
     "extendedDiagnostics": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "noEmitOnError": true,
     "outDir": "./dist"
   },
   "include": ["./src/**/*"]

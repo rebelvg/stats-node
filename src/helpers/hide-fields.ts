@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 import { shouldHideFields } from './should-hide-fields';
 import { IUserModel } from '../models/user';

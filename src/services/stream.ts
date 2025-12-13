@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { Query } from 'mongoose';
 import { ObjectId } from 'mongodb';
 

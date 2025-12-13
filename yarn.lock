@@ -1147,6 +1147,13 @@
     "@types/koa-compose" "*"
     "@types/node" "*"
 
+"@types/koa__cors@^5.0.1":
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/@types/koa__cors/-/koa__cors-5.0.1.tgz#dde631f7ea0a62946fcf4fc97464694835c0aaad"
+  integrity sha512-xZckuh3B6ycSBAIYnBImG1VDHyBNZsltGAuGb4THuZllccdLgD5DUs4RA7TAUjB58THg00SSZ1e//duQef7WRw==
+  dependencies:
+    "@types/koa" "*"
+
 "@types/locutus@^0.0.6":
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/@types/locutus/-/locutus-0.0.6.tgz#e24675b2ae8239f86de51fb008a005f976203523"

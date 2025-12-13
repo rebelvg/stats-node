@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
-import * as mongoosePaginate from 'mongoose-paginate';
-import * as _ from 'lodash';
+import mongoosePaginate from 'mongoose-paginate';
+import _ from 'lodash';
 import * as ip6addr from 'ip6addr';
 
 import { LIVE_STATS_CACHE } from '../workers';

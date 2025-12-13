@@ -3,7 +3,7 @@ import { createNamespace } from 'cls-hooked';
 import * as os from 'os';
 import { v4 } from 'uuid';
 import { Context, Next } from 'koa';
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 export enum CLS_NAMESPACES {
   SESSION = 'SESSION',

@@ -1,6 +1,6 @@
 import { Next } from 'koa';
-import * as Router from 'koa-router';
-import * as _ from 'lodash';
+import Router from 'koa-router';
+import _ from 'lodash';
 import * as moment from 'moment';
 import { strtotime } from 'locutus/php/datetime';
 

@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 import { BaseWorker, IGenericStreamsResponse } from './_base';
 import { IKolpaqueEncodePush } from '../routes/push';

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { ObjectId } from 'mongodb';
 
 import { KOLPAQUE_RTMP } from '../config';

@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import * as Router from 'koa-router';
+import Router from 'koa-router';
 
 import { isLoggedIn } from '../middleware/is-logged-in';
 import { User } from '../models/user';

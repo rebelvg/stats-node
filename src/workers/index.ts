@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 import { IStreamModel } from '../models/stream';
 import { ISubscriberModel } from '../models/subscriber';

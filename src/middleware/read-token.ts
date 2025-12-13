@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import * as Router from 'koa-router';
+import Router from 'koa-router';
 import { ObjectId } from 'mongodb';
 
 import { decodeJwtToken } from '../helpers/jwt';

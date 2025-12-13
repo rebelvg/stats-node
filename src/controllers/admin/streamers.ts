@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import * as Router from 'koa-router';
+import Router from 'koa-router';
 
 import { userService } from '../../services/user';
 

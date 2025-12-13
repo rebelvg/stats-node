@@ -1,5 +1,5 @@
-import * as Router from 'koa-router';
-import * as _ from 'lodash';
+import Router from 'koa-router';
+import _ from 'lodash';
 import { ObjectId } from 'mongodb';
 
 import { hideUserData } from '../helpers/hide-fields';

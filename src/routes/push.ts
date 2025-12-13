@@ -1,6 +1,6 @@
-import * as Router from 'koa-router';
+import Router from 'koa-router';
 import { z } from 'zod';
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 import { KolpaqueEncodeServiceWorker } from '../workers/kolpaque-encode';
 import { KOLPAQUE_ENCODE } from '../config';

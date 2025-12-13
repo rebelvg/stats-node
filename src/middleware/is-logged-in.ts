@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import * as Router from 'koa-router';
+import Router from 'koa-router';
 import { Unauthorized } from '../helpers/errors';
 
 export function isLoggedIn(ctx: Router.IRouterContext, next: Next) {

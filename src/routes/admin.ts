@@ -1,4 +1,4 @@
-import * as Router from 'koa-router';
+import Router from 'koa-router';
 
 import { router as users } from '../routes/admin/users';
 import { router as streamers } from '../routes/admin/streamers';

@@ -1,6 +1,6 @@
 import { Next } from 'koa';
-import * as Router from 'koa-router';
-import * as _ from 'lodash';
+import Router from 'koa-router';
+import _ from 'lodash';
 
 import { hideUserData } from '../helpers/hide-fields';
 import { shouldHideFields } from '../helpers/should-hide-fields';
