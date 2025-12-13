@@ -5,7 +5,7 @@ import { FilterQuery } from 'mongoose';
 import { ILiveStats, LIVE_STATS_CACHE } from '.';
 import { IWorkerConfig } from '../config';
 import { logger } from '../helpers/logger';
-import { ApiSourceEnum, IStreamModel, Stream } from '../models/stream';
+import { IStreamModel, Stream } from '../models/stream';
 import { ISubscriberModel, Subscriber } from '../models/subscriber';
 import { channelService } from '../services/channel';
 import { streamService } from '../services/stream';
@@ -36,22 +36,28 @@ export interface IGenericStreamsResponse {
 }
 
 export abstract class BaseWorker {
-  abstract apiSource: ApiSourceEnum;
+  private apiSource: string;
   private requestCount = 0;
 
-  abstract getStats(config: IWorkerConfig): Promise<IGenericStreamsResponse[]>;
+  constructor() {
+    this.apiSource = this.constructor.name;
+  }
+
+  abstract getStats(
+    origin: string,
+    secret: string,
+  ): Promise<IGenericStreamsResponse[]>;
 
   public async runUpdate(servers: IWorkerConfig[]) {
     await Promise.all(
       servers.map(async (config) => {
         try {
-          const { API_HOST } = config;
+          const stats = await this.readStats(
+            config.API_ORIGIN,
+            config.API_SECRET,
+          );
 
-          const NAME = new URL(API_HOST).host;
-
-          const stats = await this.readStats(config);
-
-          _.set(LIVE_STATS_CACHE, [NAME], stats);
+          _.set(LIVE_STATS_CACHE, [config.API_ORIGIN], stats);
         } catch (error) {
           if (error.code === 'ECONNREFUSED') {
             logger.error('update_econnrefused', {
@@ -84,7 +90,7 @@ export abstract class BaseWorker {
     }
   }
 
-  public async processStats(data: IGenericStreamsResponse[], NAME: string) {
+  public async processStats(data: IGenericStreamsResponse[], host: string) {
     _.forEach(data, (channelObjs) => {
       channelObjs.app = channelObjs.app.toLowerCase();
 
@@ -112,7 +118,7 @@ export abstract class BaseWorker {
 
         if (channelData.publisher) {
           const streamQuery: FilterQuery<IStreamModel> = {
-            server: NAME,
+            server: host,
             app: appName,
             channel: channelName,
             connectId: channelData.publisher.connectId,
@@ -148,7 +154,7 @@ export abstract class BaseWorker {
 
         for (const subscriber of channelData.subscribers) {
           const subscriberQuery: FilterQuery<ISubscriberModel> = {
-            server: NAME,
+            server: host,
             app: appName,
             channel: channelName,
             connectId: subscriber.connectId,
@@ -209,13 +215,11 @@ export abstract class BaseWorker {
     return stats;
   }
 
-  private async readStats(config: IWorkerConfig) {
-    const { API_HOST } = config;
-
+  private async readStats(origin: string, secret: string) {
     let data: IGenericStreamsResponse[] = [];
 
     try {
-      data = await this.getStats(config);
+      data = await this.getStats(origin, secret);
     } catch (error) {
       this.requestCount++;
 
@@ -228,8 +232,8 @@ export abstract class BaseWorker {
       throw error;
     }
 
-    const NAME = new URL(API_HOST).host;
+    const { host } = new URL(origin);
 
-    return this.processStats(data, NAME);
+    return this.processStats(data, host);
   }
 }

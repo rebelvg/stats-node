@@ -1,98 +1,50 @@
-import * as convict from 'convict';
 import * as _ from 'lodash';
+import * as fs from 'fs';
 import { Buffer } from 'buffer';
+import * as path from 'path';
 
-convict.addFormat({
-  name: 'stream-server-config',
-  validate: (value) => {
-    if (!_.isArray(value)) {
-      throw new Error('must_be_an_array');
-    }
+import { z } from 'zod';
 
-    for (const item of value) {
-      convict({
-        API_HOST: {
-          format: String,
-          default: null,
-        },
-        API_TOKEN: {
-          format: String,
-          default: null,
-          sensitive: true,
-        },
-      })
-        .load(item)
-        .validate({ strict: true });
-    }
-  },
+const ServiceArraySchema = z.array(
+  z.object({
+    API_ORIGIN: z.url(),
+    API_SECRET: z.string(),
+  }),
+);
+
+export const ConfigSchema = z.object({
+  API: z.object({
+    PORT: z.string().or(z.number()).describe('port || unix socket'),
+    GOOGLE_CALLBACK_HOST: z.url(),
+  }),
+
+  DB_URI: z.string(),
+
+  GOOGLE_OAUTH: z.object({
+    CLIENT_ID: z.string().nullable(),
+    CLIENT_SECRET: z.string().nullable(),
+  }),
+
+  KOLPAQUE_RTMP: ServiceArraySchema,
+  KOLPAQUE_ENCODE: ServiceArraySchema,
+  NODE_MEDIA_SERVER: ServiceArraySchema,
+  ADOBE_MEDIA_SERVER: ServiceArraySchema,
+
+  JWT: z.object({
+    SECRET: z.string().nullable(),
+  }),
 });
 
-const config = convict({
-  API: {
-    PORT: {
-      format: (value) => {
-        if (!['string', 'number'].includes(typeof value)) {
-          throw new Error('bad_value_type');
-        }
-      },
-      default: null,
-    },
-    GOOGLE_CALLBACK_HOST: {
-      format: String,
-      default: null,
-    },
-  },
-  DB_URI: {
-    format: String,
-    default: null,
-  },
-  GOOGLE_OAUTH: {
-    CLIENT_ID: {
-      format: String,
-      default: null,
-      sensitive: true,
-    },
-    CLIENT_SECRET: {
-      format: String,
-      default: null,
-      sensitive: true,
-    },
-  },
-  KLPQ_MEDIA_SERVER: {
-    format: 'stream-server-config',
-    default: null,
-  },
-  NODE_MEDIA_SERVER: {
-    format: 'stream-server-config',
-    default: null,
-  },
-  ADOBE_MEDIA_SERVER: {
-    format: 'stream-server-config',
-    default: null,
-  },
-  ENCODE_SERVICE: {
-    format: 'stream-server-config',
-    default: null,
-  },
-  JWT: {
-    SECRET: {
-      format: String,
-      default: null,
-      sensitive: true,
-    },
-  },
-});
+export type AppConfig = z.infer<typeof ConfigSchema>;
+
+let envJson: string;
 
 if (process.env.CONFIG_BASE64) {
-  config.load(
-    JSON.parse(
-      Buffer.from(process.env.CONFIG_BASE64, 'base64').toString('utf-8'),
-    ),
-  );
+  envJson = Buffer.from(process.env.CONFIG_BASE64, 'base64').toString('utf-8');
 } else {
-  config.loadFile([process.cwd() + '/config.json']);
+  envJson = fs.readFileSync(path.resolve(process.cwd(), './config.json'), {
+    encoding: 'utf-8',
+  });
 }
 
-config.validate({ allowed: 'strict' });
-
-export const env = config.get();
+export const env = ConfigSchema.parse(JSON.parse(envJson));

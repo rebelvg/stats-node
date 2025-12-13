@@ -7,10 +7,10 @@ import { IGenericStreamsResponse } from '../workers/_base';
 import { IIPModel } from './ip';
 
 export enum ApiSourceEnum {
-  KLPQ_MEDIA_SERVER = 'klpq_media_server',
-  NODE_MEDIA_SERVER = 'node_media_server',
-  ADOBE_MEDIA_SERVER = 'adobe_media_server',
-  ENCODE_SERVICE = 'encode_service',
+  KOLPAQUE_RTMP = 'KOLPAQUE_RTMP',
+  KOLPAQUE_ENCODE = 'KOLPAQUE_ENCODE',
+  NODE_MEDIA_SERVER = 'NODE_MEDIA_SERVER',
+  ADOBE_MEDIA_SERVER = 'ADOBE_MEDIA_SERVER',
 }
 
 export interface IStreamModel extends Document {
@@ -29,7 +29,7 @@ export interface IStreamModel extends Document {
   totalConnectionsCount: number;
   peakViewersCount: number;
   userId: ObjectId;
-  apiSource: ApiSourceEnum;
+  apiSource: string;
   apiResponse: IGenericStreamsResponse['channels'][0]['publisher'];
   createdAt: Date;
   updatedAt: Date;

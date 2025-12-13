@@ -8,28 +8,28 @@
     "CLIENT_ID": null,
     "CLIENT_SECRET": null
   },
-  "KLPQ_MEDIA_SERVER": [
+  "KOLPAQUE_RTMP": [
     {
-      "API_HOST": "http://klpq-media-server:80",
-      "API_TOKEN": "token"
+      "API_ORIGIN": "http://klpq-media-server:80",
+      "API_SECRET": "token"
+    }
+  ],
+  "KOLPAQUE_ENCODE": [
+    {
+      "API_ORIGIN": "http://encode-service:80",
+      "API_SECRET": "token"
     }
   ],
   "NODE_MEDIA_SERVER": [
     {
-      "API_HOST": "http://node-media-server:80",
-      "API_TOKEN": "username:password"
+      "API_ORIGIN": "http://node-media-server:80",
+      "API_SECRET": "username:password"
     }
   ],
   "ADOBE_MEDIA_SERVER": [
     {
-      "API_HOST": "http://adobe-media-server:80",
-      "API_TOKEN": "token"
-    }
-  ],
-  "ENCODE_SERVICE": [
-    {
-      "API_HOST": "http://encode-service:80",
-      "API_TOKEN": "token"
+      "API_ORIGIN": "http://adobe-media-server:80",
+      "API_SECRET": "token"
     }
   ],
   "JWT": {

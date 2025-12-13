@@ -3,7 +3,6 @@ import { Document } from 'mongoose';
 import { ObjectId } from 'mongodb';
 
 import { schema } from '../schemas/subscriber';
-import { ApiSourceEnum } from './stream';
 import { IGenericStreamsResponse } from '../workers/_base';
 import { IIPModel } from './ip';
 
@@ -21,7 +20,7 @@ export interface ISubscriberModel extends Document {
   bitrate: number;
   userId: ObjectId;
   streamIds: ObjectId[];
-  apiSource: ApiSourceEnum;
+  apiSource: string;
   apiResponse: IGenericStreamsResponse['channels'][0]['subscribers'][0];
   createdAt: Date;
   updatedAt: Date;

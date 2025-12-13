@@ -1,8 +1,7 @@
 import axios from 'axios';
 import * as _ from 'lodash';
 
-import { IWorkerConfig, NODE_MEDIA_SERVER } from '../config';
-import { ApiSourceEnum } from '../models/stream';
+import { NODE_MEDIA_SERVER } from '../config';
 
 import { BaseWorker, IGenericStreamsResponse } from './_base';
 
@@ -40,20 +39,16 @@ interface IApiResponse {
   };
 }
 
-class MediaServerWorker extends BaseWorker {
-  apiSource = ApiSourceEnum.NODE_MEDIA_SERVER;
-
-  async getStats(config: IWorkerConfig): Promise<IGenericStreamsResponse[]> {
-    const { data } = await axios.get<IApiResponse>(
-      `${config.API_HOST}/api/streams`,
-      {
-        headers: {
-          Authorization: `Basic ${Buffer.from(config.API_TOKEN).toString(
-            'base64',
-          )}`,
-        },
+class NodeMediaServerWorker extends BaseWorker {
+  async getStats(
+    origin: string,
+    secret: string,
+  ): Promise<IGenericStreamsResponse[]> {
+    const { data } = await axios.get<IApiResponse>(`${origin}/api/streams`, {
+      headers: {
+        Authorization: `Basic ${Buffer.from(secret).toString('base64')}`,
       },
-    );
+    });
 
     const connectUpdated = new Date();
 
@@ -107,7 +102,7 @@ class MediaServerWorker extends BaseWorker {
 }
 
 export async function runUpdate() {
-  const mediaServerWorker = new MediaServerWorker();
+  const mediaServerWorker = new NodeMediaServerWorker();
 
   await mediaServerWorker.run(NODE_MEDIA_SERVER);
 }

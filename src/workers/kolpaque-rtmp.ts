@@ -1,9 +1,8 @@
 import axios from 'axios';
-import { IncomingMessage } from 'http';
 import * as _ from 'lodash';
+import { ObjectId } from 'mongodb';
 
-import { ENCODE_SERVICE, IWorkerConfig, KLPQ_MEDIA_SERVER } from '../config';
-import { ApiSourceEnum } from '../models/stream';
+import { KOLPAQUE_RTMP } from '../config';
 
 import { BaseWorker, IGenericStreamsResponse } from './_base';
 
@@ -17,7 +16,24 @@ interface IApiResponse {
         connectCreated: Date;
         connectUpdated: Date;
         bytes: number;
+        ip: string;
         protocol: string;
+        video: {
+          codecId: number;
+          codecName: string;
+          size: string;
+          fps: number;
+        };
+        audio: {
+          codecId: number;
+          codecName: string;
+          profile: string;
+          sampleRate: number;
+          channels: number;
+        };
+        meta: {
+          userId: ObjectId;
+        };
       };
       subscribers: {
         connectId: string;
@@ -26,28 +42,26 @@ interface IApiResponse {
         bytes: number;
         ip: string;
         protocol: string;
+        meta: {
+          userId: ObjectId;
+        };
       }[];
     }[];
   }[];
 }
 
-class MediaServerWorker extends BaseWorker {
-  apiSource = ApiSourceEnum.ENCODE_SERVICE;
-
-  constructor(private host: string) {
-    super();
-  }
-
-  async getStats(config: IWorkerConfig): Promise<IGenericStreamsResponse[]> {
+class KolpaqueRtmpServiceWorker extends BaseWorker {
+  async getStats(
+    origin: string,
+    secret: string,
+  ): Promise<IGenericStreamsResponse[]> {
     const {
-      request,
       data: { stats: data },
-    }: {
-      request?: IncomingMessage;
-      data: IApiResponse;
-    } = await axios.get<IApiResponse>(
-      `${config.API_HOST}/api/stats/${this.host}`,
-    );
+    } = await axios.get<IApiResponse>(`${origin}/api/streams`, {
+      headers: {
+        token: secret,
+      },
+    });
 
     const stats: IGenericStreamsResponse[] = [];
 
@@ -71,15 +85,14 @@ class MediaServerWorker extends BaseWorker {
         if (channelStats.publisher) {
           liveChannel.publisher = {
             ...channelStats.publisher,
-            ip: request.socket.remoteAddress,
-            userId: null,
+            userId: channelStats.publisher.meta.userId,
           };
         }
 
         liveChannel.subscribers = channelStats.subscribers.map(
           (subscriber) => ({
             ...subscriber,
-            userId: null,
+            userId: subscriber.meta.userId,
           }),
         );
 
@@ -94,13 +107,7 @@ class MediaServerWorker extends BaseWorker {
 }
 
 export async function runUpdate() {
-  await Promise.all(
-    KLPQ_MEDIA_SERVER.map(async (config) => {
-      const NAME = new URL(config.API_HOST).host;
+  const mediaServerWorker = new KolpaqueRtmpServiceWorker();
 
-      const mediaServerWorker = new MediaServerWorker(NAME);
-
-      await mediaServerWorker.run(ENCODE_SERVICE);
-    }),
-  );
+  await mediaServerWorker.run(KOLPAQUE_RTMP);
 }
