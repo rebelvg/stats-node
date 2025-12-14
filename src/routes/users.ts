@@ -17,10 +17,10 @@ router.get('/validate', isLoggedIn, (ctx: RouterContext, next: Next) => {
 });
 
 router.get('/refresh', isLoggedIn, (ctx: RouterContext, next: Next) => {
-  const { _id } = ctx.state.user;
+  const { _id } = ctx.state.user!;
 
   const jwtToken = encodeJwtToken({
-    userId: _id,
+    userId: _id.toString(),
   });
 
   ctx.body = {

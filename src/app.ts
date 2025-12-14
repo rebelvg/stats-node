@@ -20,7 +20,29 @@ import { router as graphs } from './routes/graphs';
 import { router as streamers } from './routes/streamers';
 import { router as push } from './routes/push';
 
+interface IHttpState {
+  user: WithId<IUserModel> | null;
+  query: object;
+  sort: Sort;
+}
+
+declare module 'koa' {
+  interface Context {
+    state: IHttpState;
+  }
+
+  interface DefaultState extends IHttpState {}
+}
+
+declare module '@koa/router' {
+  interface IRouterContext {
+    state: IHttpState;
+  }
+}
+
 import { logger } from './helpers/logger';
+import { IUserModel } from './models/user';
+import { Sort, WithId } from 'mongodb';
 
 if (!fs.existsSync('logs')) {
   fs.mkdirSync('logs');
@@ -31,6 +53,12 @@ export const app = new Koa();
 app.proxy = true;
 
 app.use(async (ctx, next) => {
+  ctx.state = {
+    user: null,
+    query: {},
+    sort: {},
+  };
+
   try {
     await next();
   } catch (err) {

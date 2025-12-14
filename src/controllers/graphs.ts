@@ -11,16 +11,15 @@ const cachedGraphs: {
     value: Record<string, unknown>;
     lastUpdateDate: Date;
   } | null;
-  ids: Map<
-    string,
-    {
+  ids: {
+    [key: string]: {
       value: Record<string, unknown>;
       lastUpdateDate: Date;
-    }
-  >;
+    };
+  };
 } = {
   all: null,
-  ids: new Map(),
+  ids: {},
 };
 
 export const totalDurationQuery: any = [

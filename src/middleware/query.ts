@@ -6,41 +6,41 @@ import { strtotime } from 'locutus/php/datetime';
 
 import { IP } from '../models/ip';
 
-declare module '@koa/router' {
-  export interface IRouterContext {
-    queryObj: any;
-  }
-}
-
-const filterRules = {
+const filterRules: {
+  [key: string]: {
+    do: any[];
+    test: any[];
+    cb: (query: any, key: any) => void;
+  };
+} = {
   app: {
     do: [],
     test: [_.isString],
-    cb: (queryObj, app) => {
-      queryObj.app = new RegExp(app, 'gi');
+    cb: (query, app) => {
+      query.app = new RegExp(app, 'gi');
     },
   },
   channel: {
     do: [],
     test: [_.isString],
-    cb: (queryObj, channel) => {
-      queryObj.channel = new RegExp(channel, 'gi');
+    cb: (query, channel) => {
+      query.channel = new RegExp(channel, 'gi');
     },
   },
   connectCreated: {
-    do: [strtotime, moment.unix, (value) => value.toDate()],
+    do: [strtotime, moment.unix, (value: moment.Moment) => value.toDate()],
     test: [_.isDate],
-    cb: (queryObj, connectCreated) => {
-      queryObj.connectCreated = {
+    cb: (query, connectCreated) => {
+      query.connectCreated = {
         $gte: connectCreated,
       };
     },
   },
   connectUpdated: {
-    do: [strtotime, moment.unix, (value) => value.toDate()],
+    do: [strtotime, moment.unix, (value: moment.Moment) => value.toDate()],
     test: [_.isDate],
-    cb: (queryObj, connectUpdated) => {
-      queryObj.connectUpdated = {
+    cb: (query, connectUpdated) => {
+      query.connectUpdated = {
         $gte: connectUpdated,
       };
     },
@@ -48,8 +48,8 @@ const filterRules = {
   bytes: {
     do: [_.toNumber],
     test: [_.isFinite],
-    cb: (queryObj, bytes) => {
-      queryObj.bytes = {
+    cb: (query, bytes) => {
+      query.bytes = {
         $gte: bytes * 1024 * 1024,
       };
     },
@@ -57,40 +57,38 @@ const filterRules = {
   ip: {
     do: [],
     test: [_.isString],
-    cb: async (queryObj, ip, ctx) => {
-      const ipQuery = [
-        { 'api.country': new RegExp(ip, 'gi') },
-        { 'api.city': new RegExp(ip, 'gi') },
-        { 'api.isp': new RegExp(ip, 'gi') },
-        { 'api.countryCode': new RegExp(ip, 'gi') },
-        { 'api.message': new RegExp(ip, 'gi') },
-      ];
-
+    cb: async (query, ip) => {
       const ips = await IP.distinct<string>('ip', {
-        $or: ipQuery,
+        $or: [
+          { 'api.country': new RegExp(ip, 'gi') },
+          { 'api.city': new RegExp(ip, 'gi') },
+          { 'api.isp': new RegExp(ip, 'gi') },
+          { 'api.countryCode': new RegExp(ip, 'gi') },
+          { 'api.message': new RegExp(ip, 'gi') },
+        ],
       });
 
-      const query: any[] = [];
+      const subQuery: any[] = [];
 
-      query.push({ ip: { $in: ips } });
+      subQuery.push({ ip: { $in: ips } });
 
-      query.push({ ip: new RegExp(ip, 'gi') });
+      subQuery.push({ ip: new RegExp(ip, 'gi') });
 
-      queryObj.$or = query;
+      query.$or = query;
     },
   },
   protocol: {
     do: [],
     test: [_.isString],
-    cb: (queryObj, protocol) => {
-      queryObj.protocol = new RegExp(protocol, 'gi');
+    cb: (query, protocol) => {
+      query.protocol = new RegExp(protocol, 'gi');
     },
   },
   duration: {
     do: [_.toNumber],
     test: [_.isFinite],
-    cb: (queryObj, duration) => {
-      queryObj.duration = {
+    cb: (query, duration) => {
+      query.duration = {
         $gte: duration * 60,
       };
     },
@@ -98,8 +96,8 @@ const filterRules = {
   bitrate: {
     do: [_.toNumber],
     test: [_.isFinite],
-    cb: (queryObj, bitrate) => {
-      queryObj.bitrate = {
+    cb: (query, bitrate) => {
+      query.bitrate = {
         $gte: bitrate,
       };
     },
@@ -107,8 +105,8 @@ const filterRules = {
   totalConnectionsCount: {
     do: [_.toNumber],
     test: [_.isFinite],
-    cb: (queryObj, totalConnectionsCount) => {
-      queryObj.totalConnectionsCount = {
+    cb: (query, totalConnectionsCount) => {
+      query.totalConnectionsCount = {
         $gte: totalConnectionsCount,
       };
     },
@@ -116,17 +114,17 @@ const filterRules = {
   peakViewersCount: {
     do: [_.toNumber],
     test: [_.isFinite],
-    cb: (queryObj, peakViewersCount) => {
-      queryObj.peakViewersCount = {
+    cb: (query, peakViewersCount) => {
+      query.peakViewersCount = {
         $gte: peakViewersCount,
       };
     },
   },
   createdAt: {
-    do: [strtotime, moment.unix, (value) => value.toDate()],
+    do: [strtotime, moment.unix, (value: moment.Moment) => value.toDate()],
     test: [_.isDate],
-    cb: (queryObj, createdAt) => {
-      queryObj.createdAt = {
+    cb: (query, createdAt) => {
+      query.createdAt = {
         $gte: createdAt,
       };
     },
@@ -134,15 +132,15 @@ const filterRules = {
   'ip.ip': {
     do: [],
     test: [_.isString],
-    cb: (queryObj, ip) => {
-      queryObj['ip'] = new RegExp(ip, 'gi');
+    cb: (query, ip) => {
+      query['ip'] = new RegExp(ip, 'gi');
     },
   },
   'api.country': {
     do: [],
     test: [_.isString],
-    cb: (queryObj, country) => {
-      queryObj.$or = [
+    cb: (query, country) => {
+      query.$or = [
         { 'api.country': new RegExp(country, 'gi') },
         { 'api.message': new RegExp(country, 'gi') },
       ];
@@ -151,20 +149,24 @@ const filterRules = {
   'api.city': {
     do: [],
     test: [_.isString],
-    cb: (queryObj, city) => {
-      queryObj['api.city'] = new RegExp(city, 'gi');
+    cb: (query, city) => {
+      query['api.city'] = new RegExp(city, 'gi');
     },
   },
   'api.isp': {
     do: [],
     test: [_.isString],
-    cb: (queryObj, isp) => {
-      queryObj['api.isp'] = new RegExp(isp, 'gi');
+    cb: (query, isp) => {
+      query['api.isp'] = new RegExp(isp, 'gi');
     },
   },
 };
 
-const rulePresets = {
+const rulePresets: {
+  [key: string]: {
+    [key: string]: (typeof filterRules)[0];
+  };
+} = {
   stream: {
     app: filterRules.app,
     channel: filterRules.channel,
@@ -198,11 +200,11 @@ const rulePresets = {
   },
 };
 
-export function parseFilter(modelName) {
-  const rules = rulePresets?.[modelName];
+export function parseFilter(entityName: string) {
+  const rules = rulePresets[entityName];
 
   return async function (ctx: Router.RouterContext, next: Next) {
-    const queryObj: any = {};
+    const query: {} = {};
 
     await Promise.all(
       _.map(rules, async (rule, fieldName) => {
@@ -223,12 +225,12 @@ export function parseFilter(modelName) {
             }
           }
 
-          await rule.cb(queryObj, value, ctx);
+          await rule.cb(query, value);
         } catch (e) {}
       }),
     );
 
-    ctx.queryObj = queryObj;
+    ctx.state.query = query;
 
     await next();
   };

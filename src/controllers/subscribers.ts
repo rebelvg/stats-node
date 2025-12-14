@@ -107,14 +107,14 @@ export async function find(ctx: Router.RouterContext, next: Next) {
       await channelService.getChannelsByType(ChannelTypeEnum.PUBLIC)
     ).map((channel) => channel.name);
 
-    if (ctx.queryObj.$and) {
-      ctx.queryObj.$and.push({
+    if (ctx.ctx.state.query.$and) {
+      ctx.ctx.state.query.$and.push({
         channel: {
           $in: publicChannelNames,
         },
       });
     } else {
-      ctx.queryObj.$and = [
+      ctx.ctx.state.query.$and = [
         {
           channel: {
             $in: publicChannelNames,
@@ -128,14 +128,14 @@ export async function find(ctx: Router.RouterContext, next: Next) {
   const page = parseInt(ctx.query.page as string) || 1;
   const skip = (page - 1) * limit;
 
-  const paginatedSubscribers = await Subscriber.paginate(ctx.queryObj, {
-    sort: _.isEmpty(ctx.sortObj) ? { connectCreated: -1 } : ctx.sortObj,
+  const paginatedSubscribers = await Subscriber.paginate(ctx.ctx.state.query, {
+    sort: _.isEmpty(ctx.state.sort) ? { connectCreated: -1 } : ctx.state.sort,
     skip,
     limit,
   });
 
   const aggregation = await Subscriber.aggregate([
-    { $match: ctx.queryObj },
+    { $match: ctx.ctx.state.query },
     {
       $group: {
         _id: null,
@@ -149,7 +149,7 @@ export async function find(ctx: Router.RouterContext, next: Next) {
     },
   ]);
 
-  const uniqueIPs = await Subscriber.distinct('ip', ctx.queryObj);
+  const uniqueIPs = await Subscriber.distinct('ip', ctx.ctx.state.query);
 
   const subscribers: IChannelServerStats['apps'][0]['channels'][0]['subscribers'][0][] =
     paginatedSubscribers.docs.map((subscriber) => {
@@ -183,10 +183,10 @@ export async function find(ctx: Router.RouterContext, next: Next) {
   ctx.body = {
     subscribers,
     options: {
-      apps: await Subscriber.distinct('app', ctx.queryObj),
-      channels: await Subscriber.distinct('channel', ctx.queryObj),
+      apps: await Subscriber.distinct('app', ctx.ctx.state.query),
+      channels: await Subscriber.distinct('channel', ctx.ctx.state.query),
       countries: [],
-      protocols: await Subscriber.distinct('protocol', ctx.queryObj),
+      protocols: await Subscriber.distinct('protocol', ctx.ctx.state.query),
     },
     info: {
       totalBytes: _.get(aggregation, ['0', 'totalBytes'], 0),

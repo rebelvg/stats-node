@@ -7,24 +7,6 @@ import { logger } from '../helpers/logger';
 
 import { User, IUserModel } from '../models/user';
 
-declare module 'koa' {
-  export interface Context {
-    state: {
-      user: IUserModel;
-      [key: string]: any;
-    };
-  }
-}
-
-declare module '@koa/router' {
-  export interface IRouterContext {
-    state: {
-      user: IUserModel;
-      [key: string]: any;
-    };
-  }
-}
-
 export async function readToken(ctx: Router.RouterContext, next: Next) {
   const token = ctx.get('token');
   const jwtToken = ctx.get('jwt-token');

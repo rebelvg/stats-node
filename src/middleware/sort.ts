@@ -1,40 +1,32 @@
 import { Next } from 'koa';
 import * as Router from '@koa/router';
 import _ from 'lodash';
+import { Sort, SortDirection } from 'mongodb';
 
-const allowedPaths = ['api.country', 'api.city', 'api.isp'];
-
-declare module '@koa/router' {
-  export interface IRouterContext {
-    sortObj: any;
-  }
-}
-
-export function parseSort(model) {
+export function parseSort(allowedKeys: string[]) {
   return async function (ctx: Router.RouterContext, next: Next) {
-    const sortObj = {};
+    const sort: [string, SortDirection][] = [];
 
     if (_.isArray(ctx.query.sort)) {
-      _.forEach(ctx.query.sort, (sort) => {
-        _.forEach(
-          _.concat(_.keys(model.schema.paths), allowedPaths),
-          (path) => {
-            switch (sort) {
-              case `-${path}`: {
-                sortObj[path] = -1;
-                break;
-              }
-              case path: {
-                sortObj[path] = 1;
-                break;
-              }
+      _.forEach(ctx.query.sort, (sortKey) => {
+        _.forEach(allowedKeys, (path) => {
+          switch (sortKey) {
+            case `-${path}`: {
+              sort.push([path, 'desc']);
+
+              break;
             }
-          },
-        );
+            case path: {
+              sort.push([path, 'asc']);
+
+              break;
+            }
+          }
+        });
       });
     }
 
-    ctx.sortObj = sortObj;
+    ctx.state.sort = sort;
 
     await next();
   };
