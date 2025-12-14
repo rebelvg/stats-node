@@ -106,8 +106,6 @@ export abstract class BaseWorker {
 
     const stats: ILiveStats[0] = {};
 
-    const statsUpdateTime = new Date();
-
     for (const { channels, app } of streams) {
       for (const { channel, publisher, subscribers } of channels) {
         if (!stats[app]) {

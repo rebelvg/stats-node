@@ -21,7 +21,7 @@ export enum ApiSourceEnum {
 }
 
 export interface IStreamModel {
-  _id?: ObjectId;
+  _id: ObjectId;
   server: string;
   app: string;
   channel: string;
@@ -70,7 +70,7 @@ class StreamModel {
   }
 
   find(filter: Filter<IStreamModel>, options?: FindOptions) {
-    return this.collection.find(filter, options).toArray();
+    return this.collection.find<IStreamModel>(filter, options).toArray();
   }
 
   aggregate(query: any[]) {
@@ -88,11 +88,12 @@ class StreamModel {
     return this.collection.distinct(key, filter) as Promise<T[]>;
   }
 
-  async create(data: Omit<IStreamModel, 'createdAt' | 'updatedAt'>) {
+  async create(data: Omit<IStreamModel, '_id' | 'createdAt' | 'updatedAt'>) {
     const timestamp = new Date();
 
     return this.collection.insertOne({
       ...data,
+      _id: new ObjectId(),
       createdAt: timestamp,
       updatedAt: timestamp,
     });

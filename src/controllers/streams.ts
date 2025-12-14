@@ -8,11 +8,11 @@ import { streamService } from '../services/stream';
 import { subscriberService } from '../services/subscriber';
 import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';
-import { IChannelServerStats } from './channels';
 import { userService } from '../services/user';
 import { ObjectId } from 'mongodb';
 import { LIVE_STATS_CACHE } from '../workers';
 import { IUserModel } from '../models/user';
+import { IChannelServerStats } from '../helpers/interfaces';
 
 export async function findById(ctx: Router.RouterContext, next: Next) {
   const stream = await Stream.findOne({
@@ -105,9 +105,6 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
       updatedAt: stream.updatedAt,
       isLive,
       userName: userRecord?.name || null,
-      ip: null,
-      countryCode: null,
-      city: null,
     };
 
   const subscribersResponse: IChannelServerStats['apps'][0]['channels'][0]['subscribers'][0][] =
@@ -125,7 +122,6 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
         connectCreated: subscriber.connectCreated,
         connectUpdated: subscriber.connectUpdated,
         bytes: subscriber.bytes,
-        ip: subscriber.ip,
         protocol: subscriber.protocol,
         userId: subscriber.userId?.toString() || null,
         streamIds: subscriber.streamIds.map((e) => e.toString()),
@@ -134,8 +130,6 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
         createdAt: subscriber.createdAt,
         updatedAt: subscriber.updatedAt,
         isLive,
-        countryCode: null,
-        city: null,
       };
     });
 
@@ -178,9 +172,6 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
           updatedAt: stream.updatedAt,
           isLive,
           userName: userRecord?.name || null,
-          ip: null,
-          countryCode: null,
-          city: null,
         };
       }),
     );
@@ -198,21 +189,23 @@ export async function find(ctx: Router.RouterContext, next: Next) {
   const isAdmin = !!ctx.state.user?.isAdmin;
 
   if (!isAdmin) {
-    const publicChannelNames = (
-      await channelService.getChannelsByType(ChannelTypeEnum.PUBLIC)
-    ).map((channel) => channel.name);
+    const channels = await channelService.getChannelsByType(
+      ChannelTypeEnum.PUBLIC,
+    );
+
+    const channelNames = channels.map((c) => c.name);
 
     if (ctx.ctx.state.query.$and) {
       ctx.ctx.state.query.$and.push({
         channel: {
-          $in: publicChannelNames,
+          $in: channelNames,
         },
       });
     } else {
       ctx.ctx.state.query.$and = [
         {
           channel: {
-            $in: publicChannelNames,
+            $in: channelNames,
           },
         },
       ];

@@ -6,11 +6,11 @@ import { Subscriber } from '../models/subscriber';
 import { streamService } from '../services/stream';
 import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';
-import { IChannelServerStats } from './channels';
 import { userService } from '../services/user';
 import { ObjectId } from 'mongodb';
 import { IUserModel } from '../models/user';
 import { LIVE_STATS_CACHE } from '../workers';
+import { IChannelServerStats } from '../helpers/interfaces';
 
 export async function findById(ctx: Router.RouterContext, next: Next) {
   const subscriber = await Subscriber.findOne({
@@ -47,9 +47,6 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
       createdAt: subscriber.createdAt,
       updatedAt: subscriber.updatedAt,
       isLive,
-      ip: null,
-      countryCode: null,
-      city: null,
     };
 
   const userMap = await userService.getMapByIds(
@@ -89,9 +86,6 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
           updatedAt: stream.updatedAt,
           isLive,
           userName: userRecord?.name || null,
-          ip: null,
-          countryCode: null,
-          city: null,
         };
       }),
     );
@@ -103,21 +97,23 @@ export async function find(ctx: Router.RouterContext, next: Next) {
   const isAdmin = !!ctx.state.user?.isAdmin;
 
   if (!isAdmin) {
-    const publicChannelNames = (
-      await channelService.getChannelsByType(ChannelTypeEnum.PUBLIC)
-    ).map((channel) => channel.name);
+    const channels = await channelService.getChannelsByType(
+      ChannelTypeEnum.PUBLIC,
+    );
+
+    const channelNames = channels.map((c) => c.name);
 
     if (ctx.ctx.state.query.$and) {
       ctx.ctx.state.query.$and.push({
         channel: {
-          $in: publicChannelNames,
+          $in: channelNames,
         },
       });
     } else {
       ctx.ctx.state.query.$and = [
         {
           channel: {
-            $in: publicChannelNames,
+            $in: channelNames,
           },
         },
       ];

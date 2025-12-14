@@ -2,7 +2,7 @@ import tseslint from 'typescript-eslint';
 
 export default [
   {
-    files: ['./src/**/*'],
+    files: ['./src/**/*.ts'],
     ignores: [],
     plugins: {
       '@typescript-eslint': tseslint.plugin,
@@ -14,6 +14,16 @@ export default [
       },
     },
     rules: {
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          args: 'none',
+          varsIgnorePattern: '^_',
+          caughtErrors: 'none',
+          ignoreRestSiblings: true,
+        },
+      ],
       indent: ['off', 2],
       quotes: [
         'error',
@@ -48,14 +58,6 @@ export default [
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-require-imports': ['error'],
-      'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          args: 'none',
-          varsIgnorePattern: '^_',
-        },
-      ],
       'no-return-await': 'off',
       '@typescript-eslint/return-await': 'error',
       'object-shorthand': 'error',
