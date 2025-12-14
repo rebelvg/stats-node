@@ -1,4 +1,4 @@
-import { MongoClient, Db, Collection } from 'mongodb';
+import { MongoClient, Db, Collection, Document } from 'mongodb';
 
 import { DB_URI } from './config';
 
@@ -18,7 +18,7 @@ export async function connectMongoDriver(): Promise<MongoClient> {
 }
 
 export class MongoCollections {
-  public static getCollection<T>(name: string): Collection<T> {
+  public static getCollection<T extends Document>(name: string): Collection<T> {
     return mongoClientDb.collection<T>(name);
   }
 

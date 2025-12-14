@@ -7,6 +7,7 @@ import {
   Filter,
   OptionalId,
   AggregateOptions,
+  WithId,
 } from 'mongodb';
 
 import { IGenericStreamsResponse } from '../workers/_base';
@@ -35,7 +36,7 @@ export interface IStreamModel {
   lastBitrate: number;
   totalConnectionsCount: number;
   peakViewersCount: number;
-  userId: ObjectId;
+  userId: ObjectId | null;
   apiSource: string;
   apiResponse: IGenericStreamsResponse['channels'][0]['publisher'];
   createdAt: Date;
@@ -84,7 +85,7 @@ class StreamModel {
   }
 
   aggregate(query: any[]) {
-    return this.collection.aggregate(query);
+    return this.collection.aggregate(query).toArray();
   }
 
   async paginate(filter: Filter<IStreamModel>, options?: FindOptions) {

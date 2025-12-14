@@ -21,8 +21,8 @@ export const ConfigSchema = z.object({
   DB_URI: z.string(),
 
   GOOGLE_OAUTH: z.object({
-    CLIENT_ID: z.string().nullable(),
-    CLIENT_SECRET: z.string().nullable(),
+    CLIENT_ID: z.string(),
+    CLIENT_SECRET: z.string(),
   }),
 
   KOLPAQUE_RTMP: ServiceArraySchema,
@@ -31,7 +31,7 @@ export const ConfigSchema = z.object({
   ADOBE_MEDIA_SERVER: ServiceArraySchema,
 
   JWT: z.object({
-    SECRET: z.string().nullable(),
+    SECRET: z.string(),
   }),
 });
 

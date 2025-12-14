@@ -7,9 +7,18 @@ import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';
 import { BadRequest } from '../helpers/errors';
 import { userService } from '../services/user';
+import { IUserModel } from '../models/user';
 
 function appChannelStatsBase(server: string, app: string, channel: string) {
-  const channelStats = {
+  const channelStats: {
+    isLive: boolean;
+    viewers: number;
+    duration: number;
+    bitrate: number;
+    lastBitrate: number;
+    _id: number | null;
+    startTime: string | null;
+  } = {
     isLive: false,
     viewers: 0,
     duration: 0,
@@ -31,7 +40,8 @@ function appChannelStatsBase(server: string, app: string, channel: string) {
   channelStats.bitrate = channelRecord.publisher?.bitrate || 0;
   channelStats.lastBitrate = channelRecord.publisher?.lastBitrate || 0;
   channelStats._id = channelRecord.publisher?.connectCreated.getTime() || null;
-  channelStats.startTime = channelRecord.publisher?.connectCreated || null;
+  channelStats.startTime =
+    channelRecord.publisher?.connectCreated.toISOString() || null;
 
   return channelStats;
 }
@@ -60,7 +70,7 @@ export interface IChannelServerStats {
         connectCreated: Date;
         connectUpdated: Date;
         bytes: number;
-        ip: string;
+        ip: string | null;
         protocol: string;
         lastBitrate: number;
         userId: string | null;
@@ -84,7 +94,7 @@ export interface IChannelServerStats {
         connectCreated: Date;
         connectUpdated: Date;
         bytes: number;
-        ip: string;
+        ip: string | null;
         protocol: string;
         userId: string | null;
         streamIds: string[];
@@ -119,7 +129,13 @@ export async function channels(ctx: Router.RouterContext, next: Next) {
       continue;
     }
 
-    const liveServer = {
+    const liveServer: {
+      server: string;
+      apps: {
+        app: string;
+        channels: IChannelServerStats['apps'][0]['channels'];
+      }[];
+    } = {
       server,
       apps: [],
     };
@@ -151,9 +167,13 @@ export async function channels(ctx: Router.RouterContext, next: Next) {
         if (channelObj.publisher) {
           const livePublisher = channelObj.publisher;
 
-          const userRecord = await userService.getById(
-            channelObj.publisher.userId?.toString(),
-          );
+          let userRecord: IUserModel | null = null;
+
+          if (channelObj.publisher.userId) {
+            userRecord = await userService.getById(
+              channelObj.publisher.userId.toString(),
+            );
+          }
 
           liveChannel.publisher = {
             _id: livePublisher._id.toString(),
@@ -210,7 +230,10 @@ export async function channels(ctx: Router.RouterContext, next: Next) {
         channels.push(liveChannel);
       }
 
-      const liveApp = {
+      const liveApp: {
+        app: string;
+        channels: IChannelServerStats['apps'][0]['channels'];
+      } = {
         app,
         channels,
       };
@@ -232,7 +255,7 @@ export async function list(ctx: Router.RouterContext, next: Next) {
     app: string;
     channel: string;
     protocol: string;
-    name: string;
+    name: string | null;
     _id: string;
     startTime: Date;
     viewers: number;
@@ -250,9 +273,13 @@ export async function list(ctx: Router.RouterContext, next: Next) {
             _.map(appObj, async (channelObj) => {
               if (channelObj.publisher) {
                 if (channels.includes(channelObj.publisher.channel)) {
-                  const userRecord = await userService.getById(
-                    channelObj.publisher.userId?.toString(),
-                  );
+                  let userRecord: IUserModel | null = null;
+
+                  if (channelObj.publisher.userId) {
+                    userRecord = await userService.getById(
+                      channelObj.publisher.userId.toString(),
+                    );
+                  }
 
                   liveChannels.push({
                     _id: channelObj.publisher._id.toString(),

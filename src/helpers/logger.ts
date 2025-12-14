@@ -16,8 +16,8 @@ class Logger {
 
   constructor(
     private config: {
-      requestId?: string;
-      externalRequestId?: string;
+      requestId: string | null;
+      externalRequestId: string | null;
       ips?: string[];
     } = {
       requestId: null,
@@ -26,7 +26,7 @@ class Logger {
     },
   ) {}
 
-  public log(level: LogLevel, message: string, data: Record<string, any>) {
+  public log(level: LogLevel, message: string, data?: Record<string, any>) {
     const logData = {
       ...this.data,
       ...data,

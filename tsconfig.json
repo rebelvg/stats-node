@@ -13,6 +13,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "noEmitOnError": true,
+    "strictNullChecks": true,
     "outDir": "./dist"
   },
   "exclude": ["./dist", "./.scripts"],

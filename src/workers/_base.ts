@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { ObjectId } from 'mongodb';
+import { ObjectId, WithId } from 'mongodb';
 import * as ip6addr from 'ip6addr';
 
 import { ILiveStats, LIVE_STATS_CACHE } from '.';
@@ -22,8 +22,8 @@ export interface IGenericStreamsResponse {
       bytes: number;
       ip: string;
       protocol: string;
-      userId: ObjectId;
-    };
+      userId: ObjectId | null;
+    } | null;
     subscribers: {
       connectId: string;
       connectCreated: Date;
@@ -31,7 +31,7 @@ export interface IGenericStreamsResponse {
       bytes: number;
       ip: string;
       protocol: string;
-      userId: ObjectId;
+      userId: ObjectId | null;
     }[];
   }[];
 }
@@ -115,7 +115,7 @@ export abstract class BaseWorker {
           subscribers: [],
         });
 
-        let streamRecord: IStreamModel = null;
+        let streamRecord: WithId<IStreamModel> | null = null;
 
         if (channelData.publisher) {
           const streamQuery = {
@@ -152,6 +152,7 @@ export abstract class BaseWorker {
               apiResponse: channelData.publisher,
               createdAt: new Date(),
               updatedAt: new Date(),
+              _id: new ObjectId(),
             };
 
             try {
@@ -186,11 +187,11 @@ export abstract class BaseWorker {
             connectCreated: subscriber.connectCreated,
           };
 
-          let subscriberRecord: ISubscriberModel =
+          let subscriberRecord: WithId<ISubscriberModel> | null =
             await Subscriber.findOne(subscriberQuery);
 
           if (!subscriberRecord) {
-            const addr = ip6addr.parse(channelData.publisher.ip);
+            const addr = ip6addr.parse(subscriber.ip);
 
             const ip =
               addr.kind() === 'ipv6'
@@ -211,6 +212,7 @@ export abstract class BaseWorker {
               apiResponse: subscriber,
               createdAt: new Date(),
               updatedAt: new Date(),
+              _id: new ObjectId(),
             };
 
             try {
@@ -228,7 +230,7 @@ export abstract class BaseWorker {
           if (streamRecord) {
             const streamIds = subscriberRecord.streamIds;
 
-            streamIds.push(streamRecord._id);
+            streamIds.push(streamRecord._id!);
 
             subscriberRecord.streamIds = _.uniqBy(streamIds, (item) =>
               item.toHexString(),
@@ -260,7 +262,7 @@ export abstract class BaseWorker {
 
         if (streamRecord) {
           const streamViewers = await streamService.countViewersById(
-            streamRecord._id,
+            streamRecord._id!,
           );
 
           streamRecord.duration = Math.ceil(

@@ -24,7 +24,7 @@ export interface ISubscriberModel {
   protocol: string;
   duration: number;
   bitrate: number;
-  userId: ObjectId;
+  userId: ObjectId | null;
   streamIds: ObjectId[];
   apiSource: string;
   apiResponse: IGenericStreamsResponse['channels'][0]['subscribers'][0];
@@ -84,7 +84,7 @@ class SubscriberModel {
   }
 
   aggregate(query: any[]) {
-    return this.collection.aggregate(query);
+    return this.collection.aggregate(query).toArray();
   }
 
   async paginate(filter: Filter<ISubscriberModel>, options?: FindOptions) {

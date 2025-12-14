@@ -9,6 +9,7 @@ import { ChannelTypeEnum } from '../models/channel';
 import { IChannelServerStats } from './channels';
 import { userService } from '../services/user';
 import { ObjectId } from 'mongodb';
+import { IUserModel } from '../models/user';
 
 export async function findById(ctx: Router.RouterContext, next: Next) {
   const subscriber = await Subscriber.findOne({
@@ -47,13 +48,17 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
     };
 
   const userMap = await userService.getMapByIds(
-    streams.map((stream) => stream.userId?.toString()).filter(Boolean),
+    streams.filter((s) => s.userId).map((stream) => stream.userId!.toString()),
   );
 
   const streamsResponse: IChannelServerStats['apps'][0]['channels'][0]['publisher'][] =
     await Promise.all(
       streams.map((stream) => {
-        const userRecord = userMap[stream.userId?.toString()] || null;
+        let userRecord: IUserModel | null = null;
+
+        if (stream.userId) {
+          userRecord = userMap[stream.userId.toString()] || null;
+        }
 
         return {
           _id: stream._id.toString(),

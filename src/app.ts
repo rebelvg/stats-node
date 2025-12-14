@@ -33,7 +33,9 @@ app.proxy = true;
 app.use(async (ctx, next) => {
   try {
     await next();
-  } catch (error) {
+  } catch (err) {
+    const error = err as any;
+
     const logBody = {
       method: ctx.method,
       href: ctx.href,

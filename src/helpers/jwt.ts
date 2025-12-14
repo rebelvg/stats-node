@@ -7,7 +7,7 @@ interface IJwtPayload {
   userId: string;
 }
 
-export function encodeJwtToken(data: Partial<IJwtPayload>) {
+export function encodeJwtToken(data: Omit<IJwtPayload, '_v'>) {
   return jsonwebtoken.sign(
     {
       _v: 'v1',

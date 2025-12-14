@@ -10,7 +10,7 @@ const cachedGraphs: {
   all: {
     value: Record<string, unknown>;
     lastUpdateDate: Date;
-  };
+  } | null;
   ids: Map<
     string,
     {
@@ -470,8 +470,9 @@ const monthlyStatsSubscribersQuery: any = [
 
 export async function graphs(ctx: RouterContext) {
   if (
+    cachedGraphs.all &&
     Date.now() <
-    cachedGraphs.all?.lastUpdateDate.getTime() + 24 * 60 * 60 * 1000
+      (cachedGraphs.all.lastUpdateDate.getTime() || 0) + 24 * 60 * 60 * 1000
   ) {
     ctx.body = cachedGraphs.all.value;
 

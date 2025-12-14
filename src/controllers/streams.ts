@@ -12,6 +12,7 @@ import { IChannelServerStats } from './channels';
 import { userService } from '../services/user';
 import { ObjectId } from 'mongodb';
 import { LIVE_STATS_CACHE } from '../workers';
+import { IUserModel } from '../models/user';
 
 export async function findById(ctx: Router.RouterContext, next: Next) {
   const stream = await Stream.findOne({
@@ -73,7 +74,11 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
     totalIPs: _.chain(subscribers).map('ip').uniq().value().length,
   };
 
-  const userRecord = await userService.getById(stream.userId?.toString());
+  let userRecord: IUserModel | null = null;
+
+  if (stream.userId) {
+    userRecord = await userService.getById(stream.userId.toString());
+  }
 
   const streamResponse: IChannelServerStats['apps'][0]['channels'][0]['publisher'] =
     {
@@ -127,13 +132,19 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
     });
 
   const userMap = await userService.getMapByIds(
-    relatedStreams.map((stream) => stream.userId?.toString()).filter(Boolean),
+    relatedStreams
+      .filter((s) => s.userId)
+      .map((stream) => stream.userId!.toString()),
   );
 
   const relatedStreamsResponse: IChannelServerStats['apps'][0]['channels'][0]['publisher'][] =
     await Promise.all(
       relatedStreams.map((stream) => {
-        const userRecord = userMap[stream.userId?.toString()] || null;
+        let userRecord: IUserModel | null = null;
+
+        if (stream.userId) {
+          userRecord = userMap[stream.userId.toString()] || null;
+        }
 
         return {
           _id: stream._id.toString(),
@@ -231,14 +242,18 @@ export async function find(ctx: Router.RouterContext, next: Next) {
 
   const userMap = await userService.getMapByIds(
     paginatedStreams.docs
-      .map((stream) => stream.userId?.toString())
-      .filter(Boolean),
+      .filter((s) => s.userId)
+      .map((stream) => stream.userId!.toString()),
   );
 
   const streams: IChannelServerStats['apps'][0]['channels'][0]['publisher'][] =
     await Promise.all(
       paginatedStreams.docs.map((stream) => {
-        const userRecord = userMap[stream.userId?.toString()] || null;
+        let userRecord: IUserModel | null = null;
+
+        if (stream.userId) {
+          userRecord = userMap[stream.userId.toString()] || null;
+        }
 
         return {
           _id: stream._id.toString(),
@@ -306,7 +321,11 @@ export async function graph(ctx: Router.RouterContext, next: Next) {
     },
   );
 
-  let graph = [];
+  let graph: {
+    eventName: string;
+    time: Date;
+    subscribers: (ObjectId | undefined)[];
+  }[] = [];
 
   graph.push({
     eventName: 'streamStarted',

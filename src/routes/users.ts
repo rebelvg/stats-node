@@ -41,6 +41,10 @@ router.get('/auth/google', async (ctx, next) => {
     throw new Error('no_redirect_uri');
   }
 
+  if (!ctx.session) {
+    throw new Error();
+  }
+
   ctx.session.redirectUri = decodeURIComponent(redirectUri as string);
 
   const client = new OAuth2Client({
@@ -77,6 +81,10 @@ router.get('/auth/google/callback', async (ctx, next) => {
 
   const { tokens } = await client.getToken(code);
 
+  if (!tokens.access_token) {
+    throw new Error();
+  }
+
   const tokenInfo = await client.getTokenInfo(tokens.access_token);
 
   const auth = new google.auth.OAuth2({
@@ -101,6 +109,8 @@ router.get('/auth/google/callback', async (ctx, next) => {
     googleId: tokenInfo.sub,
   });
 
+  let userId: string | null = null;
+
   if (user) {
     user.name = firstName;
     user.raw = {
@@ -112,9 +122,11 @@ router.get('/auth/google/callback', async (ctx, next) => {
     user.ipUpdated = ctx.ip;
 
     await User.updateOne({ _id: user._id }, user);
+
+    userId = user._id.toString();
   } else {
-    user = await User.create({
-      googleId: tokenInfo.sub,
+    const newUserId = await User.create({
+      googleId: tokenInfo.sub || null,
       name: firstName,
       raw: {
         profile: tokenInfo,
@@ -130,12 +142,18 @@ router.get('/auth/google/callback', async (ctx, next) => {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
+
+    userId = newUserId.toString();
+  }
+
+  if (!ctx.session) {
+    throw new Error();
   }
 
   const { redirectUri } = ctx.session;
 
   const jwtToken = encodeJwtToken({
-    userId: user._id.toString(),
+    userId,
   });
 
   ctx.redirect(`${redirectUri}${jwtToken}`);

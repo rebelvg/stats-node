@@ -11,7 +11,7 @@ import { MongoCollections } from '../mongo';
 
 export interface IUserModel {
   _id?: ObjectId;
-  googleId: string;
+  googleId: string | null;
   name: string;
   ipCreated: string;
   ipUpdated: string;
@@ -59,9 +59,7 @@ class UserModel {
   async create(params: OptionalId<IUserModel>) {
     const user = await this.collection.insertOne(params);
 
-    return this.collection.findOne({
-      _id: user.insertedId,
-    });
+    return user.insertedId;
   }
 }
 

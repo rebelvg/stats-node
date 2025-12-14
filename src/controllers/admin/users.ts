@@ -7,13 +7,16 @@ import { ObjectId } from 'mongodb';
 import { Stream } from '../../models/stream';
 
 export async function find(ctx: Router.RouterContext, next: Next) {
-  const users = await User.find(null, {
-    sort: {
-      isAdmin: -1,
-      isStreamer: -1,
-      createdAt: -1,
+  const users = await User.find(
+    {},
+    {
+      sort: {
+        isAdmin: -1,
+        isStreamer: -1,
+        createdAt: -1,
+      },
     },
-  });
+  );
 
   ctx.body = {
     users,
