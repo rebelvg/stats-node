@@ -26,8 +26,6 @@ export interface ISubscriberModel {
   bitrate: number;
   userId: ObjectId | null;
   streamIds: ObjectId[];
-  apiSource: string;
-  apiResponse: IGenericStreamsResponse['channels'][0]['subscribers'][0];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -99,7 +97,11 @@ class SubscriberModel {
   }
 
   async create(data: ISubscriberModel) {
-    return this.collection.insertOne(data);
+    const { insertedId } = await this.collection.insertOne(data);
+
+    const record = await this.collection.findOne({ _id: insertedId });
+
+    return record!;
   }
 }
 

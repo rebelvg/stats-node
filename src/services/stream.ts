@@ -4,6 +4,7 @@ import { FindOptions, ObjectId } from 'mongodb';
 import { IStreamModel, Stream } from '../models/stream';
 import { filterSubscribers } from '../helpers/filter-subscribers';
 import { subscriberService } from './subscriber';
+import { ISubscriberModel } from '../models/subscriber';
 
 class StreamService {
   public getRelatedStreams(streamRecord: IStreamModel, options?: FindOptions) {
@@ -23,9 +24,7 @@ class StreamService {
     );
   }
 
-  public async countViewersById(id: ObjectId) {
-    const subscribers = await subscriberService.getByStreamId(id, {});
-
+  public async countViewersById(subscribers: ISubscriberModel[]) {
     const totalConnectionsCount = subscribers.length;
     let peakViewersCount = 0;
 
@@ -47,14 +46,12 @@ class StreamService {
   }
 
   public calculateLastBitrate(
-    bytes: number,
-    bytesPrev: number,
-    updateTime: Date,
-    updateTimePrev: Date,
+    { now: nowBytes, last: lastBytes }: { now: number; last: number },
+    { now: nowTime, last: lastTime }: { now: Date; last: Date },
   ): number {
     return Math.ceil(
-      ((bytes - bytesPrev) * 8) /
-        ((updateTime.valueOf() - updateTimePrev.valueOf()) / 1000) /
+      ((nowBytes - lastBytes) * 8) /
+        ((nowTime.valueOf() - lastTime.valueOf()) / 1000) /
         1024,
     );
   }

@@ -37,8 +37,6 @@ export interface IStreamModel {
   totalConnectionsCount: number;
   peakViewersCount: number;
   userId: ObjectId | null;
-  apiSource: string;
-  apiResponse: IGenericStreamsResponse['channels'][0]['publisher'];
   createdAt: Date;
   updatedAt: Date;
 }
