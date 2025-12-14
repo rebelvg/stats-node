@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import Router from '@koa/router';
+import Router, { RouterContext } from '@koa/router';
 
 import { isLoggedIn } from '../middleware/is-logged-in';
 import { User } from '../models/user';
@@ -8,18 +8,15 @@ import { encodeJwtToken } from '../helpers/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import { API, GOOGLE_OAUTH } from '../config';
 import * as google from 'googleapis/build/src/apis/oauth2';
+import { v4 } from 'uuid';
 
 export const router = new Router();
 
-router.get(
-  '/validate',
-  isLoggedIn,
-  (ctx: Router.IRouterContext, next: Next) => {
-    ctx.body = {};
-  },
-);
+router.get('/validate', isLoggedIn, (ctx: RouterContext, next: Next) => {
+  ctx.body = {};
+});
 
-router.get('/refresh', isLoggedIn, (ctx: Router.IRouterContext, next: Next) => {
+router.get('/refresh', isLoggedIn, (ctx: RouterContext, next: Next) => {
   const { _id } = ctx.state.user;
 
   const jwtToken = encodeJwtToken({
@@ -31,7 +28,7 @@ router.get('/refresh', isLoggedIn, (ctx: Router.IRouterContext, next: Next) => {
   };
 });
 
-router.get('/', isLoggedIn, (ctx: Router.IRouterContext, next: Next) => {
+router.get('/', isLoggedIn, (ctx: RouterContext, next: Next) => {
   ctx.body = { user: ctx.state.user };
 });
 
@@ -114,7 +111,7 @@ router.get('/auth/google/callback', async (ctx, next) => {
     user.ipCreated = user.ipCreated || ctx.ip;
     user.ipUpdated = ctx.ip;
 
-    await user.save();
+    await User.updateOne({ _id: user._id }, user);
   } else {
     user = await User.create({
       googleId: tokenInfo.sub,
@@ -126,13 +123,19 @@ router.get('/auth/google/callback', async (ctx, next) => {
       },
       ipCreated: ctx.ip,
       ipUpdated: ctx.ip,
+      isAdmin: false,
+      isStreamer: false,
+      token: v4(),
+      streamKey: v4(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
   }
 
   const { redirectUri } = ctx.session;
 
   const jwtToken = encodeJwtToken({
-    userId: user._id,
+    userId: user._id.toString(),
   });
 
   ctx.redirect(`${redirectUri}${jwtToken}`);

@@ -1,11 +1,6 @@
-import * as mongoose from 'mongoose';
 import { MongoClient, Db, Collection } from 'mongodb';
 
 import { DB_URI } from './config';
-
-export async function connectMongoose() {
-  await mongoose.connect(DB_URI);
-}
 
 export interface IMigration {
   name: string;

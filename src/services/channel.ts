@@ -7,10 +7,13 @@ class ChannelService {
     const channelRecord = await Channel.findOne({ name: channelName });
 
     if (!channelRecord) {
-      await new Channel({
+      await Channel.create({
         name: channelName,
         type: ChannelTypeEnum.PRIVATE,
-      }).save();
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        channelCreatedAt: new Date(),
+      });
 
       return;
     }
@@ -30,7 +33,6 @@ class ChannelService {
 
   public async getChannels(): Promise<IChannelModel[]> {
     const channels = await Channel.find(
-      {},
       {},
       {
         sort: { type: -1, channelCreatedAt: -1 },

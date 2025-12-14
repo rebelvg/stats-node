@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import Router from '@koa/router';
+import * as Router from '@koa/router';
 import _ from 'lodash';
 
 const allowedPaths = ['api.country', 'api.city', 'api.isp'];
@@ -11,7 +11,7 @@ declare module '@koa/router' {
 }
 
 export function parseSort(model) {
-  return async function (ctx: Router.IRouterContext, next: Next) {
+  return async function (ctx: Router.RouterContext, next: Next) {
     const sortObj = {};
 
     if (_.isArray(ctx.query.sort)) {

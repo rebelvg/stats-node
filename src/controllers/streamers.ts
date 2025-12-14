@@ -1,4 +1,4 @@
-import Router from '@koa/router';
+import * as Router from '@koa/router';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-export function find(ctx: Router.IRouterContext) {}
+export function find(ctx: Router.RouterContext) {}

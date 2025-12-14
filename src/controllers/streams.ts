@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import Router from '@koa/router';
+import * as Router from '@koa/router';
 import _ from 'lodash';
 
 import { Stream } from '../models/stream';
@@ -12,9 +12,12 @@ import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';
 import { IChannelServerStats } from './channels';
 import { userService } from '../services/user';
+import { ObjectId } from 'mongodb';
 
-export async function findById(ctx: Router.IRouterContext, next: Next) {
-  const stream = await Stream.findById(ctx.params.id).populate(['location']);
+export async function findById(ctx: Router.RouterContext, next: Next) {
+  const stream = await Stream.findOne({
+    _id: new ObjectId(ctx.params.id),
+  });
 
   if (!stream) {
     throw new Error('stream_not_found');
@@ -26,9 +29,8 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
     .populate(['location']);
 
   const relatedStreams = await streamService
-    .getRelatedStreams(stream, {})
-    .sort({ connectCreated: 1 })
-    .populate(['location']);
+    .getRelatedStreams(stream)
+    .sort({ connectCreated: 1 });
 
   const options = {
     countries: _
@@ -95,7 +97,7 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
       protocol: stream.protocol,
       lastBitrate: stream.lastBitrate,
       userId: stream.userId?.toString() || null,
-      _id: stream._id,
+      _id: stream._id.toString(),
       totalConnectionsCount: stream.totalConnectionsCount,
       peakViewersCount: stream.peakViewersCount,
       duration: stream.duration,
@@ -185,7 +187,7 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
   };
 }
 
-export async function find(ctx: Router.IRouterContext, next: Next) {
+export async function find(ctx: Router.RouterContext, next: Next) {
   const isAdmin = !!ctx.state.user?.isAdmin;
 
   if (!isAdmin) {
@@ -309,7 +311,7 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
   };
 }
 
-export async function graph(ctx: Router.IRouterContext, next: Next) {
+export async function graph(ctx: Router.RouterContext, next: Next) {
   const stream = await Stream.findById(ctx.params.id);
 
   if (!stream) {

@@ -1,10 +1,10 @@
 import { Next } from 'koa';
-import Router from '@koa/router';
+import * as Router from '@koa/router';
 import _ from 'lodash';
 
 import { IP } from '../models/ip';
 
-export async function findById(ctx: Router.IRouterContext, next: Next) {
+export async function findById(ctx: Router.RouterContext, next: Next) {
   const ip = await IP.findById(ctx.params.id);
 
   if (!ip) {
@@ -16,7 +16,7 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
   };
 }
 
-export async function find(ctx: Router.IRouterContext, next: Next) {
+export async function find(ctx: Router.RouterContext, next: Next) {
   const paginatedIps = await IP.paginate(ctx.queryObj, {
     sort: _.isEmpty(ctx.sortObj) ? { createdAt: -1 } : ctx.sortObj,
     page: parseInt(ctx.query.page as string) || 1,

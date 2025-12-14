@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import Router from '@koa/router';
+import * as Router from '@koa/router';
 import _ from 'lodash';
 
 import { Subscriber } from '../models/subscriber';
@@ -11,7 +11,7 @@ import { ChannelTypeEnum } from '../models/channel';
 import { IChannelServerStats } from './channels';
 import { userService } from '../services/user';
 
-export async function findById(ctx: Router.IRouterContext, next: Next) {
+export async function findById(ctx: Router.RouterContext, next: Next) {
   const subscriber = await Subscriber.findById(ctx.params.id).populate([
     'location',
   ]);
@@ -99,7 +99,7 @@ export async function findById(ctx: Router.IRouterContext, next: Next) {
   ctx.body = { subscriber: subscriberResponse, streams: streamsResponse };
 }
 
-export async function find(ctx: Router.IRouterContext, next: Next) {
+export async function find(ctx: Router.RouterContext, next: Next) {
   const isAdmin = !!ctx.state.user?.isAdmin;
 
   if (!isAdmin) {

@@ -1,12 +1,12 @@
 import { Next } from 'koa';
-import Router from '@koa/router';
+import * as Router from '@koa/router';
 import _ from 'lodash';
 
 import { hideUserData } from '../helpers/hide-fields';
 import { shouldHideFields } from '../helpers/should-hide-fields';
 import { User } from '../models/user';
 
-export async function findById(ctx: Router.IRouterContext, next: Next) {
+export async function findById(ctx: Router.RouterContext, next: Next) {
   const userId = ctx.params.id;
 
   const userRecord = await User.findById({ _id: userId });

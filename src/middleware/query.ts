@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import Router from '@koa/router';
+import * as Router from '@koa/router';
 import _ from 'lodash';
 import * as moment from 'moment';
 import { strtotime } from 'locutus/php/datetime';
@@ -67,7 +67,7 @@ const filterRules = {
         { 'api.message': new RegExp(ip, 'gi') },
       ];
 
-      const ips = await IP.distinct('ip', {
+      const ips = await IP.distinct<string>('ip', {
         $or: ipQuery,
       });
 
@@ -204,7 +204,7 @@ const rulePresets = {
 export function parseFilter(modelName) {
   const rules = rulePresets?.[modelName];
 
-  return async function (ctx: Router.IRouterContext, next: Next) {
+  return async function (ctx: Router.RouterContext, next: Next) {
     const queryObj: any = {};
 
     await Promise.all(

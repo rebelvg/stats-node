@@ -1,9 +1,14 @@
-import * as mongoose from 'mongoose';
-import { Document } from 'mongoose';
+import {
+  Collection,
+  UpdateOptions,
+  Document,
+  ObjectId,
+  OptionalId,
+} from 'mongodb';
+import { MongoCollections } from '../mongo';
 
-import { schema } from '../schemas/user';
-
-export interface IUserModel extends Document {
+export interface IUserModel {
+  _id?: ObjectId;
   googleId: string;
   name: string;
   ipCreated: string;
@@ -14,8 +19,39 @@ export interface IUserModel extends Document {
   streamKey: string;
   createdAt: Date;
   updatedAt: Date;
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  raw: Object;
+  raw: object;
 }
 
-export const User = mongoose.model<IUserModel>('User', schema);
+class UserModel {
+  private collection: Collection<IUserModel>;
+
+  constructor() {
+    this.collection = MongoCollections.getCollection<IUserModel>('users');
+  }
+
+  findOne(params: Partial<IUserModel>) {
+    return this.collection.findOne(params);
+  }
+
+  updateOne(
+    filter: Partial<IUserModel>,
+    data: Partial<IUserModel>,
+    options?: UpdateOptions,
+  ) {
+    return this.collection.updateOne(filter, data, options);
+  }
+
+  find(params: Partial<IUserModel>) {
+    return this.collection.find(params).toArray();
+  }
+
+  async create(params: OptionalId<IUserModel>) {
+    const user = await this.collection.insertOne(params);
+
+    return this.collection.findOne({
+      _id: user.insertedId,
+    });
+  }
+}
+
+export const User = new UserModel();

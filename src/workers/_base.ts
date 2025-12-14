@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import { ObjectId } from 'mongodb';
-import { FilterQuery } from 'mongoose';
 
 import { ILiveStats, LIVE_STATS_CACHE } from '.';
 import { IWorkerConfig } from '../config';
@@ -117,7 +116,7 @@ export abstract class BaseWorker {
         let streamRecord: IStreamModel = null;
 
         if (channelData.publisher) {
-          const streamQuery: FilterQuery<IStreamModel> = {
+          const streamQuery = {
             server: host,
             app: appName,
             channel: channelName,
@@ -128,14 +127,23 @@ export abstract class BaseWorker {
           streamRecord = await Stream.findOne(streamQuery);
 
           if (!streamRecord) {
-            streamQuery.connectUpdated = statsUpdateTime;
-            streamQuery.bytes = channelData.publisher.bytes;
-            streamQuery.ip = channelData.publisher.ip;
-            streamQuery.protocol = channelData.publisher.protocol;
-            streamQuery.userId = channelData.publisher.userId;
-            streamQuery.lastBitrate = 0;
-
-            streamRecord = new Stream(streamQuery);
+            streamRecord = {
+              ...streamQuery,
+              connectUpdated: statsUpdateTime,
+              bytes: channelData.publisher.bytes,
+              ip: channelData.publisher.ip,
+              protocol: channelData.publisher.protocol,
+              userId: channelData.publisher.userId,
+              lastBitrate: 0,
+              duration: 0,
+              bitrate: 0,
+              totalConnectionsCount: 0,
+              peakViewersCount: 0,
+              apiSource: this.apiSource,
+              apiResponse: channelData.publisher,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
           } else {
             const lastBitrate = streamService.calculateLastBitrate(
               channelData.publisher.bytes,
@@ -153,7 +161,7 @@ export abstract class BaseWorker {
         }
 
         for (const subscriber of channelData.subscribers) {
-          const subscriberQuery: FilterQuery<ISubscriberModel> = {
+          const subscriberQuery = {
             server: host,
             app: appName,
             channel: channelName,
@@ -161,16 +169,25 @@ export abstract class BaseWorker {
             connectCreated: subscriber.connectCreated,
           };
 
-          let subscriberRecord = await Subscriber.findOne(subscriberQuery);
+          let subscriberRecord: ISubscriberModel =
+            await Subscriber.findOne(subscriberQuery);
 
           if (!subscriberRecord) {
-            subscriberQuery.connectUpdated = statsUpdateTime;
-            subscriberQuery.bytes = subscriber.bytes;
-            subscriberQuery.ip = subscriber.ip;
-            subscriberQuery.protocol = subscriber.protocol;
-            subscriberQuery.userId = subscriber.userId;
-
-            subscriberRecord = new Subscriber(subscriberQuery);
+            subscriberRecord = {
+              ...subscriberQuery,
+              connectUpdated: statsUpdateTime,
+              bytes: subscriber.bytes,
+              ip: subscriber.ip,
+              protocol: subscriber.protocol,
+              userId: subscriber.userId,
+              duration: 0,
+              bitrate: 0,
+              streamIds: [],
+              apiSource: this.apiSource,
+              apiResponse: subscriber,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
           } else {
             subscriberRecord.bytes = subscriber.bytes;
             subscriberRecord.connectUpdated = statsUpdateTime;
@@ -189,7 +206,7 @@ export abstract class BaseWorker {
           subscriberRecord.apiSource = this.apiSource;
           subscriberRecord.apiResponse = subscriber;
 
-          await subscriberRecord.save();
+          await Subscriber.upsert(subscriberRecord);
 
           stats[appName][channelName].subscribers.push(subscriberRecord);
         }
@@ -203,7 +220,7 @@ export abstract class BaseWorker {
             streamViewers.totalConnectionsCount;
           streamRecord.peakViewersCount = streamViewers.peakViewersCount;
 
-          await streamRecord.save();
+          await Stream.upsert(streamRecord);
 
           await channelService.addChannel(streamRecord.channel);
         }

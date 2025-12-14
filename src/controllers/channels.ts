@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import Router from '@koa/router';
+import * as Router from '@koa/router';
 import _ from 'lodash';
 
 import { Stream } from '../models/stream';
@@ -39,7 +39,7 @@ function appChannelStatsBase(server: string, app: string, channel: string) {
   return channelStats;
 }
 
-export function appChannelStats(ctx: Router.IRouterContext, next: Next) {
+export function appChannelStats(ctx: Router.RouterContext, next: Next) {
   const channelStats = appChannelStatsBase(
     ctx.params.server,
     ctx.params.app,
@@ -104,7 +104,7 @@ export interface IChannelServerStats {
   }[];
 }
 
-export async function channels(ctx: Router.IRouterContext, next: Next) {
+export async function channels(ctx: Router.RouterContext, next: Next) {
   const liveStatsClone = _.cloneDeep(LIVE_STATS_CACHE);
 
   const isAdmin = !!ctx.state.user?.isAdmin;
@@ -241,7 +241,7 @@ export async function channels(ctx: Router.IRouterContext, next: Next) {
   ctx.body = { live: liveServers };
 }
 
-export async function list(ctx: Router.IRouterContext, next: Next) {
+export async function list(ctx: Router.RouterContext, next: Next) {
   const liveChannels: {
     server: string;
     app: string;
@@ -294,7 +294,7 @@ export async function list(ctx: Router.IRouterContext, next: Next) {
   };
 }
 
-export async function updateChannel(ctx: Router.IRouterContext, next: Next) {
+export async function updateChannel(ctx: Router.RouterContext, next: Next) {
   const { id } = ctx.params;
   const { type } = ctx.request.body as { type: ChannelTypeEnum };
 

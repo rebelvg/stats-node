@@ -1,12 +1,17 @@
-import * as mongoose from 'mongoose';
-import { Document } from 'mongoose';
-import { ObjectId } from 'mongodb';
+import {
+  Collection,
+  UpdateOptions,
+  Document,
+  ObjectId,
+  Filter,
+  OptionalId,
+} from 'mongodb';
+import { MongoCollections } from '../mongo';
 
-import { schema } from '../schemas/subscriber';
 import { IGenericStreamsResponse } from '../workers/_base';
-import { IIPModel } from './ip';
 
-export interface ISubscriberModel extends Document {
+export interface ISubscriberModel {
+  _id?: ObjectId;
   server: string;
   app: string;
   channel: string;
@@ -24,11 +29,50 @@ export interface ISubscriberModel extends Document {
   apiResponse: IGenericStreamsResponse['channels'][0]['subscribers'][0];
   createdAt: Date;
   updatedAt: Date;
-  isLive: boolean;
-  location?: IIPModel;
 }
 
-export const Subscriber = mongoose.model<ISubscriberModel>(
-  'Subscriber',
-  schema,
-);
+class SubscriberModel {
+  private collection: Collection<ISubscriberModel>;
+
+  constructor() {
+    this.collection =
+      MongoCollections.getCollection<ISubscriberModel>('subscribers');
+  }
+
+  findOne(params: Partial<ISubscriberModel>) {
+    return this.collection.findOne(params);
+  }
+
+  updateOne(
+    filter: Partial<ISubscriberModel>,
+    data: Partial<ISubscriberModel>,
+    options?: UpdateOptions,
+  ) {
+    return this.collection.updateOne(filter, data, options);
+  }
+
+  find(filter: Filter<ISubscriberModel>) {
+    return this.collection.find(filter).toArray();
+  }
+
+  create(params: OptionalId<ISubscriberModel>) {
+    return this.collection.insertOne(params);
+  }
+
+  async upsert(params: OptionalId<ISubscriberModel>) {
+    if (params._id) {
+      await this.collection.updateOne(
+        {
+          _id: params._id,
+        },
+        {
+          ...params,
+        },
+      );
+    } else {
+      await this.collection.insertOne(params);
+    }
+  }
+}
+
+export const Subscriber = new SubscriberModel();

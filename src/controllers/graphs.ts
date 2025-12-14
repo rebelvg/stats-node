@@ -1,4 +1,3 @@
-import Router from '@koa/router';
 import _ from 'lodash';
 import { ObjectId } from 'mongodb';
 
@@ -469,7 +468,7 @@ const monthlyStatsSubscribersQuery: any = [
   },
 ];
 
-export async function graphs(ctx: Router.IRouterContext) {
+export async function graphs(ctx: Router.RouterContext) {
   if (
     Date.now() <
     cachedGraphs.all?.lastUpdateDate.getTime() + 24 * 60 * 60 * 1000

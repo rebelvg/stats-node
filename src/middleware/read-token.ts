@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import Router from '@koa/router';
+import * as Router from '@koa/router';
 import { ObjectId } from 'mongodb';
 
 import { decodeJwtToken } from '../helpers/jwt';
@@ -25,7 +25,7 @@ declare module '@koa/router' {
   }
 }
 
-export async function readToken(ctx: Router.IRouterContext, next: Next) {
+export async function readToken(ctx: Router.RouterContext, next: Next) {
   const token = ctx.get('token');
   const jwtToken = ctx.get('jwt-token');
 

@@ -1,8 +1,8 @@
 import { Next } from 'koa';
-import Router from '@koa/router';
+import * as Router from '@koa/router';
 import { Unauthorized } from '../helpers/errors';
 
-export function isLoggedIn(ctx: Router.IRouterContext, next: Next) {
+export function isLoggedIn(ctx: Router.RouterContext, next: Next) {
   if (ctx.state.user) {
     return next();
   }

@@ -1,10 +1,10 @@
 import { Next } from 'koa';
-import Router from '@koa/router';
+import * as Router from '@koa/router';
 import _ from 'lodash';
 
 import { User } from '../../models/user';
 
-export async function find(ctx: Router.IRouterContext, next: Next) {
+export async function find(ctx: Router.RouterContext, next: Next) {
   const users = await User.find(null, null, {
     sort: {
       isAdmin: -1,
@@ -18,7 +18,7 @@ export async function find(ctx: Router.IRouterContext, next: Next) {
   };
 }
 
-export async function update(ctx: Router.IRouterContext, next: Next) {
+export async function update(ctx: Router.RouterContext, next: Next) {
   const user = await User.findOne({
     _id: ctx.params.id,
   });

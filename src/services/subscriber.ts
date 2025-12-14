@@ -1,9 +1,9 @@
-import { ObjectId } from 'mongodb';
+import { Filter, ObjectId } from 'mongodb';
 
-import { Subscriber } from '../models/subscriber';
+import { ISubscriberModel, Subscriber } from '../models/subscriber';
 
 class SubscriberService {
-  public getByStreamId(id: ObjectId, params: any) {
+  public getByStreamId(id: ObjectId, params: Filter<ISubscriberModel>) {
     const query = {
       $and: [
         {

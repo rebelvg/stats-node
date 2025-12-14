@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { Query } from 'mongoose';
 import { ObjectId } from 'mongodb';
 
 import { IStreamModel, Stream } from '../models/stream';
@@ -7,11 +6,8 @@ import { filterSubscribers } from '../helpers/filter-subscribers';
 import { subscriberService } from './subscriber';
 
 class StreamService {
-  public getRelatedStreams(
-    streamRecord: IStreamModel,
-    query: any,
-  ): Query<IStreamModel[], IStreamModel> {
-    query = {
+  public getRelatedStreams(streamRecord: IStreamModel) {
+    return Stream.find({
       $and: [
         {
           _id: { $ne: streamRecord._id },
@@ -20,11 +16,8 @@ class StreamService {
           connectUpdated: { $gte: streamRecord.connectCreated },
           connectCreated: { $lte: streamRecord.connectUpdated },
         },
-        query,
       ],
-    };
-
-    return Stream.find(query);
+    });
   }
 
   public async countViewersById(id: ObjectId) {
@@ -63,10 +56,7 @@ class StreamService {
     );
   }
 
-  public getBySubscriberIds(
-    streamIds: ObjectId[],
-    params: any,
-  ): Query<IStreamModel[], IStreamModel> {
+  public getBySubscriberIds(streamIds: ObjectId[]) {
     const query = {
       $and: [
         {
@@ -74,7 +64,6 @@ class StreamService {
             $in: streamIds,
           },
         },
-        params,
       ],
     };
 
