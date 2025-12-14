@@ -2,7 +2,6 @@ import _ from 'lodash';
 import { ObjectId, WithId } from 'mongodb';
 import * as ip6addr from 'ip6addr';
 
-import { ILiveStats, LIVE_STATS_CACHE } from '.';
 import { IWorkerConfig } from '../config';
 import { logger } from '../helpers/logger';
 import { Stream } from '../models/stream';
@@ -55,13 +54,7 @@ export abstract class BaseWorker {
         try {
           const { host } = new URL(config.API_ORIGIN);
 
-          const stats = await this.readStats(
-            config.API_ORIGIN,
-            config.API_SECRET,
-            host,
-          );
-
-          _.set(LIVE_STATS_CACHE, [host], stats);
+          await this.readStats(config.API_ORIGIN, config.API_SECRET, host);
         } catch (error) {
           if (error.code === 'ECONNREFUSED') {
             logger.error('update_econnrefused', {
@@ -102,21 +95,8 @@ export abstract class BaseWorker {
       });
     });
 
-    const stats: ILiveStats[0] = {};
-
     for (const { channels, app } of streams) {
       for (const { channel, publisher, subscribers } of channels) {
-        if (!stats[app]) {
-          stats[app] = {};
-        }
-
-        if (!stats[app][channel]) {
-          stats[app][channel] = {
-            publisher: null,
-            subscribers: [],
-          };
-        }
-
         let streamId: ObjectId | null = null;
 
         if (publisher) {
@@ -315,7 +295,7 @@ export abstract class BaseWorker {
       }
     }
 
-    return stats;
+    return;
   }
 
   private async readStats(origin: string, secret: string, host: string) {

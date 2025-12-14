@@ -9,52 +9,55 @@ import { ChannelTypeEnum } from '../models/channel';
 import { userService } from '../services/user';
 import { ObjectId } from 'mongodb';
 import { IUserModel } from '../models/user';
-import { LIVE_STATS_CACHE } from '../workers';
 import { IChannelServerStats } from '../helpers/interfaces';
 
 export async function findById(ctx: Router.RouterContext, next: Next) {
-  const subscriber = await Subscriber.findOne({
+  const subscriberRecord = await Subscriber.findOne({
     _id: new ObjectId(ctx.params.id),
   });
 
-  if (!subscriber) {
+  if (!subscriberRecord) {
     throw new Error('subscriber_not_found');
   }
 
-  const streams = await streamService.getBySubscriberIds(subscriber.streamIds, {
-    sort: { connectCreated: 1 },
-  });
-
-  const isLive = !!LIVE_STATS_CACHE[subscriber.server]?.[subscriber.app]?.[
-    subscriber.channel
-  ]?.subscribers.find((s) => s._id === subscriber._id);
-
-  const subscriberResponse: IChannelServerStats['apps'][0]['channels'][0]['subscribers'] =
+  const streamRecords = await streamService.getBySubscriberIds(
+    subscriberRecord.streamIds,
     {
-      _id: subscriber._id.toString(),
-      server: subscriber.server,
-      app: subscriber.app,
-      channel: subscriber.channel,
-      connectId: subscriber.connectId,
-      connectCreated: subscriber.connectCreated,
-      connectUpdated: subscriber.connectUpdated,
-      bytes: subscriber.bytes,
-      protocol: subscriber.protocol,
-      userId: subscriber.userId?.toString() || null,
-      streamIds: subscriber.streamIds.map((e) => e.toString()),
-      duration: subscriber.duration,
-      bitrate: subscriber.bitrate,
-      createdAt: subscriber.createdAt,
-      updatedAt: subscriber.updatedAt,
+      sort: { connectCreated: 1 },
+    },
+  );
+
+  const isLive =
+    subscriberRecord.connectUpdated > new Date(Date.now() - 30 * 1000);
+
+  const subscriber: IChannelServerStats['apps'][0]['channels'][0]['subscribers'] =
+    {
+      _id: subscriberRecord._id.toString(),
+      server: subscriberRecord.server,
+      app: subscriberRecord.app,
+      channel: subscriberRecord.channel,
+      connectId: subscriberRecord.connectId,
+      connectCreated: subscriberRecord.connectCreated,
+      connectUpdated: subscriberRecord.connectUpdated,
+      bytes: subscriberRecord.bytes,
+      protocol: subscriberRecord.protocol,
+      userId: subscriberRecord.userId?.toString() || null,
+      streamIds: subscriberRecord.streamIds.map((e) => e.toString()),
+      duration: subscriberRecord.duration,
+      bitrate: subscriberRecord.bitrate,
+      createdAt: subscriberRecord.createdAt,
+      updatedAt: subscriberRecord.updatedAt,
       isLive,
     };
 
   const userMap = await userService.getMapByIds(
-    streams.filter((s) => s.userId).map((stream) => stream.userId!.toString()),
+    streamRecords
+      .filter((s) => s.userId)
+      .map((stream) => stream.userId!.toString()),
   );
 
-  const streamsResponse = await Promise.all(
-    streams.map(
+  const streams = await Promise.all(
+    streamRecords.map(
       (stream): IChannelServerStats['apps'][0]['channels'][0]['publisher'] => {
         let userRecord: IUserModel | null = null;
 
@@ -62,9 +65,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
           userRecord = userMap[stream.userId.toString()] || null;
         }
 
-        const isLive =
-          !!LIVE_STATS_CACHE[stream.server]?.[stream.app]?.[stream.channel]
-            ?.publisher;
+        const isLive = stream.connectUpdated > new Date(Date.now() - 30 * 1000);
 
         return {
           _id: stream._id.toString(),
@@ -91,7 +92,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
     ),
   );
 
-  ctx.body = { subscriber: subscriberResponse, streams: streamsResponse };
+  ctx.body = { subscriber, streams };
 }
 
 export async function find(ctx: Router.RouterContext, next: Next) {
@@ -152,9 +153,8 @@ export async function find(ctx: Router.RouterContext, next: Next) {
     (
       subscriber,
     ): IChannelServerStats['apps'][0]['channels'][0]['subscribers'] => {
-      const isLive = !!LIVE_STATS_CACHE[subscriber.server]?.[subscriber.app]?.[
-        subscriber.channel
-      ]?.subscribers.find((s) => s._id === subscriber._id);
+      const isLive =
+        subscriber.connectUpdated > new Date(Date.now() - 30 * 1000);
 
       return {
         _id: subscriber._id.toString(),

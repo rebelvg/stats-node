@@ -10,43 +10,45 @@ import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';
 import { userService } from '../services/user';
 import { ObjectId } from 'mongodb';
-import { LIVE_STATS_CACHE } from '../workers';
 import { IUserModel } from '../models/user';
 import { IChannelServerStats } from '../helpers/interfaces';
 
 export async function findById(ctx: Router.RouterContext, next: Next) {
-  const stream = await Stream.findOne({
+  const streamRecord = await Stream.findOne({
     _id: new ObjectId(ctx.params.id),
   });
 
-  if (!stream) {
+  if (!streamRecord) {
     throw new Error('stream_not_found');
   }
 
-  const subscribers = await subscriberService.getByStreamId(
-    stream._id,
+  const subscriberRecords = await subscriberService.getByStreamId(
+    streamRecord._id,
     ctx.ctx.state.query,
     {
       sort: _.isEmpty(ctx.state.sort) ? { connectCreated: 1 } : ctx.state.sort,
     },
   );
 
-  const relatedStreams = await streamService.getRelatedStreams(stream, {
-    sort: {
-      connectCreated: 1,
+  const relatedStreamRecords = await streamService.getRelatedStreams(
+    streamRecord,
+    {
+      sort: {
+        connectCreated: 1,
+      },
     },
-  });
+  );
 
   const options = {
     countries: [],
-    protocols: _.chain(subscribers).map('protocol').uniq().value(),
+    protocols: _.chain(subscriberRecords).map('protocol').uniq().value(),
   };
 
   let totalPeakViewers = 0;
 
-  _.forEach(subscribers, (subscriber) => {
+  _.forEach(subscriberRecords, (subscriber) => {
     const viewersCount = filterSubscribers(
-      subscribers,
+      subscriberRecords,
       subscriber.connectCreated,
     ).length;
 
@@ -57,63 +59,59 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
 
   const info = {
     totalBytes: _.reduce(
-      subscribers,
+      subscriberRecords,
       (sum, sub) => {
         return sum + sub.bytes;
       },
       0,
     ),
     totalDuration: _.reduce(
-      subscribers,
+      subscriberRecords,
       (sum, sub) => {
         return sum + sub.duration;
       },
       0,
     ),
     totalPeakViewers,
-    totalIPs: _.chain(subscribers).map('ip').uniq().value().length,
+    totalIPs: _.chain(subscriberRecords).map('ip').uniq().value().length,
   };
 
   let userRecord: IUserModel | null = null;
 
-  if (stream.userId) {
-    userRecord = await userService.getById(stream.userId.toString());
+  if (streamRecord.userId) {
+    userRecord = await userService.getById(streamRecord.userId.toString());
   }
 
-  const isLive =
-    !!LIVE_STATS_CACHE[stream.server]?.[stream.app]?.[stream.channel]
-      ?.publisher;
+  const isLive = streamRecord.connectUpdated > new Date(Date.now() - 30 * 1000);
 
-  const streamResponse: IChannelServerStats['apps'][0]['channels'][0]['publisher'] =
-    {
-      _id: stream._id.toString(),
-      server: stream.server,
-      app: stream.app,
-      channel: stream.channel,
-      connectId: stream.connectId,
-      connectCreated: stream.connectCreated,
-      connectUpdated: stream.connectUpdated,
-      bytes: stream.bytes,
-      protocol: stream.protocol,
-      lastBitrate: stream.lastBitrate,
-      userId: stream.userId?.toString() || null,
-      totalConnectionsCount: stream.totalConnectionsCount,
-      peakViewersCount: stream.peakViewersCount,
-      duration: stream.duration,
-      bitrate: stream.bitrate,
-      createdAt: stream.createdAt,
-      updatedAt: stream.updatedAt,
-      isLive,
-      userName: userRecord?.name || null,
-    };
+  const stream: IChannelServerStats['apps'][0]['channels'][0]['publisher'] = {
+    _id: streamRecord._id.toString(),
+    server: streamRecord.server,
+    app: streamRecord.app,
+    channel: streamRecord.channel,
+    connectId: streamRecord.connectId,
+    connectCreated: streamRecord.connectCreated,
+    connectUpdated: streamRecord.connectUpdated,
+    bytes: streamRecord.bytes,
+    protocol: streamRecord.protocol,
+    lastBitrate: streamRecord.lastBitrate,
+    userId: streamRecord.userId?.toString() || null,
+    totalConnectionsCount: streamRecord.totalConnectionsCount,
+    peakViewersCount: streamRecord.peakViewersCount,
+    duration: streamRecord.duration,
+    bitrate: streamRecord.bitrate,
+    createdAt: streamRecord.createdAt,
+    updatedAt: streamRecord.updatedAt,
+    isLive,
+    userName: userRecord?.name || null,
+  };
 
-  const subscribersResponse = subscribers.map(
+  const subscribers = subscriberRecords.map(
     (
       subscriber,
     ): IChannelServerStats['apps'][0]['channels'][0]['subscribers'] => {
-      const isLive = !!LIVE_STATS_CACHE[subscriber.server]?.[subscriber.app]?.[
-        subscriber.channel
-      ]?.subscribers.find((s) => s._id === subscriber._id);
+      const isLive =
+        subscriber.connectUpdated > new Date(Date.now() - 30 * 1000);
 
       return {
         _id: subscriber._id.toString(),
@@ -137,13 +135,13 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
   );
 
   const userMap = await userService.getMapByIds(
-    relatedStreams
+    relatedStreamRecords
       .filter((s) => s.userId)
       .map((stream) => stream.userId!.toString()),
   );
 
-  const relatedStreamsResponse = await Promise.all(
-    relatedStreams.map(
+  const relatedStreams = await Promise.all(
+    relatedStreamRecords.map(
       (stream): IChannelServerStats['apps'][0]['channels'][0]['publisher'] => {
         let userRecord: IUserModel | null = null;
 
@@ -151,9 +149,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
           userRecord = userMap[stream.userId.toString()] || null;
         }
 
-        const isLive =
-          !!LIVE_STATS_CACHE[stream.server]?.[stream.app]?.[stream.channel]
-            ?.publisher;
+        const isLive = stream.connectUpdated > new Date(Date.now() - 30 * 1000);
 
         return {
           _id: stream._id.toString(),
@@ -181,11 +177,11 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
   );
 
   ctx.body = {
-    stream: streamResponse,
-    subscribers: subscribersResponse,
+    stream,
+    subscribers,
     options,
     info,
-    relatedStreams: relatedStreamsResponse,
+    relatedStreams,
   };
 }
 
@@ -264,9 +260,7 @@ export async function find(ctx: Router.RouterContext, next: Next) {
           userRecord = userMap[stream.userId.toString()] || null;
         }
 
-        const isLive =
-          !!LIVE_STATS_CACHE[stream.server]?.[stream.app]?.[stream.channel]
-            ?.publisher;
+        const isLive = stream.connectUpdated > new Date(Date.now() - 30 * 1000);
 
         return {
           _id: stream._id.toString(),
@@ -361,11 +355,7 @@ export async function graph(ctx: Router.RouterContext, next: Next) {
       return;
     }
 
-    if (
-      LIVE_STATS_CACHE[subscriber.server]?.[subscriber.app]?.[
-        subscriber.channel
-      ]?.subscribers.find((s) => s._id === subscriber._id)
-    ) {
+    if (subscriber.connectUpdated > new Date(Date.now() - 30 * 1000)) {
       return;
     }
 
@@ -376,10 +366,7 @@ export async function graph(ctx: Router.RouterContext, next: Next) {
     });
   });
 
-  if (
-    LIVE_STATS_CACHE[stream.server]?.[stream.app]?.[stream.channel]?.publisher
-      ?._id === stream._id
-  ) {
+  if (stream.connectUpdated > new Date(Date.now() - 30 * 1000)) {
     graph.push({
       eventName: 'streamIsLive',
       time: stream.connectUpdated,
