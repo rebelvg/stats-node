@@ -53,12 +53,15 @@ export abstract class BaseWorker {
     await Promise.all(
       servers.map(async (config) => {
         try {
+          const { host } = new URL(config.API_ORIGIN);
+
           const stats = await this.readStats(
             config.API_ORIGIN,
             config.API_SECRET,
+            host,
           );
 
-          _.set(LIVE_STATS_CACHE, [config.API_ORIGIN], stats);
+          _.set(LIVE_STATS_CACHE, [host], stats);
         } catch (error) {
           if (error.code === 'ECONNREFUSED') {
             logger.error('update_econnrefused', {
@@ -292,7 +295,7 @@ export abstract class BaseWorker {
     return stats;
   }
 
-  private async readStats(origin: string, secret: string) {
+  private async readStats(origin: string, secret: string, host: string) {
     let data: IGenericStreamsResponse[] = [];
 
     try {
@@ -308,8 +311,6 @@ export abstract class BaseWorker {
 
       throw error;
     }
-
-    const { host } = new URL(origin);
 
     return this.processStats(data, host);
   }
