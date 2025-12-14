@@ -20,7 +20,7 @@ import { router as graphs } from './routes/graphs';
 import { router as streamers } from './routes/streamers';
 import { router as push } from './routes/push';
 
-import { logger, setLogger } from './helpers/logger';
+import { logger } from './helpers/logger';
 
 if (!fs.existsSync('logs')) {
   fs.mkdirSync('logs');
@@ -59,8 +59,6 @@ app.use(async (ctx, next) => {
 app.keys = [uuid.v4()];
 
 app.use(koaSession({ signed: true }, app));
-
-app.use(setLogger);
 
 // app.use(koaMorgan('combined', { immediate: true, stream: process.stdout }));
 app.use(koaMorgan('short', { stream: process.stdout }));

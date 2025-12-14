@@ -1,19 +1,5 @@
-import { createNamespace } from 'cls-hooked';
-// import * as fs from 'fs';
 import * as os from 'os';
-import { v4 } from 'uuid';
-import { Context, Next } from 'koa';
 import _ from 'lodash';
-
-export enum CLS_NAMESPACES {
-  SESSION = 'SESSION',
-}
-
-export const NAMESPACE_VALUES = {
-  [CLS_NAMESPACES.SESSION]: {
-    LOGGER: 'LOGGER',
-  },
-};
 
 enum LogLevel {
   CHILD = 'child',
@@ -23,40 +9,6 @@ enum LogLevel {
   INFO = 'info',
   DEBUG = 'debug',
   TRACE = 'trace',
-}
-
-const session = createNamespace(CLS_NAMESPACES.SESSION);
-
-// const writeStream = fs.createWriteStream('./logs/app.log', { flags: 'a' });
-
-export async function setLogger(ctx: Context, next: Next) {
-  await new Promise<void>((resolve, reject) => {
-    session.run(async () => {
-      const requestId = v4();
-      const externalRequestId = ctx.get('x-request-id') || v4();
-      const ips = ctx.ips;
-
-      const loggerInstance = new Logger({ requestId, externalRequestId, ips });
-
-      session.set(
-        NAMESPACE_VALUES[CLS_NAMESPACES.SESSION].LOGGER,
-        loggerInstance,
-      );
-
-      ctx.set('request-id', requestId);
-      ctx.set('x-request-id', externalRequestId);
-
-      try {
-        await next();
-      } catch (error) {
-        reject(error);
-
-        return;
-      }
-
-      resolve();
-    });
-  });
 }
 
 class Logger {
@@ -101,8 +53,6 @@ class Logger {
     });
 
     process.stdout.write(`${logLine}${os.EOL}`);
-
-    // writeStream.write(`${logLine}${os.EOL}`);
   }
 
   public child(data: Record<string, any>) {
@@ -117,17 +67,7 @@ class ClsLogger {
   private logger = new Logger();
 
   private log(level: LogLevel, message: string, data?: Record<string, any>) {
-    const loggerInstance: Logger = session.get(
-      NAMESPACE_VALUES[CLS_NAMESPACES.SESSION].LOGGER,
-    );
-
-    if (!loggerInstance) {
-      this.logger.log(level, message, data);
-
-      return;
-    }
-
-    loggerInstance.log(level, message, data);
+    this.logger.log(level, message, data);
   }
 
   public fatal(message: string, data?: Record<string, any>) {
@@ -155,17 +95,7 @@ class ClsLogger {
   }
 
   public child(data: Record<string, any>) {
-    const clsLogger: ClsLogger = session.get(
-      NAMESPACE_VALUES[CLS_NAMESPACES.SESSION].LOGGER,
-    );
-
-    if (!clsLogger) {
-      this.logger.log(LogLevel.CHILD, 'child_log', data);
-
-      return;
-    }
-
-    clsLogger.child(data);
+    this.logger.log(LogLevel.CHILD, 'child_log', data);
   }
 }
 
