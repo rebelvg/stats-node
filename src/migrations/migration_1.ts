@@ -8,7 +8,6 @@ export async function up(mongoClient: Db): Promise<void> {
 
   const cursor = streams.find();
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const record = await cursor.next();
 

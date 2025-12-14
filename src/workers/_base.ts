@@ -5,9 +5,8 @@ import * as ip6addr from 'ip6addr';
 import { ILiveStats, LIVE_STATS_CACHE } from '.';
 import { IWorkerConfig } from '../config';
 import { logger } from '../helpers/logger';
-import { IStreamModel, Stream } from '../models/stream';
+import { Stream } from '../models/stream';
 import { ISubscriberModel, Subscriber } from '../models/subscriber';
-import { channelService } from '../services/channel';
 import { streamService } from '../services/stream';
 import { ipService } from '../services/ip';
 import { subscriberService } from '../services/subscriber';
@@ -87,7 +86,6 @@ export abstract class BaseWorker {
       source: this.apiSource,
     });
 
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       await this.runUpdate(WORKER_CONFIG);
 

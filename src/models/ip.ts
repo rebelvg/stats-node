@@ -1,11 +1,9 @@
 import {
   Collection,
   UpdateOptions,
-  Document,
   ObjectId,
   Filter,
   FindOptions,
-  OptionalId,
 } from 'mongodb';
 import { MongoCollections } from '../mongo';
 
@@ -78,7 +76,7 @@ class IPModel {
     };
   }
 
-  async create(data: Omit<IIPModel, 'createdAt' | 'updatedAt'>) {
+  create(data: Omit<IIPModel, 'createdAt' | 'updatedAt'>) {
     const timestamp = new Date();
 
     return this.collection.insertOne({

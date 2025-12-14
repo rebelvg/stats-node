@@ -5,7 +5,7 @@ import _ from 'lodash';
 import { IP } from '../models/ip';
 import { ObjectId } from 'mongodb';
 
-export async function findById(ctx: Router.RouterContext, next: Next) {
+export function findById(ctx: Router.RouterContext, next: Next) {
   const ip = IP.findOne({
     _id: new ObjectId(ctx.params.id),
   });

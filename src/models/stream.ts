@@ -1,16 +1,11 @@
 import {
   Collection,
   UpdateOptions,
-  Document,
   ObjectId,
   FindOptions,
   Filter,
-  OptionalId,
-  AggregateOptions,
-  WithId,
 } from 'mongodb';
 
-import { IGenericStreamsResponse } from '../workers/_base';
 import { MongoCollections } from '../mongo';
 
 export enum ApiSourceEnum {
@@ -88,7 +83,7 @@ class StreamModel {
     return this.collection.distinct(key, filter) as Promise<T[]>;
   }
 
-  async create(data: Omit<IStreamModel, '_id' | 'createdAt' | 'updatedAt'>) {
+  create(data: Omit<IStreamModel, '_id' | 'createdAt' | 'updatedAt'>) {
     const timestamp = new Date();
 
     return this.collection.insertOne({

@@ -1,9 +1,7 @@
 import {
   Collection,
   UpdateOptions,
-  Document,
   ObjectId,
-  OptionalId,
   FindOptions,
   Filter,
 } from 'mongodb';
@@ -56,7 +54,7 @@ class UserModel {
     return this.collection.find(params, options).toArray();
   }
 
-  async create(data: Omit<IUserModel, 'createdAt' | 'updatedAt'>) {
+  create(data: Omit<IUserModel, 'createdAt' | 'updatedAt'>) {
     const timestamp = new Date();
 
     return this.collection.insertOne({

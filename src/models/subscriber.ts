@@ -1,15 +1,11 @@
 import {
   Collection,
   UpdateOptions,
-  Document,
   ObjectId,
   Filter,
-  OptionalId,
   FindOptions,
 } from 'mongodb';
 import { MongoCollections } from '../mongo';
-
-import { IGenericStreamsResponse } from '../workers/_base';
 
 export interface ISubscriberModel {
   _id?: ObjectId;

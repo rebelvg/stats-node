@@ -1,7 +1,7 @@
 import { Next } from 'koa';
 import * as Router from '@koa/router';
 import _ from 'lodash';
-import { Sort, SortDirection } from 'mongodb';
+import { SortDirection } from 'mongodb';
 
 export function parseSort(allowedKeys: string[]) {
   return async function (ctx: Router.RouterContext, next: Next) {

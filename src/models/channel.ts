@@ -1,11 +1,4 @@
-import {
-  Collection,
-  UpdateOptions,
-  Document,
-  OptionalId,
-  FindOptions,
-  ObjectId,
-} from 'mongodb';
+import { Collection, UpdateOptions, FindOptions, ObjectId } from 'mongodb';
 import { MongoCollections } from '../mongo';
 
 export enum ChannelTypeEnum {
@@ -54,7 +47,7 @@ class ChannelModel {
     return this.collection.find(params, options).toArray();
   }
 
-  async create(data: Omit<IChannelModel, 'createdAt' | 'updatedAt'>) {
+  create(data: Omit<IChannelModel, 'createdAt' | 'updatedAt'>) {
     const timestamp = new Date();
 
     return this.collection.insertOne({

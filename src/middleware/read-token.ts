@@ -5,7 +5,7 @@ import { ObjectId } from 'mongodb';
 import { decodeJwtToken } from '../helpers/jwt';
 import { logger } from '../helpers/logger';
 
-import { User, IUserModel } from '../models/user';
+import { User } from '../models/user';
 
 export async function readToken(ctx: Router.RouterContext, next: Next) {
   const token = ctx.get('token');

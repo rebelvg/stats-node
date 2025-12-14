@@ -1,4 +1,4 @@
-import { MongoClient, Db, Collection, Document } from 'mongodb';
+import { MongoClient, Collection, Document } from 'mongodb';
 
 import { DB_URI } from './config';
 

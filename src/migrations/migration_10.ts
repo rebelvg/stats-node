@@ -12,7 +12,6 @@ export async function up(mongoClient: Db): Promise<void> {
 
   const cursor = channelsCollection.find();
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const channelRecord = await cursor.next();
 

@@ -3,7 +3,6 @@ import { FindOptions, ObjectId, WithId } from 'mongodb';
 
 import { IStreamModel, Stream } from '../models/stream';
 import { filterSubscribers } from '../helpers/filter-subscribers';
-import { subscriberService } from './subscriber';
 import { ISubscriberModel } from '../models/subscriber';
 
 class StreamService {
@@ -24,7 +23,7 @@ class StreamService {
     );
   }
 
-  public async countViewersById(subscribers: WithId<ISubscriberModel>[]) {
+  public countViewersById(subscribers: WithId<ISubscriberModel>[]) {
     const totalConnectionsCount = subscribers.length;
     let peakViewersCount = 0;
 
