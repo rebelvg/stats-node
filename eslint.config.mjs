@@ -14,6 +14,7 @@ export default [
       },
     },
     rules: {
+      'no-console': 'error',
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
@@ -32,7 +33,6 @@ export default [
       ],
       semi: ['error', 'always'],
       'eol-last': ['error', 'always'],
-      'no-console': 0,
       'no-var': 'error',
       eqeqeq: ['error', 'always'],
       curly: ['error', 'all'],
