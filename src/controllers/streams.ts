@@ -24,7 +24,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
 
   const subscriberRecords = await subscriberService.getByStreamId(
     streamRecord._id,
-    ctx.ctx.state.query,
+    ctx.state.query,
     {
       sort: _.isEmpty(ctx.state.sort) ? { connectCreated: 1 } : ctx.state.sort,
     },
@@ -195,14 +195,14 @@ export async function find(ctx: Router.RouterContext, next: Next) {
 
     const channelNames = channels.map((c) => c.name);
 
-    if (ctx.ctx.state.query.$and) {
-      ctx.ctx.state.query.$and.push({
+    if (ctx.state.query.$and) {
+      ctx.state.query.$and.push({
         channel: {
           $in: channelNames,
         },
       });
     } else {
-      ctx.ctx.state.query.$and = [
+      ctx.state.query.$and = [
         {
           channel: {
             $in: channelNames,
@@ -216,14 +216,14 @@ export async function find(ctx: Router.RouterContext, next: Next) {
   const page = parseInt(ctx.query.page as string) || 1;
   const skip = (page - 1) * limit;
 
-  const paginatedStreams = await Stream.paginate(ctx.ctx.state.query, {
+  const paginatedStreams = await Stream.paginate(ctx.state.query, {
     sort: _.isEmpty(ctx.state.sort) ? { connectCreated: -1 } : ctx.state.sort,
     skip,
     limit,
   });
 
   const aggregation = await Stream.aggregate([
-    { $match: ctx.ctx.state.query },
+    { $match: ctx.state.query },
     {
       $group: {
         _id: null,
@@ -243,7 +243,7 @@ export async function find(ctx: Router.RouterContext, next: Next) {
     },
   ]);
 
-  const uniqueIPs = await Stream.distinct('ip', ctx.ctx.state.query);
+  const uniqueIPs = await Stream.distinct('ip', ctx.state.query);
 
   const userMap = await userService.getMapByIds(
     paginatedStreams.docs
@@ -290,10 +290,10 @@ export async function find(ctx: Router.RouterContext, next: Next) {
   ctx.body = {
     streams,
     options: {
-      apps: await Stream.distinct('app', ctx.ctx.state.query),
-      channels: await Stream.distinct('channel', ctx.ctx.state.query),
+      apps: await Stream.distinct('app', ctx.state.query),
+      channels: await Stream.distinct('channel', ctx.state.query),
       countries: [],
-      protocols: await Stream.distinct('protocol', ctx.ctx.state.query),
+      protocols: await Stream.distinct('protocol', ctx.state.query),
     },
     info: {
       totalBytes: _.get(aggregation, ['0', 'totalBytes'], 0),
@@ -320,7 +320,7 @@ export async function graph(ctx: Router.RouterContext, next: Next) {
 
   const subscribers = await subscriberService.getByStreamId(
     stream._id,
-    ctx.ctx.state.query,
+    ctx.state.query,
     {
       sort: { connectCreated: 1 },
     },

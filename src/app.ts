@@ -21,7 +21,7 @@ import { router as push } from './routes/push';
 
 interface IHttpState {
   user: WithId<IUserModel> | null;
-  query: object;
+  query: any;
   sort: Sort;
 }
 

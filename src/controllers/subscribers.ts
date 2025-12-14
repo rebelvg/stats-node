@@ -105,14 +105,14 @@ export async function find(ctx: Router.RouterContext, next: Next) {
 
     const channelNames = channels.map((c) => c.name);
 
-    if (ctx.ctx.state.query.$and) {
-      ctx.ctx.state.query.$and.push({
+    if (ctx.state.query.$and) {
+      ctx.state.query.$and.push({
         channel: {
           $in: channelNames,
         },
       });
     } else {
-      ctx.ctx.state.query.$and = [
+      ctx.state.query.$and = [
         {
           channel: {
             $in: channelNames,
@@ -126,14 +126,14 @@ export async function find(ctx: Router.RouterContext, next: Next) {
   const page = parseInt(ctx.query.page as string) || 1;
   const skip = (page - 1) * limit;
 
-  const paginatedSubscribers = await Subscriber.paginate(ctx.ctx.state.query, {
+  const paginatedSubscribers = await Subscriber.paginate(ctx.state.query, {
     sort: _.isEmpty(ctx.state.sort) ? { connectCreated: -1 } : ctx.state.sort,
     skip,
     limit,
   });
 
   const aggregation = await Subscriber.aggregate([
-    { $match: ctx.ctx.state.query },
+    { $match: ctx.state.query },
     {
       $group: {
         _id: null,
@@ -147,7 +147,7 @@ export async function find(ctx: Router.RouterContext, next: Next) {
     },
   ]);
 
-  const uniqueIPs = await Subscriber.distinct('ip', ctx.ctx.state.query);
+  const uniqueIPs = await Subscriber.distinct('ip', ctx.state.query);
 
   const subscribers = paginatedSubscribers.docs.map(
     (
@@ -180,10 +180,10 @@ export async function find(ctx: Router.RouterContext, next: Next) {
   ctx.body = {
     subscribers,
     options: {
-      apps: await Subscriber.distinct('app', ctx.ctx.state.query),
-      channels: await Subscriber.distinct('channel', ctx.ctx.state.query),
+      apps: await Subscriber.distinct('app', ctx.state.query),
+      channels: await Subscriber.distinct('channel', ctx.state.query),
       countries: [],
-      protocols: await Subscriber.distinct('protocol', ctx.ctx.state.query),
+      protocols: await Subscriber.distinct('protocol', ctx.state.query),
     },
     info: {
       totalBytes: _.get(aggregation, ['0', 'totalBytes'], 0),

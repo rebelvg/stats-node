@@ -24,19 +24,16 @@ export async function find(ctx: Router.RouterContext, next: Next) {
   const page = parseInt(ctx.query.page as string) || 1;
   const skip = (page - 1) * limit;
 
-  const paginatedIps = await IP.paginate(ctx.ctx.state.query, {
+  const paginatedIps = await IP.paginate(ctx.state.query, {
     sort: _.isEmpty(ctx.state.sort) ? { createdAt: -1 } : ctx.state.sort,
     skip,
     limit,
   });
 
-  const counties = await IP.distinct('api.country', ctx.ctx.state.query);
-  const cities = await IP.distinct('api.city', ctx.ctx.state.query);
-  const ISPs = await IP.distinct('api.isp', ctx.ctx.state.query);
-  const uniqueApiMessages = await IP.distinct(
-    'api.message',
-    ctx.ctx.state.query,
-  );
+  const counties = await IP.distinct('api.country', ctx.state.query);
+  const cities = await IP.distinct('api.city', ctx.state.query);
+  const ISPs = await IP.distinct('api.isp', ctx.state.query);
+  const uniqueApiMessages = await IP.distinct('api.message', ctx.state.query);
 
   ctx.body = {
     ips: paginatedIps.docs,
