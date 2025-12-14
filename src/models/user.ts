@@ -8,12 +8,12 @@ import {
   Filter,
 } from 'mongodb';
 import { MongoCollections } from '../mongo';
-import { TokenInfo } from 'google-auth-library';
 
 export interface IUserModel {
   _id?: ObjectId;
   googleId: string | null;
-  name: string;
+  email: string | null;
+  name: string | null;
   ipCreated: string;
   ipUpdated: string;
   isAdmin: boolean;
@@ -22,7 +22,6 @@ export interface IUserModel {
   streamKey: string;
   createdAt: Date;
   updatedAt: Date;
-  googleProfile: TokenInfo;
 }
 
 class UserModel {
@@ -38,7 +37,7 @@ class UserModel {
 
   updateOne(
     filter: Partial<IUserModel>,
-    data: Partial<IUserModel>,
+    data: Partial<Omit<IUserModel, 'createdAt' | 'updatedAt'>>,
     options?: UpdateOptions,
   ) {
     return this.collection.updateOne(
@@ -57,10 +56,14 @@ class UserModel {
     return this.collection.find(params, options).toArray();
   }
 
-  async create(params: OptionalId<IUserModel>) {
-    const user = await this.collection.insertOne(params);
+  async create(data: Omit<IUserModel, 'createdAt' | 'updatedAt'>) {
+    const timestamp = new Date();
 
-    return user.insertedId;
+    return this.collection.insertOne({
+      ...data,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
   }
 }
 

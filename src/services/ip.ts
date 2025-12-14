@@ -29,8 +29,6 @@ class IPService {
     if (!ipRecord) {
       await IP.create({
         api: data,
-        createdAt: currentTime,
-        updatedAt: currentTime,
         apiUpdatedAt: currentTime,
         isLocked: false,
         ip,
@@ -43,6 +41,7 @@ class IPService {
       { _id: ipRecord._id },
       {
         api: data,
+        apiUpdatedAt: currentTime,
       },
     );
   }

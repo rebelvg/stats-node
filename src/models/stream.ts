@@ -54,32 +54,23 @@ class StreamModel {
 
   updateOne(
     filter: Partial<IStreamModel>,
-    data: Partial<IStreamModel>,
+    data: Partial<Omit<IStreamModel, 'createdAt' | 'updatedAt'>>,
     options?: UpdateOptions,
   ) {
-    return this.collection.updateOne(filter, data, options);
+    return this.collection.updateOne(
+      filter,
+      {
+        $set: {
+          ...data,
+          updatedAt: new Date(),
+        },
+      },
+      options,
+    );
   }
 
   find(filter: Filter<IStreamModel>, options?: FindOptions) {
     return this.collection.find(filter, options).toArray();
-  }
-
-  async upsert(params: OptionalId<IStreamModel>) {
-    if (params._id) {
-      await this.collection.updateOne(
-        {
-          _id: params._id,
-        },
-        {
-          $set: {
-            ...params,
-            updatedAt: new Date(),
-          },
-        },
-      );
-    } else {
-      await this.collection.insertOne(params);
-    }
   }
 
   aggregate(query: any[]) {
@@ -97,8 +88,14 @@ class StreamModel {
     return this.collection.distinct(key, filter) as Promise<T[]>;
   }
 
-  async create(data: IStreamModel) {
-    return this.collection.insertOne(data);
+  async create(data: Omit<IStreamModel, 'createdAt' | 'updatedAt'>) {
+    const timestamp = new Date();
+
+    return this.collection.insertOne({
+      ...data,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
   }
 }
 

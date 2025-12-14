@@ -35,7 +35,7 @@ class ChannelModel {
 
   updateOne(
     filter: Partial<IChannelModel>,
-    data: Partial<IChannelModel>,
+    data: Partial<Omit<IChannelModel, 'createdAt' | 'updatedAt'>>,
     options?: UpdateOptions,
   ) {
     return this.collection.updateOne(
@@ -54,8 +54,14 @@ class ChannelModel {
     return this.collection.find(params, options).toArray();
   }
 
-  create(params: OptionalId<IChannelModel>) {
-    return this.collection.insertOne(params);
+  async create(data: Omit<IChannelModel, 'createdAt' | 'updatedAt'>) {
+    const timestamp = new Date();
+
+    return this.collection.insertOne({
+      ...data,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
   }
 }
 

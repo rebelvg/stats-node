@@ -48,7 +48,7 @@ class IPModel {
 
   updateOne(
     filter: Partial<IIPModel>,
-    data: Partial<IIPModel>,
+    data: Partial<Omit<IIPModel, 'createdAt' | 'updatedAt'>>,
     options?: UpdateOptions,
   ) {
     return this.collection.updateOne(
@@ -57,7 +57,6 @@ class IPModel {
         $set: {
           ...data,
           updatedAt: new Date(),
-          apiUpdatedAt: new Date(),
         },
       },
       options,
@@ -79,8 +78,14 @@ class IPModel {
     };
   }
 
-  async create(data: IIPModel) {
-    return this.collection.insertOne(data);
+  async create(data: Omit<IIPModel, 'createdAt' | 'updatedAt'>) {
+    const timestamp = new Date();
+
+    return this.collection.insertOne({
+      ...data,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
   }
 }
 

@@ -10,8 +10,6 @@ class ChannelService {
       await Channel.create({
         name: channelName,
         type: ChannelTypeEnum.PRIVATE,
-        createdAt: new Date(),
-        updatedAt: new Date(),
         channelCreatedAt: new Date(),
       });
 

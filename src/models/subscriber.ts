@@ -44,7 +44,7 @@ class SubscriberModel {
 
   updateOne(
     filter: Partial<ISubscriberModel>,
-    data: Partial<ISubscriberModel>,
+    data: Partial<Omit<ISubscriberModel, 'createdAt' | 'updatedAt'>>,
     options?: UpdateOptions,
   ) {
     return this.collection.updateOne(
@@ -63,24 +63,6 @@ class SubscriberModel {
     return this.collection.find(filter, options).toArray();
   }
 
-  async upsert(params: OptionalId<ISubscriberModel>) {
-    if (params._id) {
-      await this.collection.updateOne(
-        {
-          _id: params._id,
-        },
-        {
-          $set: {
-            ...params,
-            updatedAt: new Date(),
-          },
-        },
-      );
-    } else {
-      await this.collection.insertOne(params);
-    }
-  }
-
   aggregate(query: any[]) {
     return this.collection.aggregate(query).toArray();
   }
@@ -96,8 +78,14 @@ class SubscriberModel {
     return this.collection.distinct(key, filter) as Promise<T[]>;
   }
 
-  async create(data: ISubscriberModel) {
-    const { insertedId } = await this.collection.insertOne(data);
+  async create(data: Omit<ISubscriberModel, 'createdAt' | 'updatedAt'>) {
+    const timestamp = new Date();
+
+    const { insertedId } = await this.collection.insertOne({
+      ...data,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
 
     const record = await this.collection.findOne({ _id: insertedId });
 

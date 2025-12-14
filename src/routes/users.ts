@@ -98,44 +98,45 @@ router.get('/auth/google/callback', async (ctx, next) => {
   });
 
   const {
-    data: { name },
+    data: { name, email },
   } = await google.oauth2('v2').userinfo.get({
     auth,
   });
 
-  const firstName = name || 'NO_DISPLAY_NAME';
-
-  let user = await User.findOne({
+  const userRecord = await User.findOne({
     googleId: profile.sub,
   });
 
   let userId: string | null = null;
 
-  if (user) {
-    user.name = firstName;
-    user.googleProfile = profile;
-    user.ipCreated = user.ipCreated || ctx.ip;
-    user.ipUpdated = ctx.ip;
+  profile.email;
 
-    await User.updateOne({ _id: user._id }, user);
-
-    userId = user._id.toString();
-  } else {
+  if (!userRecord) {
     const newUserId = await User.create({
       googleId: profile.sub || null,
-      name: firstName,
-      googleProfile: profile,
       ipCreated: ctx.ip,
-      ipUpdated: ctx.ip,
       isAdmin: false,
       isStreamer: false,
       token: v4(),
       streamKey: v4(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+
+      email: email || null,
+      name: name || null,
+      ipUpdated: ctx.ip,
     });
 
     userId = newUserId.toString();
+  } else {
+    userId = userRecord._id.toString();
+
+    await User.updateOne(
+      { _id: userRecord._id },
+      {
+        email,
+        name,
+        ipUpdated: ctx.ip,
+      },
+    );
   }
 
   if (!ctx.session) {

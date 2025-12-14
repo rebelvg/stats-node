@@ -163,13 +163,11 @@ export abstract class BaseWorker {
               protocol,
               userId,
               ip: sanitizedIp,
-              createdAt: statsUpdateTime,
 
               connectUpdated,
               bytes,
               duration,
               bitrate,
-              updatedAt: statsUpdateTime,
 
               lastBitrate: bitrate,
               totalConnectionsCount: 0,
@@ -200,7 +198,6 @@ export abstract class BaseWorker {
                 bytes,
                 duration,
                 bitrate,
-                updatedAt: statsUpdateTime,
 
                 lastBitrate,
               },
@@ -253,13 +250,11 @@ export abstract class BaseWorker {
               protocol,
               userId,
               ip: sanitizedIp,
-              createdAt: statsUpdateTime,
 
               connectUpdated,
               bytes,
               duration,
               bitrate,
-              updatedAt: statsUpdateTime,
 
               streamIds: [],
             });
@@ -281,7 +276,6 @@ export abstract class BaseWorker {
                 bytes,
                 duration,
                 bitrate,
-                updatedAt: statsUpdateTime,
               },
             );
           }
