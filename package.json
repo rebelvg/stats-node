@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "prepush": "yarn run lint",
+    "pre-push": "yarn run lint",
     "prettier": "prettier \"**/*\" --list-different --ignore-unknown",
     "prettier:fix": "prettier \"**/*\" --write --ignore-unknown",
     "lint": "eslint . && yarn run prettier && yarn tsc --project tsconfig.eslint.json",
