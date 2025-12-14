@@ -96,8 +96,12 @@ export abstract class BaseWorker {
     });
 
     for (const { channels, app } of streams) {
+      console.log(channels);
+
       for (const { channel, publisher, subscribers } of channels) {
         let streamId: ObjectId | null = null;
+
+        console.log(publisher);
 
         if (publisher) {
           const {

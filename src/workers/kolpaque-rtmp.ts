@@ -14,7 +14,6 @@ interface IApiResponse {
       publisher: {
         connectId: string;
         connectCreated: Date;
-        connectUpdated: Date;
         bytes: number;
         ip: string;
         protocol: string;
@@ -38,7 +37,6 @@ interface IApiResponse {
       subscribers: {
         connectId: string;
         connectCreated: Date;
-        connectUpdated: Date;
         bytes: number;
         ip: string;
         protocol: string;
@@ -55,6 +53,8 @@ class KolpaqueRtmpServiceWorker extends BaseWorker {
     origin: string,
     secret: string,
   ): Promise<IGenericStreamsResponse[]> {
+    const timestamp = new Date();
+
     const {
       data: { stats: data },
     } = await axios.get<IApiResponse>(`${origin}/api/streams`, {
@@ -86,6 +86,7 @@ class KolpaqueRtmpServiceWorker extends BaseWorker {
           liveChannel.publisher = {
             ...channelStats.publisher,
             userId: channelStats.publisher.meta.userId,
+            connectUpdated: timestamp,
           };
         }
 
@@ -93,6 +94,7 @@ class KolpaqueRtmpServiceWorker extends BaseWorker {
           (subscriber) => ({
             ...subscriber,
             userId: subscriber.meta.userId,
+            connectUpdated: timestamp,
           }),
         );
 
