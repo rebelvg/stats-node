@@ -97,6 +97,10 @@ class SubscriberModel {
   distinct<T>(key: string, filter: Filter<ISubscriberModel>) {
     return this.collection.distinct(key, filter) as Promise<T[]>;
   }
+
+  async create(data: ISubscriberModel) {
+    return this.collection.insertOne(data);
+  }
 }
 
 export const Subscriber = new SubscriberModel();

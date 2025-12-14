@@ -124,6 +124,188 @@ export abstract class BaseWorker {
           };
         }
 
+        for (const subscriber of channelData.subscribers) {
+          const connectCreated = subscriber.connectCreated;
+          const connectUpdated = subscriber.connectUpdated;
+
+          const bytes = subscriber.bytes;
+
+          const duration = Math.ceil(
+            (connectUpdated.valueOf() - connectCreated.valueOf()) / 1000,
+          );
+          const bitrate =
+            duration > 0 ? Math.ceil((bytes * 8) / duration / 1024) : 0;
+
+          const subscriberQuery = {
+            server: host,
+            app: appName,
+            channel: channelName,
+            connectId: subscriber.connectId,
+            connectCreated,
+          };
+
+          const subscriberRecord = await Subscriber.findOne(subscriberQuery);
+
+          if (!subscriberRecord) {
+            const addr = ip6addr.parse(subscriber.ip);
+
+            const ip =
+              addr.kind() === 'ipv6'
+                ? addr.toString({ format: 'v6' })
+                : addr.toString({ format: 'v4' });
+
+            await Subscriber.create({
+              ...subscriberQuery,
+              protocol: subscriber.protocol,
+              userId: subscriber.userId,
+              ip,
+              createdAt: new Date(),
+
+              connectUpdated: statsUpdateTime,
+              bytes: subscriber.bytes,
+              duration,
+              bitrate,
+              apiSource: this.apiSource,
+              apiResponse: subscriber,
+              updatedAt: new Date(),
+
+              streamIds: [],
+            });
+
+            ipService.upsert(ip).catch((error) =>
+              logger.error('stream_failed_to_save_ip', {
+                error,
+              }),
+            );
+          } else {
+            await Subscriber.updateOne(
+              {
+                _id: subscriberRecord._id,
+              },
+              {
+                connectUpdated: statsUpdateTime,
+                bytes,
+                duration,
+                bitrate,
+                streamIds: [],
+                apiSource: this.apiSource,
+                apiResponse: subscriber,
+                updatedAt: new Date(),
+              },
+            );
+          }
+        }
+
+        if (channelData.publisher) {
+          const connectCreated = channelData.publisher.connectCreated;
+          const connectUpdated = channelData.publisher.connectUpdated;
+
+          const bytes = channelData.publisher.bytes;
+
+          const duration = Math.ceil(
+            (connectUpdated.valueOf() - connectCreated.valueOf()) / 1000,
+          );
+          const bitrate =
+            duration > 0 ? Math.ceil((bytes * 8) / duration / 1024) : 0;
+
+          const streamViewers = await streamService.countViewersById(
+            streamRecord._id,
+          );
+
+          const totalConnectionsCount = streamViewers.totalConnectionsCount;
+          const peakViewersCount = streamViewers.peakViewersCount;
+
+          const streamQuery = {
+            server: host,
+            app: appName,
+            channel: channelName,
+            connectId: channelData.publisher.connectId,
+            connectCreated: channelData.publisher.connectCreated,
+          };
+
+          const streamRecord = await Stream.findOne(streamQuery);
+
+          if (!streamRecord) {
+            const addr = ip6addr.parse(channelData.publisher.ip);
+
+            const ip =
+              addr.kind() === 'ipv6'
+                ? addr.toString({ format: 'v6' })
+                : addr.toString({ format: 'v4' });
+
+            await Stream.create({
+              ...streamQuery,
+              protocol: channelData.publisher.protocol,
+              userId: channelData.publisher.userId,
+              ip,
+              createdAt: new Date(),
+
+              connectUpdated: statsUpdateTime,
+              bytes: channelData.publisher.bytes,
+              duration,
+              bitrate,
+              apiSource: this.apiSource,
+              apiResponse: channelData.publisher,
+              updatedAt: new Date(),
+
+              lastBitrate: bitrate,
+              totalConnectionsCount: 0,
+              peakViewersCount: 0,
+            });
+
+            ipService.upsert(ip).catch((error) =>
+              logger.error('stream_failed_to_save_ip', {
+                error,
+              }),
+            );
+          } else {
+            const lastBitrate = streamService.calculateLastBitrate(
+              bytes,
+              streamRecord.bytes,
+              statsUpdateTime,
+              streamRecord.updatedAt,
+            );
+
+            await Stream.updateOne(
+              {
+                _id: streamRecord._id,
+              },
+              {
+                connectUpdated: statsUpdateTime,
+                bytes: channelData.publisher.bytes,
+                duration,
+                bitrate,
+                apiSource: this.apiSource,
+                apiResponse: channelData.publisher,
+                updatedAt: new Date(),
+
+                lastBitrate,
+                totalConnectionsCount,
+                peakViewersCount,
+              },
+            );
+          }
+        }
+      }
+    }
+
+    for (const channelObjs of data) {
+      const { app: appName } = channelObjs;
+
+      for (const channelData of channelObjs.channels) {
+        const { channel: channelName } = channelData;
+
+        if (!stats[appName]) {
+          stats[appName] = {};
+        }
+
+        if (!stats[appName][channelName]) {
+          stats[appName][channelName] = {
+            publisher: null,
+            subscribers: [],
+          };
+        }
+
         let streamRecord: WithId<IStreamModel> | null = null;
 
         if (channelData.publisher) {
@@ -164,13 +346,11 @@ export abstract class BaseWorker {
               _id: new ObjectId(),
             };
 
-            try {
-              await ipService.upsert(ip);
-            } catch (error) {
+            ipService.upsert(ip).catch((error) =>
               logger.error('stream_failed_to_save_ip', {
                 error,
-              });
-            }
+              }),
+            );
           } else {
             const lastBitrate = streamService.calculateLastBitrate(
               channelData.publisher.bytes,
@@ -186,6 +366,8 @@ export abstract class BaseWorker {
             streamRecord.apiResponse = channelData.publisher;
           }
         }
+
+        const subscribers: WithId<ISubscriberModel>[] = [];
 
         for (const subscriber of channelData.subscribers) {
           const subscriberQuery = {
@@ -224,13 +406,11 @@ export abstract class BaseWorker {
               _id: new ObjectId(),
             };
 
-            try {
-              await ipService.upsert(ip);
-            } catch (error) {
+            ipService.upsert(ip).catch((error) =>
               logger.error('stream_failed_to_save_ip', {
                 error,
-              });
-            }
+              }),
+            );
           } else {
             subscriberRecord.bytes = subscriber.bytes;
             subscriberRecord.connectUpdated = statsUpdateTime;
@@ -266,12 +446,12 @@ export abstract class BaseWorker {
 
           await Subscriber.upsert(subscriberRecord);
 
-          stats[appName][channelName].subscribers.push(subscriberRecord);
+          subscribers.push(subscriberRecord);
         }
 
         if (streamRecord) {
           const streamViewers = await streamService.countViewersById(
-            streamRecord._id!,
+            streamRecord._id,
           );
 
           streamRecord.duration = Math.ceil(
@@ -295,6 +475,7 @@ export abstract class BaseWorker {
         }
 
         stats[appName][channelName].publisher = streamRecord;
+        stats[appName][channelName].subscribers = subscribers;
       }
     }
 

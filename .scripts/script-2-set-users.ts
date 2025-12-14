@@ -25,6 +25,10 @@ const REBEL_ID = '5a3a62c866fa07792cfcee67';
   for (const ip of ipsNoUserId) {
     const ipRecord = await ipsCollection.findOne({ ip });
 
+    if (!ipRecord) {
+      continue;
+    }
+
     const location = ipRecord.api.city || ipRecord.api.message;
     // const isp = ipRecord.api.isp;
 

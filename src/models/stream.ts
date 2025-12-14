@@ -98,6 +98,10 @@ class StreamModel {
   distinct<T>(key: string, filter: Filter<IStreamModel>) {
     return this.collection.distinct(key, filter) as Promise<T[]>;
   }
+
+  async create(data: IStreamModel) {
+    return this.collection.insertOne(data);
+  }
 }
 
 export const Stream = new StreamModel();

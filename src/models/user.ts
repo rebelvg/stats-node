@@ -8,6 +8,7 @@ import {
   Filter,
 } from 'mongodb';
 import { MongoCollections } from '../mongo';
+import { TokenInfo } from 'google-auth-library';
 
 export interface IUserModel {
   _id?: ObjectId;
@@ -21,7 +22,7 @@ export interface IUserModel {
   streamKey: string;
   createdAt: Date;
   updatedAt: Date;
-  raw: object;
+  googleProfile: TokenInfo;
 }
 
 class UserModel {

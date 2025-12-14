@@ -5,6 +5,7 @@ import {
   ObjectId,
   Filter,
   FindOptions,
+  OptionalId,
 } from 'mongodb';
 import { MongoCollections } from '../mongo';
 
@@ -56,6 +57,7 @@ class IPModel {
         $set: {
           ...data,
           updatedAt: new Date(),
+          apiUpdatedAt: new Date(),
         },
       },
       options,
@@ -75,6 +77,10 @@ class IPModel {
       docs: await this.collection.find(filter, options).toArray(),
       total: await this.collection.countDocuments(),
     };
+  }
+
+  async create(data: IIPModel) {
+    return this.collection.insertOne(data);
   }
 }
 

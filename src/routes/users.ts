@@ -85,7 +85,7 @@ router.get('/auth/google/callback', async (ctx, next) => {
     throw new Error();
   }
 
-  const tokenInfo = await client.getTokenInfo(tokens.access_token);
+  const profile = await client.getTokenInfo(tokens.access_token);
 
   const auth = new google.auth.OAuth2({
     clientId: GOOGLE_OAUTH.CLIENT_ID,
@@ -106,18 +106,14 @@ router.get('/auth/google/callback', async (ctx, next) => {
   const firstName = name || 'NO_DISPLAY_NAME';
 
   let user = await User.findOne({
-    googleId: tokenInfo.sub,
+    googleId: profile.sub,
   });
 
   let userId: string | null = null;
 
   if (user) {
     user.name = firstName;
-    user.raw = {
-      profile: tokenInfo,
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token,
-    };
+    user.googleProfile = profile;
     user.ipCreated = user.ipCreated || ctx.ip;
     user.ipUpdated = ctx.ip;
 
@@ -126,13 +122,9 @@ router.get('/auth/google/callback', async (ctx, next) => {
     userId = user._id.toString();
   } else {
     const newUserId = await User.create({
-      googleId: tokenInfo.sub || null,
+      googleId: profile.sub || null,
       name: firstName,
-      raw: {
-        profile: tokenInfo,
-        accessToken: tokens.access_token,
-        refreshToken: tokens.refresh_token,
-      },
+      googleProfile: profile,
       ipCreated: ctx.ip,
       ipUpdated: ctx.ip,
       isAdmin: false,
