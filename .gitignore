@@ -1,7 +1,6 @@
 .vscode/
 .idea/
 node_modules/
-logs/
 dist/
 /config.json
 !config.example.json

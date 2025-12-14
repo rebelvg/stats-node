@@ -4,7 +4,6 @@ import Router from '@koa/router';
 import koaQs from 'koa-qs';
 import cors from '@koa/cors';
 import koaMorgan from 'koa-morgan';
-import * as fs from 'fs';
 import koaSession from 'koa-session';
 import * as uuid from 'uuid';
 
@@ -42,10 +41,6 @@ declare module '@koa/router' {
 import { logger } from './helpers/logger';
 import { IUserModel } from './models/user';
 import { Sort, WithId } from 'mongodb';
-
-if (!fs.existsSync('logs')) {
-  fs.mkdirSync('logs');
-}
 
 export const app = new Koa();
 
