@@ -82,6 +82,7 @@ router.get('/', async (ctx) => {
               return {
                 isLive: true,
                 _id,
+                name: channel,
                 app,
                 server,
                 viewers: subscribers.length,
@@ -89,7 +90,7 @@ router.get('/', async (ctx) => {
                 bitrate,
                 lastBitrate,
                 startTime: connectCreated,
-                name: userRecord?.name || null,
+                userName: userRecord?.name || null,
               };
             },
           ),
@@ -159,7 +160,7 @@ router.get('/:channel', async (ctx) => {
           bitrate,
           lastBitrate,
           startTime: connectCreated,
-          name: userRecord?.name || null,
+          userName: userRecord?.name || null,
         };
       },
     ),
