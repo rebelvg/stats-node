@@ -1,15 +1,25 @@
 import Router from '@koa/router';
 
-import { isAdmin } from '../middleware/is-admin';
 import { Stream } from '../models/stream';
 import { Subscriber } from '../models/subscriber';
 import _ from 'lodash';
 import { User } from '../models/user';
 import { ObjectId } from 'mongodb';
 
+import { channelService } from '../services/channel';
+import { ChannelTypeEnum } from '../models/channel';
+
 export const router = new Router();
 
-router.get('/', isAdmin, async (ctx) => {
+router.get('/', async (ctx) => {
+  const isAdmin = !!ctx.state.user?.isAdmin;
+
+  const channelsPublic = await channelService.getChannelsByType(
+    ChannelTypeEnum.PUBLIC,
+  );
+
+  const channelNamesPublic = channelsPublic.map((c) => c.name);
+
   const lastTimestamp = new Date(Date.now() - 30 * 1000);
 
   const streamRecordsAll = await Stream.find(
@@ -17,6 +27,13 @@ router.get('/', isAdmin, async (ctx) => {
       connectUpdated: {
         $gt: lastTimestamp,
       },
+      channel: !isAdmin
+        ? {
+            $in: channelNamesPublic,
+          }
+        : {
+            $exists: true,
+          },
     },
     {
       sort: {
