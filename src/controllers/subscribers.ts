@@ -29,7 +29,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
     subscriber.channel
   ]?.subscribers.find((s) => s._id === subscriber._id);
 
-  const subscriberResponse: IChannelServerStats['apps'][0]['channels'][0]['subscribers'][0] =
+  const subscriberResponse: IChannelServerStats['apps'][0]['channels'][0]['subscribers'] =
     {
       _id: subscriber._id.toString(),
       server: subscriber.server,
@@ -53,9 +53,9 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
     streams.filter((s) => s.userId).map((stream) => stream.userId!.toString()),
   );
 
-  const streamsResponse: IChannelServerStats['apps'][0]['channels'][0]['publisher'][] =
-    await Promise.all(
-      streams.map((stream) => {
+  const streamsResponse = await Promise.all(
+    streams.map(
+      (stream): IChannelServerStats['apps'][0]['channels'][0]['publisher'] => {
         let userRecord: IUserModel | null = null;
 
         if (stream.userId) {
@@ -87,8 +87,9 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
           isLive,
           userName: userRecord?.name || null,
         };
-      }),
-    );
+      },
+    ),
+  );
 
   ctx.body = { subscriber: subscriberResponse, streams: streamsResponse };
 }
@@ -147,8 +148,10 @@ export async function find(ctx: Router.RouterContext, next: Next) {
 
   const uniqueIPs = await Subscriber.distinct('ip', ctx.ctx.state.query);
 
-  const subscribers: IChannelServerStats['apps'][0]['channels'][0]['subscribers'][0][] =
-    paginatedSubscribers.docs.map((subscriber) => {
+  const subscribers = paginatedSubscribers.docs.map(
+    (
+      subscriber,
+    ): IChannelServerStats['apps'][0]['channels'][0]['subscribers'] => {
       const isLive = !!LIVE_STATS_CACHE[subscriber.server]?.[subscriber.app]?.[
         subscriber.channel
       ]?.subscribers.find((s) => s._id === subscriber._id);
@@ -170,11 +173,9 @@ export async function find(ctx: Router.RouterContext, next: Next) {
         createdAt: subscriber.createdAt,
         updatedAt: subscriber.updatedAt,
         isLive,
-        ip: null,
-        countryCode: null,
-        city: null,
       };
-    });
+    },
+  );
 
   ctx.body = {
     subscribers,

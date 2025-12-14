@@ -107,8 +107,10 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
       userName: userRecord?.name || null,
     };
 
-  const subscribersResponse: IChannelServerStats['apps'][0]['channels'][0]['subscribers'][0][] =
-    subscribers.map((subscriber) => {
+  const subscribersResponse = subscribers.map(
+    (
+      subscriber,
+    ): IChannelServerStats['apps'][0]['channels'][0]['subscribers'] => {
       const isLive = !!LIVE_STATS_CACHE[subscriber.server]?.[subscriber.app]?.[
         subscriber.channel
       ]?.subscribers.find((s) => s._id === subscriber._id);
@@ -131,7 +133,8 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
         updatedAt: subscriber.updatedAt,
         isLive,
       };
-    });
+    },
+  );
 
   const userMap = await userService.getMapByIds(
     relatedStreams
@@ -139,9 +142,9 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
       .map((stream) => stream.userId!.toString()),
   );
 
-  const relatedStreamsResponse: IChannelServerStats['apps'][0]['channels'][0]['publisher'][] =
-    await Promise.all(
-      relatedStreams.map((stream) => {
+  const relatedStreamsResponse = await Promise.all(
+    relatedStreams.map(
+      (stream): IChannelServerStats['apps'][0]['channels'][0]['publisher'] => {
         let userRecord: IUserModel | null = null;
 
         if (stream.userId) {
@@ -173,8 +176,9 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
           isLive,
           userName: userRecord?.name || null,
         };
-      }),
-    );
+      },
+    ),
+  );
 
   ctx.body = {
     stream: streamResponse,
@@ -251,9 +255,9 @@ export async function find(ctx: Router.RouterContext, next: Next) {
       .map((stream) => stream.userId!.toString()),
   );
 
-  const streams: IChannelServerStats['apps'][0]['channels'][0]['publisher'][] =
-    await Promise.all(
-      paginatedStreams.docs.map((stream) => {
+  const streams = await Promise.all(
+    paginatedStreams.docs.map(
+      (stream): IChannelServerStats['apps'][0]['channels'][0]['publisher'] => {
         let userRecord: IUserModel | null = null;
 
         if (stream.userId) {
@@ -284,12 +288,10 @@ export async function find(ctx: Router.RouterContext, next: Next) {
           updatedAt: stream.updatedAt,
           isLive,
           userName: userRecord?.name || null,
-          ip: null,
-          countryCode: null,
-          city: null,
         };
-      }),
-    );
+      },
+    ),
+  );
 
   ctx.body = {
     streams,

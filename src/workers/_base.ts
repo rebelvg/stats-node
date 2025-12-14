@@ -300,7 +300,7 @@ export abstract class BaseWorker {
           );
 
           const { peakViewersCount, totalConnectionsCount } =
-            await streamService.countViewersById(allSubscribers);
+            streamService.countViewersById(allSubscribers);
 
           await Stream.updateOne(
             {
