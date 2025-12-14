@@ -12,23 +12,27 @@ export const router = new Router();
 router.get('/', isAdmin, async (ctx) => {
   const lastTimestamp = new Date(Date.now() - 30 * 1000);
 
-  const channelNames = await Stream.distinct<string>('channel', {});
+  const streamRecordsAll = await Stream.find(
+    {
+      connectUpdated: {
+        $gt: lastTimestamp,
+      },
+    },
+    {
+      sort: {
+        connectCreated: -1,
+      },
+    },
+  );
+
+  const channelNames = _.chain(streamRecordsAll)
+    .map((s) => s.channel)
+    .uniq()
+    .value();
 
   const channels = await Promise.all(
     channelNames.map(async (channel) => {
-      const streamRecords = await Stream.find(
-        {
-          channel,
-          connectUpdated: {
-            $gte: lastTimestamp,
-          },
-        },
-        {
-          sort: {
-            connectCreated: -1,
-          },
-        },
-      );
+      const streamRecords = _.filter(streamRecordsAll, { channel });
 
       return {
         streams: await Promise.all(
@@ -91,7 +95,7 @@ router.get('/:channel', async (ctx) => {
     {
       channel,
       connectUpdated: {
-        $gte: lastTimestamp,
+        $gt: lastTimestamp,
       },
     },
     {
