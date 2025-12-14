@@ -152,6 +152,10 @@ export async function channels(ctx: Router.RouterContext, next: Next) {
       for (const channel in appObj) {
         const channelObj = appObj[channel];
 
+        if (!channelObj) {
+          continue;
+        }
+
         if (!isAdmin) {
           if (!publicChannelNames.includes(channel)) {
             continue;
@@ -271,6 +275,10 @@ export async function list(ctx: Router.RouterContext, next: Next) {
         _.map(serverObj, (appObj) => {
           return Promise.all(
             _.map(appObj, async (channelObj) => {
+              if (!channelObj) {
+                return;
+              }
+
               if (channelObj.publisher) {
                 if (channels.includes(channelObj.publisher.channel)) {
                   let userRecord: IUserModel | null = null;

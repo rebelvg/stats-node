@@ -5,16 +5,16 @@ import { ISubscriberModel } from '../models/subscriber';
 import { WithId } from 'mongodb';
 
 export interface IStream {
-  readonly publisher: WithId<IStreamModel>;
-  readonly subscribers: WithId<ISubscriberModel>[];
+  publisher: WithId<IStreamModel> | null;
+  subscribers: WithId<ISubscriberModel>[];
 }
 
 export interface ILiveStats {
-  readonly [server: string]: {
-    readonly [app: string]: {
-      readonly [channel: string]: IStream;
-    };
-  };
+  [server: string]: {
+    [app: string]: {
+      [channel: string]: IStream | null;
+    } | null;
+  } | null;
 }
 
 export const LIVE_STATS_CACHE: ILiveStats = {};

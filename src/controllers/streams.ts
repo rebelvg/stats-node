@@ -81,7 +81,8 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
   }
 
   const isLive =
-    !!LIVE_STATS_CACHE[stream.server][stream.app][stream.channel].publisher;
+    !!LIVE_STATS_CACHE[stream.server]?.[stream.app]?.[stream.channel]
+      ?.publisher;
 
   const streamResponse: IChannelServerStats['apps'][0]['channels'][0]['publisher'] =
     {
@@ -111,9 +112,9 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
 
   const subscribersResponse: IChannelServerStats['apps'][0]['channels'][0]['subscribers'][0][] =
     subscribers.map((subscriber) => {
-      const isLive = !!LIVE_STATS_CACHE[subscriber.server][subscriber.app][
+      const isLive = !!LIVE_STATS_CACHE[subscriber.server]?.[subscriber.app]?.[
         subscriber.channel
-      ].subscribers.find((s) => s._id === subscriber._id);
+      ]?.subscribers.find((s) => s._id === subscriber._id);
 
       return {
         _id: subscriber._id.toString(),
@@ -154,8 +155,8 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
         }
 
         const isLive =
-          !!LIVE_STATS_CACHE[stream.server][stream.app][stream.channel]
-            .publisher;
+          !!LIVE_STATS_CACHE[stream.server]?.[stream.app]?.[stream.channel]
+            ?.publisher;
 
         return {
           _id: stream._id.toString(),
@@ -267,8 +268,8 @@ export async function find(ctx: Router.RouterContext, next: Next) {
         }
 
         const isLive =
-          !!LIVE_STATS_CACHE[stream.server][stream.app][stream.channel]
-            .publisher;
+          !!LIVE_STATS_CACHE[stream.server]?.[stream.app]?.[stream.channel]
+            ?.publisher;
 
         return {
           _id: stream._id.toString(),
@@ -366,9 +367,9 @@ export async function graph(ctx: Router.RouterContext, next: Next) {
     }
 
     if (
-      LIVE_STATS_CACHE[subscriber.server][subscriber.app][
+      LIVE_STATS_CACHE[subscriber.server]?.[subscriber.app]?.[
         subscriber.channel
-      ].subscribers.find((s) => s._id === subscriber._id)
+      ]?.subscribers.find((s) => s._id === subscriber._id)
     ) {
       return;
     }
@@ -381,7 +382,7 @@ export async function graph(ctx: Router.RouterContext, next: Next) {
   });
 
   if (
-    LIVE_STATS_CACHE[stream.server][stream.app][stream.channel].publisher
+    LIVE_STATS_CACHE[stream.server]?.[stream.app]?.[stream.channel]?.publisher
       ?._id === stream._id
   ) {
     graph.push({

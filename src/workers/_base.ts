@@ -113,10 +113,16 @@ export abstract class BaseWorker {
       for (const channelData of channelObjs.channels) {
         const { channel: channelName } = channelData;
 
-        _.set(stats, [appName, channelName], {
-          publisher: null,
-          subscribers: [],
-        });
+        if (!stats[appName]) {
+          stats[appName] = {};
+        }
+
+        if (!stats[appName][channelName]) {
+          stats[appName][channelName] = {
+            publisher: null,
+            subscribers: [],
+          };
+        }
 
         let streamRecord: WithId<IStreamModel> | null = null;
 
@@ -288,7 +294,7 @@ export abstract class BaseWorker {
           await channelService.addChannel(streamRecord.channel);
         }
 
-        _.set(stats, [appName, channelName, 'publisher'], streamRecord);
+        stats[appName][channelName].publisher = streamRecord;
       }
     }
 

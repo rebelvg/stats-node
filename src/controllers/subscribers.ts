@@ -25,9 +25,9 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
     sort: { connectCreated: 1 },
   });
 
-  const isLive = !!LIVE_STATS_CACHE[subscriber.server][subscriber.app][
+  const isLive = !!LIVE_STATS_CACHE[subscriber.server]?.[subscriber.app]?.[
     subscriber.channel
-  ].subscribers.find((s) => s._id === subscriber._id);
+  ]?.subscribers.find((s) => s._id === subscriber._id);
 
   const subscriberResponse: IChannelServerStats['apps'][0]['channels'][0]['subscribers'][0] =
     {
@@ -66,8 +66,8 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
         }
 
         const isLive =
-          !!LIVE_STATS_CACHE[stream.server][stream.app][stream.channel]
-            .publisher;
+          !!LIVE_STATS_CACHE[stream.server]?.[stream.app]?.[stream.channel]
+            ?.publisher;
 
         return {
           _id: stream._id.toString(),
@@ -153,9 +153,9 @@ export async function find(ctx: Router.RouterContext, next: Next) {
 
   const subscribers: IChannelServerStats['apps'][0]['channels'][0]['subscribers'][0][] =
     paginatedSubscribers.docs.map((subscriber) => {
-      const isLive = !!LIVE_STATS_CACHE[subscriber.server][subscriber.app][
+      const isLive = !!LIVE_STATS_CACHE[subscriber.server]?.[subscriber.app]?.[
         subscriber.channel
-      ].subscribers.find((s) => s._id === subscriber._id);
+      ]?.subscribers.find((s) => s._id === subscriber._id);
 
       return {
         _id: subscriber._id.toString(),
