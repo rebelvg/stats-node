@@ -5,7 +5,6 @@ import * as moment from 'moment';
 import { strtotime } from 'locutus/php/datetime';
 
 import { IP } from '../models/ip';
-import { shouldHideFields } from '../helpers/should-hide-fields';
 
 declare module '@koa/router' {
   export interface IRouterContext {
@@ -75,9 +74,7 @@ const filterRules = {
 
       query.push({ ip: { $in: ips } });
 
-      if (!shouldHideFields(ctx.state.user)) {
-        query.push({ ip: new RegExp(ip, 'gi') });
-      }
+      query.push({ ip: new RegExp(ip, 'gi') });
 
       queryObj.$or = query;
     },

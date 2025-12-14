@@ -1,15 +1,12 @@
 import * as fs from 'fs';
-import * as mongoose from 'mongoose';
 import * as path from 'path';
 
-import { connectMongoDriver, connectMongoose, MongoCollections } from './mongo';
+import { connectMongoDriver, MongoCollections } from './mongo';
 
 async function migrate() {
   console.log('running_migrations');
 
   const mongoClient = await connectMongoDriver();
-
-  await connectMongoose();
 
   const { Migrations } = MongoCollections;
 
@@ -46,8 +43,6 @@ async function migrate() {
   }
 
   await mongoClient.close();
-
-  await mongoose.disconnect();
 
   console.log('migrations_done');
 }

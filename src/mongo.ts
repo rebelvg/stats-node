@@ -7,12 +7,12 @@ export interface IMigration {
   timeCreated: Date;
 }
 
-let mongoClientDb: Db;
+const client = new MongoClient(DB_URI);
+
+const mongoClientDb = client.db();
 
 export async function connectMongoDriver(): Promise<MongoClient> {
-  const client = await MongoClient.connect(DB_URI);
-
-  mongoClientDb = client.db();
+  await client.connect();
 
   return client;
 }

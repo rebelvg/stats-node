@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import { ObjectId } from 'mongodb';
 
-import { hideUserData } from '../helpers/hide-fields';
 import { Stream } from '../models/stream';
 import { Subscriber } from '../models/subscriber';
 import { userService } from '../services/user';
+import { RouterContext } from '@koa/router';
 
 const cachedGraphs: {
   all: {
@@ -468,7 +468,7 @@ const monthlyStatsSubscribersQuery: any = [
   },
 ];
 
-export async function graphs(ctx: Router.RouterContext) {
+export async function graphs(ctx: RouterContext) {
   if (
     Date.now() <
     cachedGraphs.all?.lastUpdateDate.getTime() + 24 * 60 * 60 * 1000
@@ -497,9 +497,9 @@ export async function graphs(ctx: Router.RouterContext) {
     { $limit: 5 },
   ]);
 
-  const topStreamers = topStreamersResult.map((topUser) => ({
-    ...topUser,
-    user: hideUserData(topUser.user, true),
+  const topStreamers = topStreamersResult.map((topStreamer) => ({
+    ...topStreamer,
+    user: topStreamer.user,
   }));
 
   const monthlyStatsStreams = await Stream.aggregate([...monthlyStatsQuery]);
@@ -544,7 +544,7 @@ export async function graphs(ctx: Router.RouterContext) {
   };
 }
 
-export async function graphsById(ctx: Router.RouterContext) {
+export async function graphsById(ctx: RouterContext) {
   const { id } = ctx.params;
 
   if (
@@ -588,9 +588,9 @@ export async function graphsById(ctx: Router.RouterContext) {
     { $limit: 5 },
   ]);
 
-  const topStreamersRes = topStreamers.map((topUser) => ({
-    ...topUser,
-    user: hideUserData(topUser.user, true),
+  const topStreamersRes = topStreamers.map((topStreamer) => ({
+    ...topStreamer,
+    user: topStreamer.user,
   }));
 
   const monthlyStatsStreams = await Stream.aggregate([
@@ -637,7 +637,7 @@ export async function graphsById(ctx: Router.RouterContext) {
     monthlyStatsSubscribers,
     dayOfWeekStatsStreams,
     timeOfDayStatsStreams,
-    user: hideUserData(userRecord, true),
+    user: userRecord,
   };
 
   ctx.body = body;

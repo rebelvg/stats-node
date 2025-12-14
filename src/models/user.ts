@@ -4,6 +4,8 @@ import {
   Document,
   ObjectId,
   OptionalId,
+  FindOptions,
+  Filter,
 } from 'mongodb';
 import { MongoCollections } from '../mongo';
 
@@ -41,8 +43,8 @@ class UserModel {
     return this.collection.updateOne(filter, data, options);
   }
 
-  find(params: Partial<IUserModel>) {
-    return this.collection.find(params).toArray();
+  find(params: Filter<IUserModel>, options?: FindOptions) {
+    return this.collection.find(params, options).toArray();
   }
 
   async create(params: OptionalId<IUserModel>) {

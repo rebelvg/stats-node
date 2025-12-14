@@ -1,9 +1,13 @@
-import { Filter, ObjectId } from 'mongodb';
+import { Filter, FindOptions, ObjectId } from 'mongodb';
 
 import { ISubscriberModel, Subscriber } from '../models/subscriber';
 
 class SubscriberService {
-  public getByStreamId(id: ObjectId, params: Filter<ISubscriberModel>) {
+  public getByStreamId(
+    id: ObjectId,
+    params: Filter<ISubscriberModel>,
+    options?: FindOptions,
+  ) {
     const query = {
       $and: [
         {
@@ -15,7 +19,7 @@ class SubscriberService {
       ],
     };
 
-    return Subscriber.find(query);
+    return Subscriber.find(query, options);
   }
 }
 

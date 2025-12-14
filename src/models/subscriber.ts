@@ -5,6 +5,7 @@ import {
   ObjectId,
   Filter,
   OptionalId,
+  FindOptions,
 } from 'mongodb';
 import { MongoCollections } from '../mongo';
 
@@ -51,8 +52,8 @@ class SubscriberModel {
     return this.collection.updateOne(filter, data, options);
   }
 
-  find(filter: Filter<ISubscriberModel>) {
-    return this.collection.find(filter).toArray();
+  find(filter: Filter<ISubscriberModel>, options?: FindOptions) {
+    return this.collection.find(filter, options).toArray();
   }
 
   create(params: OptionalId<ISubscriberModel>) {
@@ -72,6 +73,21 @@ class SubscriberModel {
     } else {
       await this.collection.insertOne(params);
     }
+  }
+
+  aggregate(query: any[]) {
+    return this.collection.aggregate(query);
+  }
+
+  async paginate(filter: Filter<ISubscriberModel>, options?: FindOptions) {
+    return {
+      docs: await this.collection.find(filter, options).toArray(),
+      total: await this.collection.countDocuments(),
+    };
+  }
+
+  distinct<T>(key: string, filter: Filter<ISubscriberModel>) {
+    return this.collection.distinct(key, filter) as Promise<T[]>;
   }
 }
 

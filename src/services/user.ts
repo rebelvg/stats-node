@@ -29,7 +29,7 @@ class UserService {
   ): Promise<Record<string, IUserModel>> {
     const userRecords = await User.find({
       _id: {
-        $in: userIds,
+        $in: userIds.map((id) => new ObjectId(id)),
       },
     });
 

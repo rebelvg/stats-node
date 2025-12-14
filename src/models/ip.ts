@@ -1,4 +1,11 @@
-import { Collection, UpdateOptions, Document, ObjectId, Filter } from 'mongodb';
+import {
+  Collection,
+  UpdateOptions,
+  Document,
+  ObjectId,
+  Filter,
+  FindOptions,
+} from 'mongodb';
 import { MongoCollections } from '../mongo';
 
 export interface IIPModel {
@@ -48,6 +55,17 @@ class IPModel {
 
   distinct<T>(key: string, filter: Filter<IIPModel>) {
     return this.collection.distinct(key, filter) as Promise<T[]>;
+  }
+
+  find(filter: Filter<IIPModel>, options?: FindOptions) {
+    return this.collection.find(filter, options).toArray();
+  }
+
+  async paginate(filter: Filter<IIPModel>, options?: FindOptions) {
+    return {
+      docs: await this.collection.find(filter, options).toArray(),
+      total: await this.collection.countDocuments(),
+    };
   }
 }
 

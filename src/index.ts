@@ -2,13 +2,13 @@ import 'source-map-support/register';
 import * as fs from 'fs';
 
 import { app } from './app';
-import { connectMongoose } from './mongo';
 
 import { API } from './config';
 import { logger } from './helpers/logger';
 import { runUpdate as runUpdate_kolpaqueRtmp } from './workers/kolpaque-rtmp';
 import { runUpdate as runUpdate_nodeMediaServer } from './workers/node-media-server';
 import { runUpdate as runUpdate_adobeMediaServer } from './workers/adobe-media-server';
+import { connectMongoDriver } from './mongo';
 
 process.on('unhandledRejection', (error, p) => {
   logger.fatal('unhandledRejection', {
@@ -34,7 +34,7 @@ if (typeof API.PORT === 'string') {
 }
 
 (async () => {
-  await connectMongoose();
+  await connectMongoDriver();
 
   app.listen(API.PORT, () => {
     logger.info('http_server_running');

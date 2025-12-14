@@ -3,9 +3,12 @@ import * as Router from '@koa/router';
 import _ from 'lodash';
 
 import { IP } from '../models/ip';
+import { ObjectId } from 'mongodb';
 
 export async function findById(ctx: Router.RouterContext, next: Next) {
-  const ip = await IP.findById(ctx.params.id);
+  const ip = IP.findOne({
+    _id: new ObjectId(ctx.params.id),
+  });
 
   if (!ip) {
     throw new Error('ip_not_found');
@@ -17,10 +20,14 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
 }
 
 export async function find(ctx: Router.RouterContext, next: Next) {
+  const limit = parseInt(ctx.query.limit as string) || 20;
+  const page = parseInt(ctx.query.page as string) || 1;
+  const skip = (page - 1) * limit;
+
   const paginatedIps = await IP.paginate(ctx.queryObj, {
     sort: _.isEmpty(ctx.sortObj) ? { createdAt: -1 } : ctx.sortObj,
-    page: parseInt(ctx.query.page as string) || 1,
-    limit: parseInt(ctx.query.limit as string) || 20,
+    skip,
+    limit,
   });
 
   const counties = await IP.distinct('api.country', ctx.queryObj);
@@ -41,8 +48,8 @@ export async function find(ctx: Router.RouterContext, next: Next) {
       totalISPs: ISPs.length,
     },
     total: paginatedIps.total,
-    limit: paginatedIps.limit,
-    page: paginatedIps.page,
-    pages: paginatedIps.pages,
+    limit,
+    page,
+    pages: Math.ceil(paginatedIps.total / limit),
   };
 }

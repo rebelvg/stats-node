@@ -6,6 +6,7 @@ import {
   FindOptions,
   Filter,
   OptionalId,
+  AggregateOptions,
 } from 'mongodb';
 
 import { IGenericStreamsResponse } from '../workers/_base';
@@ -60,8 +61,8 @@ class StreamModel {
     return this.collection.updateOne(filter, data, options);
   }
 
-  find(filter: Filter<IStreamModel>) {
-    return this.collection.find(filter).toArray();
+  find(filter: Filter<IStreamModel>, options?: FindOptions) {
+    return this.collection.find(filter, options).toArray();
   }
 
   create(params: OptionalId<IStreamModel>) {
@@ -81,6 +82,21 @@ class StreamModel {
     } else {
       await this.collection.insertOne(params);
     }
+  }
+
+  aggregate(query: any[]) {
+    return this.collection.aggregate(query);
+  }
+
+  async paginate(filter: Filter<IStreamModel>, options?: FindOptions) {
+    return {
+      docs: await this.collection.find(filter, options).toArray(),
+      total: await this.collection.countDocuments(),
+    };
+  }
+
+  distinct<T>(key: string, filter: Filter<IStreamModel>) {
+    return this.collection.distinct(key, filter) as Promise<T[]>;
   }
 }
 

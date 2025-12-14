@@ -4,35 +4,29 @@ import _ from 'lodash';
 
 import { Subscriber } from '../models/subscriber';
 import { IP } from '../models/ip';
-import { hideFields } from '../helpers/hide-fields';
 import { streamService } from '../services/stream';
 import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';
 import { IChannelServerStats } from './channels';
 import { userService } from '../services/user';
+import { ObjectId } from 'mongodb';
 
 export async function findById(ctx: Router.RouterContext, next: Next) {
-  const subscriber = await Subscriber.findById(ctx.params.id).populate([
-    'location',
-  ]);
+  const subscriber = await Subscriber.findOne({
+    _id: new ObjectId(ctx.params.id),
+  });
 
   if (!subscriber) {
     throw new Error('subscriber_not_found');
   }
 
-  const streams = await streamService
-    .getBySubscriberIds(subscriber.streamIds, {})
-    .sort({ connectCreated: 1 })
-    .populate(['location']);
-
-  hideFields(ctx.state.user, subscriber);
-
-  _.forEach(streams, (stream) => {
-    hideFields(ctx.state.user, stream);
+  const streams = await streamService.getBySubscriberIds(subscriber.streamIds, {
+    sort: { connectCreated: 1 },
   });
 
   const subscriberResponse: IChannelServerStats['apps'][0]['channels'][0]['subscribers'][0] =
     {
+      _id: subscriber._id.toString(),
       server: subscriber.server,
       app: subscriber.app,
       channel: subscriber.channel,
@@ -43,18 +37,14 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
       protocol: subscriber.protocol,
       userId: subscriber.userId?.toString() || null,
       streamIds: subscriber.streamIds.map((e) => e.toString()),
-      _id: subscriber._id,
       duration: subscriber.duration,
       bitrate: subscriber.bitrate,
       createdAt: subscriber.createdAt,
       updatedAt: subscriber.updatedAt,
-      isLive: subscriber.isLive,
+      isLive: true,
       ip: null,
       countryCode: null,
       city: null,
-      // ip: subscriber.ip,
-      // countryCode: subscriber?.location?.api?.countryCode || null,
-      // city: subscriber?.location?.api?.city || null,
     };
 
   const userMap = await userService.getMapByIds(
@@ -67,6 +57,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
         const userRecord = userMap[stream.userId?.toString()] || null;
 
         return {
+          _id: stream._id.toString(),
           server: stream.server,
           app: stream.app,
           channel: stream.channel,
@@ -77,21 +68,17 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
           protocol: stream.protocol,
           lastBitrate: stream.lastBitrate,
           userId: stream.userId?.toString() || null,
-          _id: stream._id,
           totalConnectionsCount: stream.totalConnectionsCount,
           peakViewersCount: stream.peakViewersCount,
           duration: stream.duration,
           bitrate: stream.bitrate,
           createdAt: stream.createdAt,
           updatedAt: stream.updatedAt,
-          isLive: stream.isLive,
+          isLive: true,
           userName: userRecord?.name || null,
           ip: null,
           countryCode: null,
           city: null,
-          // ip: stream.ip,
-          // countryCode: stream?.location?.api?.countryCode || null,
-          // city: stream?.location?.api?.city || null,
         };
       }),
     );
@@ -124,11 +111,14 @@ export async function find(ctx: Router.RouterContext, next: Next) {
     }
   }
 
+  const limit = parseInt(ctx.query.limit as string) || 20;
+  const page = parseInt(ctx.query.page as string) || 1;
+  const skip = (page - 1) * limit;
+
   const paginatedSubscribers = await Subscriber.paginate(ctx.queryObj, {
     sort: _.isEmpty(ctx.sortObj) ? { connectCreated: -1 } : ctx.sortObj,
-    page: parseInt(ctx.query.page as string) || 1,
-    limit: parseInt(ctx.query.limit as string) || 20,
-    populate: ['location'],
+    skip,
+    limit,
   });
 
   const aggregation = await Subscriber.aggregate([
@@ -147,16 +137,11 @@ export async function find(ctx: Router.RouterContext, next: Next) {
   ]);
 
   const uniqueIPs = await Subscriber.distinct('ip', ctx.queryObj);
-  const _uniqueCountries = await IP.distinct('api.country');
-  const _uniqueApiMessages = await IP.distinct('api.message');
-
-  _.forEach(paginatedSubscribers.docs, (subscriber) => {
-    hideFields(ctx.state.user, subscriber);
-  });
 
   const subscribers: IChannelServerStats['apps'][0]['channels'][0]['subscribers'][0][] =
     paginatedSubscribers.docs.map((subscriber) => {
       return {
+        _id: subscriber._id.toString(),
         server: subscriber.server,
         app: subscriber.app,
         channel: subscriber.channel,
@@ -167,18 +152,14 @@ export async function find(ctx: Router.RouterContext, next: Next) {
         protocol: subscriber.protocol,
         userId: subscriber.userId?.toString() || null,
         streamIds: subscriber.streamIds.map((e) => e.toString()),
-        _id: subscriber._id,
         duration: subscriber.duration,
         bitrate: subscriber.bitrate,
         createdAt: subscriber.createdAt,
         updatedAt: subscriber.updatedAt,
-        isLive: subscriber.isLive,
+        isLive: true,
         ip: null,
         countryCode: null,
         city: null,
-        // ip: subscriber.ip,
-        // countryCode: subscriber?.location?.api?.countryCode || null,
-        // city: subscriber?.location?.api?.city || null,
       };
     });
 
@@ -196,8 +177,8 @@ export async function find(ctx: Router.RouterContext, next: Next) {
       totalIPs: uniqueIPs.length,
     },
     total: paginatedSubscribers.total,
-    limit: paginatedSubscribers.limit,
-    page: paginatedSubscribers.page,
-    pages: paginatedSubscribers.pages,
+    limit,
+    page,
+    pages: Math.ceil(paginatedSubscribers.total / limit),
   };
 }

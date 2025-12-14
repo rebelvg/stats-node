@@ -2,10 +2,12 @@ import { Next } from 'koa';
 import * as Router from '@koa/router';
 import _ from 'lodash';
 
-import { User } from '../../models/user';
+import { IUserModel, User } from '../../models/user';
+import { ObjectId } from 'mongodb';
+import { Stream } from '../../models/stream';
 
 export async function find(ctx: Router.RouterContext, next: Next) {
-  const users = await User.find(null, null, {
+  const users = await User.find(null, {
     sort: {
       isAdmin: -1,
       isStreamer: -1,
@@ -19,21 +21,18 @@ export async function find(ctx: Router.RouterContext, next: Next) {
 }
 
 export async function update(ctx: Router.RouterContext, next: Next) {
-  const user = await User.findOne({
-    _id: ctx.params.id,
-  });
+  const body = <Partial<IUserModel>>ctx.request.body;
 
-  if (!user) {
-    throw Error('user_not_found');
-  }
-
-  _.forEach(ctx.request.body as any[], (value, key) => {
-    user[key] = value;
-  });
-
-  await user.save();
+  await User.updateOne(
+    { _id: new ObjectId(ctx.params.id) },
+    {
+      ...body,
+    },
+  );
 
   ctx.body = {
-    user,
+    user: await Stream.findOne({
+      _id: new ObjectId(ctx.params.id),
+    }),
   };
 }

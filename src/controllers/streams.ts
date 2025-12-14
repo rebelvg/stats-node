@@ -4,7 +4,6 @@ import _ from 'lodash';
 
 import { Stream } from '../models/stream';
 import { IP } from '../models/ip';
-import { hideFields } from '../helpers/hide-fields';
 import { filterSubscribers } from '../helpers/filter-subscribers';
 import { streamService } from '../services/stream';
 import { subscriberService } from '../services/subscriber';
@@ -13,6 +12,7 @@ import { ChannelTypeEnum } from '../models/channel';
 import { IChannelServerStats } from './channels';
 import { userService } from '../services/user';
 import { ObjectId } from 'mongodb';
+import { LIVE_STATS_CACHE } from '../workers';
 
 export async function findById(ctx: Router.RouterContext, next: Next) {
   const stream = await Stream.findOne({
@@ -23,14 +23,19 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
     throw new Error('stream_not_found');
   }
 
-  const subscribers = await subscriberService
-    .getByStreamId(stream._id, ctx.queryObj)
-    .sort(_.isEmpty(ctx.sortObj) ? { connectCreated: 1 } : ctx.sortObj)
-    .populate(['location']);
+  const subscribers = await subscriberService.getByStreamId(
+    stream._id,
+    ctx.queryObj,
+    {
+      sort: _.isEmpty(ctx.sortObj) ? { connectCreated: 1 } : ctx.sortObj,
+    },
+  );
 
-  const relatedStreams = await streamService
-    .getRelatedStreams(stream)
-    .sort({ connectCreated: 1 });
+  const relatedStreams = await streamService.getRelatedStreams(stream, {
+    sort: {
+      connectCreated: 1,
+    },
+  });
 
   const options = {
     countries: _
@@ -73,20 +78,11 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
     totalIPs: _.chain(subscribers).map('ip').uniq().value().length,
   };
 
-  hideFields(ctx.state.user, stream);
-
-  _.forEach(subscribers, (subscriber) => {
-    hideFields(ctx.state.user, subscriber);
-  });
-
-  _.forEach(relatedStreams, (stream) => {
-    hideFields(ctx.state.user, stream);
-  });
-
   const userRecord = await userService.getById(stream.userId?.toString());
 
   const streamResponse: IChannelServerStats['apps'][0]['channels'][0]['publisher'] =
     {
+      _id: stream._id.toString(),
       server: stream.server,
       app: stream.app,
       channel: stream.channel,
@@ -97,26 +93,23 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
       protocol: stream.protocol,
       lastBitrate: stream.lastBitrate,
       userId: stream.userId?.toString() || null,
-      _id: stream._id.toString(),
       totalConnectionsCount: stream.totalConnectionsCount,
       peakViewersCount: stream.peakViewersCount,
       duration: stream.duration,
       bitrate: stream.bitrate,
       createdAt: stream.createdAt,
       updatedAt: stream.updatedAt,
-      isLive: stream.isLive,
+      isLive: true,
       userName: userRecord?.name || null,
       ip: null,
       countryCode: null,
       city: null,
-      // ip: stream.ip,
-      // countryCode: stream?.location?.api?.countryCode || null,
-      // city: stream?.location?.api?.city || null,
     };
 
   const subscribersResponse: IChannelServerStats['apps'][0]['channels'][0]['subscribers'][0][] =
     subscribers.map((subscriber) => {
       return {
+        _id: subscriber._id.toString(),
         server: subscriber.server,
         app: subscriber.app,
         channel: subscriber.channel,
@@ -128,14 +121,13 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
         protocol: subscriber.protocol,
         userId: subscriber.userId?.toString() || null,
         streamIds: subscriber.streamIds.map((e) => e.toString()),
-        _id: subscriber._id,
         duration: subscriber.duration,
         bitrate: subscriber.bitrate,
         createdAt: subscriber.createdAt,
         updatedAt: subscriber.updatedAt,
-        isLive: subscriber.isLive,
-        countryCode: subscriber?.location?.api?.countryCode || null,
-        city: subscriber?.location?.api?.city || null,
+        isLive: true,
+        countryCode: null,
+        city: null,
       };
     });
 
@@ -149,6 +141,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
         const userRecord = userMap[stream.userId?.toString()] || null;
 
         return {
+          _id: stream._id.toString(),
           server: stream.server,
           app: stream.app,
           channel: stream.channel,
@@ -159,21 +152,17 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
           protocol: stream.protocol,
           lastBitrate: stream.lastBitrate,
           userId: stream.userId?.toString() || null,
-          _id: stream._id,
           totalConnectionsCount: stream.totalConnectionsCount,
           peakViewersCount: stream.peakViewersCount,
           duration: stream.duration,
           bitrate: stream.bitrate,
           createdAt: stream.createdAt,
           updatedAt: stream.updatedAt,
-          isLive: stream.isLive,
+          isLive: true,
           userName: userRecord?.name || null,
           ip: null,
           countryCode: null,
           city: null,
-          // ip: stream.ip,
-          // countryCode: stream?.location?.api?.countryCode || null,
-          // city: stream?.location?.api?.city || null,
         };
       }),
     );
@@ -212,11 +201,14 @@ export async function find(ctx: Router.RouterContext, next: Next) {
     }
   }
 
+  const limit = parseInt(ctx.query.limit as string) || 20;
+  const page = parseInt(ctx.query.page as string) || 1;
+  const skip = (page - 1) * limit;
+
   const paginatedStreams = await Stream.paginate(ctx.queryObj, {
     sort: _.isEmpty(ctx.sortObj) ? { connectCreated: -1 } : ctx.sortObj,
-    page: parseInt(ctx.query.page as string) || 1,
-    limit: parseInt(ctx.query.limit as string) || 20,
-    populate: ['location'],
+    skip,
+    limit,
   });
 
   const aggregation = await Stream.aggregate([
@@ -241,12 +233,6 @@ export async function find(ctx: Router.RouterContext, next: Next) {
   ]);
 
   const uniqueIPs = await Stream.distinct('ip', ctx.queryObj);
-  const _uniqueCountries = await IP.distinct('api.country');
-  const _uniqueApiMessages = await IP.distinct('api.message');
-
-  _.forEach(paginatedStreams.docs, (stream) => {
-    hideFields(ctx.state.user, stream);
-  });
 
   const userMap = await userService.getMapByIds(
     paginatedStreams.docs
@@ -260,6 +246,7 @@ export async function find(ctx: Router.RouterContext, next: Next) {
         const userRecord = userMap[stream.userId?.toString()] || null;
 
         return {
+          _id: stream._id.toString(),
           server: stream.server,
           app: stream.app,
           channel: stream.channel,
@@ -270,21 +257,17 @@ export async function find(ctx: Router.RouterContext, next: Next) {
           protocol: stream.protocol,
           lastBitrate: stream.lastBitrate,
           userId: stream.userId?.toString() || null,
-          _id: stream._id,
           totalConnectionsCount: stream.totalConnectionsCount,
           peakViewersCount: stream.peakViewersCount,
           duration: stream.duration,
           bitrate: stream.bitrate,
           createdAt: stream.createdAt,
           updatedAt: stream.updatedAt,
-          isLive: stream.isLive,
+          isLive: true,
           userName: userRecord?.name || null,
           ip: null,
           countryCode: null,
           city: null,
-          // ip: stream.ip,
-          // countryCode: stream?.location?.api?.countryCode || null,
-          // city: stream?.location?.api?.city || null,
         };
       }),
     );
@@ -305,22 +288,28 @@ export async function find(ctx: Router.RouterContext, next: Next) {
       totalIPs: uniqueIPs.length,
     },
     total: paginatedStreams.total,
-    limit: paginatedStreams.limit,
-    page: paginatedStreams.page,
-    pages: paginatedStreams.pages,
+    limit,
+    page,
+    pages: Math.ceil(paginatedStreams.total / limit),
   };
 }
 
 export async function graph(ctx: Router.RouterContext, next: Next) {
-  const stream = await Stream.findById(ctx.params.id);
+  const stream = await Stream.findOne({
+    _id: new ObjectId(ctx.params.id),
+  });
 
   if (!stream) {
     throw new Error('stream_not_found');
   }
 
-  const subscribers = await subscriberService
-    .getByStreamId(stream._id, ctx.queryObj)
-    .sort({ connectCreated: 1 });
+  const subscribers = await subscriberService.getByStreamId(
+    stream._id,
+    ctx.queryObj,
+    {
+      sort: { connectCreated: 1 },
+    },
+  );
 
   let graph = [];
 
@@ -346,7 +335,12 @@ export async function graph(ctx: Router.RouterContext, next: Next) {
     if (subscriber.connectUpdated >= stream.connectUpdated) {
       return;
     }
-    if (subscriber.isLive) {
+
+    if (
+      LIVE_STATS_CACHE[subscriber.server][subscriber.app][
+        subscriber.channel
+      ].subscribers.find((s) => s._id === subscriber._id)
+    ) {
       return;
     }
 
@@ -357,17 +351,20 @@ export async function graph(ctx: Router.RouterContext, next: Next) {
     });
   });
 
-  if (!stream.isLive) {
-    graph.push({
-      eventName: 'streamEnded',
-      time: stream.connectUpdated,
-      subscribers: filterSubscribers(subscribers, stream.connectUpdated),
-    });
-  } else {
+  if (
+    LIVE_STATS_CACHE[stream.server][stream.app][stream.channel].publisher
+      ?._id === stream._id
+  ) {
     graph.push({
       eventName: 'streamIsLive',
       time: stream.connectUpdated,
       subscribers: filterSubscribers(subscribers, stream.connectUpdated, true),
+    });
+  } else {
+    graph.push({
+      eventName: 'streamEnded',
+      time: stream.connectUpdated,
+      subscribers: filterSubscribers(subscribers, stream.connectUpdated),
     });
   }
 

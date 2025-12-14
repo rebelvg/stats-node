@@ -11,7 +11,7 @@ const paths = [
   ['apiResponse', 'ip'],
 ];
 
-export function hideFields(user: IUserModel, obj) {
+function hideFields(user: IUserModel, obj) {
   if (!shouldHideFields(user)) {
     return;
   }
@@ -23,7 +23,7 @@ export function hideFields(user: IUserModel, obj) {
   });
 }
 
-export function hideUserData(user: IUserModel, shouldHideIp: boolean) {
+function hideUserData(user: IUserModel, shouldHideIp: boolean) {
   if (shouldHideIp) {
     _.set(user, 'ipCreated', undefined);
     _.set(user, 'ipUpdated', undefined);

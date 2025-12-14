@@ -2,10 +2,8 @@ import { Next } from 'koa';
 import * as Router from '@koa/router';
 import _ from 'lodash';
 
-import { Stream } from '../models/stream';
 import { Subscriber } from '../models/subscriber';
 import { LIVE_STATS_CACHE } from '../workers';
-import { hideFields } from '../helpers/hide-fields';
 import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';
 import { BadRequest } from '../helpers/errors';
@@ -154,17 +152,12 @@ export async function channels(ctx: Router.RouterContext, next: Next) {
         if (channelObj.publisher) {
           const livePublisher = channelObj.publisher;
 
-          await Stream.populate(livePublisher, {
-            path: 'location',
-          });
-
-          hideFields(ctx.state.user, livePublisher);
-
           const userRecord = await userService.getById(
             channelObj.publisher.userId?.toString(),
           );
 
           liveChannel.publisher = {
+            _id: livePublisher._id.toString(),
             server: livePublisher.server,
             app: livePublisher.app,
             channel: livePublisher.channel,
@@ -176,16 +169,15 @@ export async function channels(ctx: Router.RouterContext, next: Next) {
             protocol: livePublisher.protocol,
             lastBitrate: livePublisher.lastBitrate,
             userId: livePublisher.userId?.toString() || null,
-            _id: livePublisher._id,
             totalConnectionsCount: livePublisher.totalConnectionsCount,
             peakViewersCount: livePublisher.peakViewersCount,
             duration: livePublisher.duration,
             bitrate: livePublisher.bitrate,
             createdAt: livePublisher.createdAt,
             updatedAt: livePublisher.updatedAt,
-            isLive: livePublisher.isLive,
-            countryCode: livePublisher?.location?.api?.countryCode || null,
-            city: livePublisher?.location?.api?.city || null,
+            isLive: true,
+            countryCode: null,
+            city: null,
             userName: userRecord?.name || null,
           };
         }
@@ -193,13 +185,8 @@ export async function channels(ctx: Router.RouterContext, next: Next) {
         for (const subscriberObj of channelObj.subscribers) {
           const liveSubscriber = subscriberObj;
 
-          await Subscriber.populate(liveSubscriber, {
-            path: 'location',
-          });
-
-          hideFields(ctx.state.user, liveSubscriber);
-
           liveChannel.subscribers.push({
+            _id: liveSubscriber._id.toString(),
             server: liveSubscriber.server,
             app: liveSubscriber.app,
             channel: liveSubscriber.channel,
@@ -211,14 +198,13 @@ export async function channels(ctx: Router.RouterContext, next: Next) {
             protocol: liveSubscriber.protocol,
             userId: liveSubscriber.userId?.toString() || null,
             streamIds: liveSubscriber.streamIds.map((e) => e.toString()),
-            _id: liveSubscriber._id,
             duration: liveSubscriber.duration,
             bitrate: liveSubscriber.bitrate,
             createdAt: liveSubscriber.createdAt,
             updatedAt: liveSubscriber.updatedAt,
-            isLive: liveSubscriber.isLive,
-            countryCode: liveSubscriber?.location?.api?.countryCode || null,
-            city: liveSubscriber?.location?.api?.city || null,
+            isLive: true,
+            countryCode: null,
+            city: null,
           });
         }
 
@@ -270,12 +256,12 @@ export async function list(ctx: Router.RouterContext, next: Next) {
                   );
 
                   liveChannels.push({
+                    _id: channelObj.publisher._id.toString(),
                     server: serverName,
                     app: channelObj.publisher.app,
                     channel: channelObj.publisher.channel,
                     protocol: channelObj.publisher.protocol,
                     name: userRecord?.name || null,
-                    _id: channelObj.publisher._id,
                     startTime: channelObj.publisher.connectCreated,
                     viewers: channelObj.subscribers.length,
                   });
