@@ -4,13 +4,13 @@ import { Db } from 'mongodb';
 
 export async function up(mongoClient: Db): Promise<void> {
   const usersCollection = mongoClient.collection<{
-    name: string;
+    name: string | null;
   }>('users');
 
   const userRecords = await usersCollection.find().toArray();
 
   for (const userRecord of userRecords) {
-    const firstName = userRecord.name.split(' ')[0] ?? 'NO_DISPLAY_NAME';
+    const firstName = userRecord.name?.split(' ')[0] || null;
 
     await usersCollection.updateOne(
       {

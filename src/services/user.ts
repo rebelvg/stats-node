@@ -35,7 +35,7 @@ class UserService {
     const userMap: Record<string, IUserModel> = {};
 
     for (const userRecord of userRecords) {
-      userMap[userRecord._id?.toString()] = userRecord;
+      userMap[userRecord._id.toString()] = userRecord;
     }
 
     return userMap;

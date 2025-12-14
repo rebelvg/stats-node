@@ -16,13 +16,7 @@ const sortKeys = [
   'updatedAt',
 ] as const satisfies Array<keyof Partial<IIPModel>>;
 
-router.get(
-  '/:id',
-  isAdmin,
-  parseFilter('ip'),
-  parseSort([...sortKeys, 'api.country', 'api.city', 'api.isp']),
-  findById,
-);
+router.get('/:id', isAdmin, findById);
 router.get(
   '/',
   isAdmin,

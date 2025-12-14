@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { FindOptions, ObjectId } from 'mongodb';
+import { FindOptions, ObjectId, WithId } from 'mongodb';
 
 import { IStreamModel, Stream } from '../models/stream';
 import { filterSubscribers } from '../helpers/filter-subscribers';
@@ -24,7 +24,7 @@ class StreamService {
     );
   }
 
-  public async countViewersById(subscribers: ISubscriberModel[]) {
+  public async countViewersById(subscribers: WithId<ISubscriberModel>[]) {
     const totalConnectionsCount = subscribers.length;
     let peakViewersCount = 0;
 

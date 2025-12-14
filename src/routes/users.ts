@@ -103,6 +103,8 @@ router.get('/auth/google/callback', async (ctx, next) => {
     auth,
   });
 
+  const firstName = name?.split(' ')[0];
+
   const userRecord = await User.findOne({
     googleId: profile.sub,
   });
@@ -121,7 +123,7 @@ router.get('/auth/google/callback', async (ctx, next) => {
       streamKey: v4(),
 
       email: email || null,
-      name: name || null,
+      name: firstName || null,
       ipUpdated: ctx.ip,
     });
 
@@ -133,7 +135,7 @@ router.get('/auth/google/callback', async (ctx, next) => {
       { _id: userRecord._id },
       {
         email,
-        name,
+        name: firstName,
         ipUpdated: ctx.ip,
       },
     );

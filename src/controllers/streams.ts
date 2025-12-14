@@ -340,7 +340,7 @@ export async function graph(ctx: Router.RouterContext, next: Next) {
   let graph: {
     eventName: string;
     time: Date;
-    subscribers: (ObjectId | undefined)[];
+    subscribers: ObjectId[];
   }[] = [];
 
   graph.push({

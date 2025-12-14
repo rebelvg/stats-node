@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import { ISubscriberModel } from '../models/subscriber';
+import { WithId } from 'mongodb';
 
 export function filterSubscribers(
-  subscribers: ISubscriberModel[],
+  subscribers: WithId<ISubscriberModel>[],
   time: Date,
   include = false,
 ) {

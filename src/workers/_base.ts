@@ -208,7 +208,7 @@ export abstract class BaseWorker {
         const lastSubscribers = streamId
           ? await subscriberService.getByStreamId(streamId, {})
           : [];
-        const newSubscribers: ISubscriberModel[] = [];
+        const newSubscribers: WithId<ISubscriberModel>[] = [];
 
         for (const subscriber of subscribers) {
           const {
