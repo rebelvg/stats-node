@@ -7,42 +7,36 @@ export class KolpaqueEncodeServiceWorker extends BaseWorker {
   public map(data: IKolpaqueEncodePush['stats'], ip: string) {
     const stats: IGenericStreamsResponse[] = [];
 
-    _.forEach(data, (appStats) => {
-      const { app } = appStats;
-
-      const liveApp: IGenericStreamsResponse = {
+    _.forEach(data, ({ app, channels }) => {
+      const statsApp: IGenericStreamsResponse = {
         app,
         channels: [],
       };
 
-      _.forEach(appStats.channels, (channelStats) => {
-        const { channel } = channelStats;
-
-        const liveChannel: IGenericStreamsResponse['channels'][0] = {
+      _.forEach(channels, ({ channel, publisher, subscribers }) => {
+        const statsChannel: IGenericStreamsResponse['channels'][0] = {
           channel,
           publisher: null,
           subscribers: [],
         };
 
-        if (channelStats.publisher) {
-          liveChannel.publisher = {
-            ...channelStats.publisher,
+        if (publisher) {
+          statsChannel.publisher = {
+            ...publisher,
             ip,
             userId: null,
           };
         }
 
-        liveChannel.subscribers = channelStats.subscribers.map(
-          (subscriber) => ({
-            ...subscriber,
-            userId: null,
-          }),
-        );
+        statsChannel.subscribers = subscribers.map((subscriber) => ({
+          ...subscriber,
+          userId: null,
+        }));
 
-        liveApp.channels.push(liveChannel);
+        statsApp.channels.push(statsChannel);
       });
 
-      stats.push(liveApp);
+      stats.push(statsApp);
     });
 
     return stats;

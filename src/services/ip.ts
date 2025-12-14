@@ -8,9 +8,16 @@ class IPService {
   public async upsert(ip: string) {
     const currentTime = new Date();
 
-    const ipRecord = await IP.findOne({ ip });
+    let ipRecord = await IP.findOne({ ip });
 
-    if (ipRecord) {
+    if (!ipRecord) {
+      ipRecord = await IP.create({
+        api: null,
+        apiUpdatedAt: currentTime,
+        isLocked: false,
+        ip,
+      });
+    } else {
       if (ipRecord.isLocked) {
         return;
       }
@@ -25,17 +32,6 @@ class IPService {
     }
 
     const { data } = await axios.get<IIPModel['api']>(`${apiLink}/${ip}`);
-
-    if (!ipRecord) {
-      await IP.create({
-        api: data,
-        apiUpdatedAt: currentTime,
-        isLocked: false,
-        ip,
-      });
-
-      return;
-    }
 
     await IP.updateOne(
       { _id: ipRecord._id },

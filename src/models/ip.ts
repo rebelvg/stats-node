@@ -26,7 +26,7 @@ export interface IIPModel {
     timezone: string;
     zip: string;
     message: string;
-  };
+  } | null;
   createdAt: Date;
   updatedAt: Date;
   apiUpdatedAt: Date;
@@ -76,14 +76,20 @@ class IPModel {
     };
   }
 
-  create(data: Omit<IIPModel, 'createdAt' | 'updatedAt'>) {
+  async create(data: Omit<IIPModel, 'createdAt' | 'updatedAt'>) {
     const timestamp = new Date();
 
-    return this.collection.insertOne({
+    const { insertedId } = await this.collection.insertOne({
       ...data,
       createdAt: timestamp,
       updatedAt: timestamp,
     });
+
+    const record = await this.collection.findOne({
+      _id: insertedId,
+    });
+
+    return record!;
   }
 }
 

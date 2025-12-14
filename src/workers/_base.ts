@@ -21,7 +21,7 @@ export interface IGenericStreamsResponse {
       bytes: number;
       ip: string;
       protocol: string;
-      userId: ObjectId | null;
+      userId: string | null;
     } | null;
     subscribers: {
       connectId: string;
@@ -30,7 +30,7 @@ export interface IGenericStreamsResponse {
       bytes: number;
       ip: string;
       protocol: string;
-      userId: ObjectId | null;
+      userId: string | null;
     }[];
   }[];
 }
@@ -141,7 +141,7 @@ export abstract class BaseWorker {
             const { insertedId } = await Stream.create({
               ...streamQuery,
               protocol,
-              userId,
+              userId: userId ? new ObjectId(userId) : null,
               ip: sanitizedIp,
 
               connectUpdated,
@@ -228,7 +228,7 @@ export abstract class BaseWorker {
             const newSubscriber = await Subscriber.create({
               ...subscriberQuery,
               protocol,
-              userId,
+              userId: userId ? new ObjectId(userId) : null,
               ip: sanitizedIp,
 
               connectUpdated,

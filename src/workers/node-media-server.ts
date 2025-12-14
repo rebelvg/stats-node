@@ -10,7 +10,7 @@ interface IApiResponse {
     [channel: string]: {
       publisher: {
         clientId: string;
-        connectCreated: Date;
+        connectCreated: string;
         bytes: number;
         ip: string;
         audio: {
@@ -30,7 +30,7 @@ interface IApiResponse {
       };
       subscribers: {
         clientId: string;
-        connectCreated: Date;
+        connectCreated: string;
         bytes: number;
         ip: string;
         protocol: string;
@@ -54,47 +54,49 @@ class NodeMediaServerWorker extends BaseWorker {
 
     const stats: IGenericStreamsResponse[] = [];
 
-    _.forEach(data, (appStats, appName) => {
-      const liveApp: IGenericStreamsResponse = {
+    _.forEach(data, (app, appName) => {
+      const statsApp: IGenericStreamsResponse = {
         app: appName,
         channels: [],
       };
 
-      _.forEach(appStats, (channelStats, channelName) => {
-        const liveChannel: IGenericStreamsResponse['channels'][0] = {
+      _.forEach(app, ({ publisher, subscribers }, channelName) => {
+        const statsChannel: IGenericStreamsResponse['channels'][0] = {
           channel: channelName,
           publisher: null,
           subscribers: [],
         };
 
-        if (channelStats.publisher) {
-          const { clientId, ...publisher } = channelStats.publisher;
+        if (publisher) {
+          const { clientId, ...rest } = publisher;
 
-          liveChannel.publisher = {
-            ...publisher,
+          statsChannel.publisher = {
+            ...rest,
             connectId: clientId,
             protocol: 'rtmp',
+            connectCreated: new Date(publisher.connectCreated),
             connectUpdated,
             userId: null,
           };
         }
 
-        liveChannel.subscribers = channelStats.subscribers.map(
+        statsChannel.subscribers = subscribers.map(
           ({ clientId, ...subscriber }) => {
             return {
               ...subscriber,
               channel: channelName,
               connectId: clientId,
+              connectCreated: new Date(subscriber.connectCreated),
               connectUpdated,
               userId: null,
             };
           },
         );
 
-        liveApp.channels.push(liveChannel);
+        statsApp.channels.push(statsChannel);
       });
 
-      stats.push(liveApp);
+      stats.push(statsApp);
     });
 
     return stats;

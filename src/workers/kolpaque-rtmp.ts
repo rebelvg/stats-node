@@ -1,6 +1,5 @@
 import axios from 'axios';
 import _ from 'lodash';
-import { ObjectId } from 'mongodb';
 
 import { KOLPAQUE_RTMP } from '../config';
 
@@ -13,7 +12,7 @@ interface IApiResponse {
       channel: string;
       publisher: {
         connectId: string;
-        connectCreated: Date;
+        connectCreated: string;
         bytes: number;
         ip: string;
         protocol: string;
@@ -31,17 +30,17 @@ interface IApiResponse {
           channels: number;
         };
         meta: {
-          userId: ObjectId;
+          userId: string;
         };
       };
       subscribers: {
         connectId: string;
-        connectCreated: Date;
+        connectCreated: string;
         bytes: number;
         ip: string;
         protocol: string;
         meta: {
-          userId: ObjectId;
+          userId: string;
         };
       }[];
     }[];
@@ -68,7 +67,7 @@ class KolpaqueRtmpServiceWorker extends BaseWorker {
     _.forEach(data, (appStats) => {
       const { app } = appStats;
 
-      const liveApp: IGenericStreamsResponse = {
+      const statsApp: IGenericStreamsResponse = {
         app,
         channels: [],
       };
@@ -76,32 +75,34 @@ class KolpaqueRtmpServiceWorker extends BaseWorker {
       _.forEach(appStats.channels, (channelStats) => {
         const { channel } = channelStats;
 
-        const liveChannel: IGenericStreamsResponse['channels'][0] = {
+        const statsChannel: IGenericStreamsResponse['channels'][0] = {
           channel,
           publisher: null,
           subscribers: [],
         };
 
         if (channelStats.publisher) {
-          liveChannel.publisher = {
+          statsChannel.publisher = {
             ...channelStats.publisher,
             userId: channelStats.publisher.meta.userId,
+            connectCreated: new Date(channelStats.publisher.connectCreated),
             connectUpdated: timestamp,
           };
         }
 
-        liveChannel.subscribers = channelStats.subscribers.map(
+        statsChannel.subscribers = channelStats.subscribers.map(
           (subscriber) => ({
             ...subscriber,
             userId: subscriber.meta.userId,
+            connectCreated: new Date(subscriber.connectCreated),
             connectUpdated: timestamp,
           }),
         );
 
-        liveApp.channels.push(liveChannel);
+        statsApp.channels.push(statsChannel);
       });
 
-      stats.push(liveApp);
+      stats.push(statsApp);
     });
 
     return stats;
