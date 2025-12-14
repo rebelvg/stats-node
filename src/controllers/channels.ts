@@ -2,7 +2,6 @@ import { Next } from 'koa';
 import * as Router from '@koa/router';
 import _ from 'lodash';
 
-import { Subscriber } from '../models/subscriber';
 import { LIVE_STATS_CACHE } from '../workers';
 import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';

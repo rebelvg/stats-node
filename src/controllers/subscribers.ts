@@ -3,7 +3,6 @@ import * as Router from '@koa/router';
 import _ from 'lodash';
 
 import { Subscriber } from '../models/subscriber';
-import { IP } from '../models/ip';
 import { streamService } from '../services/stream';
 import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';

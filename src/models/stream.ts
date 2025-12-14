@@ -65,10 +65,6 @@ class StreamModel {
     return this.collection.find(filter, options).toArray();
   }
 
-  create(params: OptionalId<IStreamModel>) {
-    return this.collection.insertOne(params);
-  }
-
   async upsert(params: OptionalId<IStreamModel>) {
     if (params._id) {
       await this.collection.updateOne(
@@ -76,7 +72,10 @@ class StreamModel {
           _id: params._id,
         },
         {
-          ...params,
+          $set: {
+            ...params,
+            updatedAt: new Date(),
+          },
         },
       );
     } else {

@@ -40,7 +40,16 @@ class UserModel {
     data: Partial<IUserModel>,
     options?: UpdateOptions,
   ) {
-    return this.collection.updateOne(filter, data, options);
+    return this.collection.updateOne(
+      filter,
+      {
+        $set: {
+          ...data,
+          updatedAt: new Date(),
+        },
+      },
+      options,
+    );
   }
 
   find(params: Filter<IUserModel>, options?: FindOptions) {

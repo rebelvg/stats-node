@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { ObjectId } from 'mongodb';
+import * as ip6addr from 'ip6addr';
 
 import { ILiveStats, LIVE_STATS_CACHE } from '.';
 import { IWorkerConfig } from '../config';
@@ -8,6 +9,7 @@ import { IStreamModel, Stream } from '../models/stream';
 import { ISubscriberModel, Subscriber } from '../models/subscriber';
 import { channelService } from '../services/channel';
 import { streamService } from '../services/stream';
+import { ipService } from '../services/ip';
 
 export interface IGenericStreamsResponse {
   app: string;
@@ -127,11 +129,18 @@ export abstract class BaseWorker {
           streamRecord = await Stream.findOne(streamQuery);
 
           if (!streamRecord) {
+            const addr = ip6addr.parse(channelData.publisher.ip);
+
+            const ip =
+              addr.kind() === 'ipv6'
+                ? addr.toString({ format: 'v6' })
+                : addr.toString({ format: 'v4' });
+
             streamRecord = {
               ...streamQuery,
               connectUpdated: statsUpdateTime,
               bytes: channelData.publisher.bytes,
-              ip: channelData.publisher.ip,
+              ip,
               protocol: channelData.publisher.protocol,
               userId: channelData.publisher.userId,
               lastBitrate: 0,
@@ -144,6 +153,14 @@ export abstract class BaseWorker {
               createdAt: new Date(),
               updatedAt: new Date(),
             };
+
+            try {
+              await ipService.upsert(ip);
+            } catch (error) {
+              logger.error('stream_failed_to_save_ip', {
+                error,
+              });
+            }
           } else {
             const lastBitrate = streamService.calculateLastBitrate(
               channelData.publisher.bytes,
@@ -173,11 +190,18 @@ export abstract class BaseWorker {
             await Subscriber.findOne(subscriberQuery);
 
           if (!subscriberRecord) {
+            const addr = ip6addr.parse(channelData.publisher.ip);
+
+            const ip =
+              addr.kind() === 'ipv6'
+                ? addr.toString({ format: 'v6' })
+                : addr.toString({ format: 'v4' });
+
             subscriberRecord = {
               ...subscriberQuery,
               connectUpdated: statsUpdateTime,
               bytes: subscriber.bytes,
-              ip: subscriber.ip,
+              ip,
               protocol: subscriber.protocol,
               userId: subscriber.userId,
               duration: 0,
@@ -188,6 +212,14 @@ export abstract class BaseWorker {
               createdAt: new Date(),
               updatedAt: new Date(),
             };
+
+            try {
+              await ipService.upsert(ip);
+            } catch (error) {
+              logger.error('stream_failed_to_save_ip', {
+                error,
+              });
+            }
           } else {
             subscriberRecord.bytes = subscriber.bytes;
             subscriberRecord.connectUpdated = statsUpdateTime;
@@ -206,6 +238,21 @@ export abstract class BaseWorker {
           subscriberRecord.apiSource = this.apiSource;
           subscriberRecord.apiResponse = subscriber;
 
+          subscriberRecord.duration = Math.ceil(
+            (subscriberRecord.connectUpdated.valueOf() -
+              subscriberRecord.connectCreated.valueOf()) /
+              1000,
+          );
+
+          subscriberRecord.bitrate =
+            subscriberRecord.duration > 0
+              ? Math.ceil(
+                  (subscriberRecord.bytes * 8) /
+                    subscriberRecord.duration /
+                    1024,
+                )
+              : 0;
+
           await Subscriber.upsert(subscriberRecord);
 
           stats[appName][channelName].subscribers.push(subscriberRecord);
@@ -216,6 +263,17 @@ export abstract class BaseWorker {
             streamRecord._id,
           );
 
+          streamRecord.duration = Math.ceil(
+            (streamRecord.connectUpdated.valueOf() -
+              streamRecord.connectCreated.valueOf()) /
+              1000,
+          );
+          streamRecord.bitrate =
+            streamRecord.duration > 0
+              ? Math.ceil(
+                  (streamRecord.bytes * 8) / streamRecord.duration / 1024,
+                )
+              : 0;
           streamRecord.totalConnectionsCount =
             streamViewers.totalConnectionsCount;
           streamRecord.peakViewersCount = streamViewers.peakViewersCount;

@@ -26,8 +26,6 @@ if (!fs.existsSync('logs')) {
   fs.mkdirSync('logs');
 }
 
-// const logFileStream = fs.createWriteStream('./logs/access.log', { flags: 'a' });
-
 export const app = new Koa();
 
 app.proxy = true;
@@ -60,7 +58,6 @@ app.keys = [uuid.v4()];
 
 app.use(koaSession({ signed: true }, app));
 
-// app.use(koaMorgan('combined', { immediate: true, stream: process.stdout }));
 app.use(koaMorgan('short', { stream: process.stdout }));
 app.use(cors());
 

@@ -1,7 +1,6 @@
 import { ObjectId } from 'mongodb';
 
 import { IUserModel, User } from '../models/user';
-import { IFindStreamers } from './interfaces/user';
 
 class UserService {
   public getById(id: string) {
@@ -14,7 +13,7 @@ class UserService {
     });
   }
 
-  public async findStreamers(): Promise<IFindStreamers[]> {
+  public async findStreamers() {
     const streamers = await User.find({ isStreamer: true });
 
     return streamers.map(({ _id, name, streamKey }) => ({

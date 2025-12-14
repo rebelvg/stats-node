@@ -49,15 +49,20 @@ class SubscriberModel {
     data: Partial<ISubscriberModel>,
     options?: UpdateOptions,
   ) {
-    return this.collection.updateOne(filter, data, options);
+    return this.collection.updateOne(
+      filter,
+      {
+        $set: {
+          ...data,
+          updatedAt: new Date(),
+        },
+      },
+      options,
+    );
   }
 
   find(filter: Filter<ISubscriberModel>, options?: FindOptions) {
     return this.collection.find(filter, options).toArray();
-  }
-
-  create(params: OptionalId<ISubscriberModel>) {
-    return this.collection.insertOne(params);
   }
 
   async upsert(params: OptionalId<ISubscriberModel>) {
@@ -67,7 +72,10 @@ class SubscriberModel {
           _id: params._id,
         },
         {
-          ...params,
+          $set: {
+            ...params,
+            updatedAt: new Date(),
+          },
         },
       );
     } else {

@@ -50,7 +50,16 @@ class IPModel {
     data: Partial<IIPModel>,
     options?: UpdateOptions,
   ) {
-    return this.collection.updateOne(filter, data, options);
+    return this.collection.updateOne(
+      filter,
+      {
+        $set: {
+          ...data,
+          updatedAt: new Date(),
+        },
+      },
+      options,
+    );
   }
 
   distinct<T>(key: string, filter: Filter<IIPModel>) {

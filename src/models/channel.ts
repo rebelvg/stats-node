@@ -38,7 +38,16 @@ class ChannelModel {
     data: Partial<IChannelModel>,
     options?: UpdateOptions,
   ) {
-    return this.collection.updateOne(filter, data, options);
+    return this.collection.updateOne(
+      filter,
+      {
+        $set: {
+          ...data,
+          updatedAt: new Date(),
+        },
+      },
+      options,
+    );
   }
 
   find(params: Partial<IChannelModel>, options?: FindOptions) {

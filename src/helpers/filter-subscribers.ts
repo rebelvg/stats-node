@@ -1,6 +1,11 @@
 import _ from 'lodash';
+import { ISubscriberModel } from '../models/subscriber';
 
-export function filterSubscribers(subscribers, time, include = false) {
+export function filterSubscribers(
+  subscribers: ISubscriberModel[],
+  time: Date,
+  include = false,
+) {
   const compareFnc = include ? _.gte : _.gt;
 
   return _.filter(subscribers, (subscriber) => {

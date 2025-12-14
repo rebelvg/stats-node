@@ -3,7 +3,6 @@ import * as Router from '@koa/router';
 import _ from 'lodash';
 
 import { Stream } from '../models/stream';
-import { IP } from '../models/ip';
 import { filterSubscribers } from '../helpers/filter-subscribers';
 import { streamService } from '../services/stream';
 import { subscriberService } from '../services/subscriber';
@@ -38,11 +37,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
   });
 
   const options = {
-    countries: _
-      .concat
-      // _.chain(subscribers).map('location.api.country').compact().uniq().value(),
-      // _.chain(subscribers).map('location.api.message').compact().uniq().value(),
-      (),
+    countries: [],
     protocols: _.chain(subscribers).map('protocol').uniq().value(),
   };
 
