@@ -1,0 +1,842 @@
+openapi: 3.0.3
+info:
+  title: Stats API
+  version: 1.0.0
+  description: Endpoints exposed by src/app.ts (Koa).
+servers:
+  - url: http://localhost:8000
+security:
+  - TokenAuth: []
+  - JwtAuth: []
+components:
+  securitySchemes:
+    TokenAuth:
+      type: apiKey
+      in: header
+      name: token
+    JwtAuth:
+      type: apiKey
+      in: header
+      name: jwt-token
+    PushAuth:
+      type: apiKey
+      in: header
+      name: authorization
+  schemas:
+    Stream:
+      type: object
+      properties:
+        _id: { type: string }
+        server: { type: string }
+        app: { type: string }
+        channel: { type: string }
+        connectId: { type: string }
+        connectCreated: { type: string, format: date-time }
+        connectUpdated: { type: string, format: date-time }
+        bytes: { type: number }
+        ip: { type: string }
+        protocol: { type: string }
+        lastBitrate: { type: number }
+        userId: { type: string, nullable: true }
+        totalConnectionsCount: { type: number }
+        peakViewersCount: { type: number }
+        duration: { type: number }
+        bitrate: { type: number }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        isLive: { type: boolean }
+        userName: { type: string, nullable: true }
+    Subscriber:
+      type: object
+      properties:
+        _id: { type: string }
+        server: { type: string }
+        app: { type: string }
+        channel: { type: string }
+        connectId: { type: string }
+        connectCreated: { type: string, format: date-time }
+        connectUpdated: { type: string, format: date-time }
+        bytes: { type: number }
+        ip: { type: string }
+        protocol: { type: string }
+        userId: { type: string, nullable: true }
+        streamIds:
+          type: array
+          items: { type: string }
+        duration: { type: number }
+        bitrate: { type: number }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        isLive: { type: boolean }
+    User:
+      type: object
+      properties:
+        _id: { type: string }
+        googleId: { type: string, nullable: true }
+        email: { type: string, nullable: true }
+        name: { type: string, nullable: true }
+        ipCreated: { type: string }
+        ipUpdated: { type: string }
+        isAdmin: { type: boolean }
+        isStreamer: { type: boolean }
+        token: { type: string }
+        streamKey: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    IP:
+      type: object
+      properties:
+        _id: { type: string }
+        ip: { type: string }
+        api:
+          type: object
+          additionalProperties: true
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        apiUpdatedAt: { type: string, format: date-time }
+        isLocked: { type: boolean }
+    ChannelStreamSummary:
+      type: object
+      properties:
+        isLive: { type: boolean }
+        _id: { type: string }
+        app: { type: string }
+        server: { type: string }
+        viewers: { type: integer }
+        duration: { type: number }
+        bitrate: { type: number }
+        lastBitrate: { type: number }
+        startTime: { type: string, format: date-time }
+        name: { type: string, nullable: true }
+    Paginated:
+      type: object
+      properties:
+        total: { type: integer }
+        limit: { type: integer }
+        page: { type: integer }
+        pages: { type: integer }
+    GraphEvent:
+      type: object
+      properties:
+        eventName: { type: string }
+        time: { type: string, format: date-time }
+        subscribers:
+          type: array
+          items: { type: string }
+paths:
+  /channels:
+    get:
+      summary: List all channels with live streams (admin only)
+      security:
+        - TokenAuth: []
+        - JwtAuth: []
+      responses:
+        '200':
+          description: Channel + live stream snapshot
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  channels:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        streams:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/ChannelStreamSummary'
+  /channels/{channel}:
+    get:
+      summary: List live streams in a channel
+      parameters:
+        - name: channel
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  streams:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChannelStreamSummary'
+  /streams:
+    get:
+      summary: List streams (public channels only for non-admins)
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: sort
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                [
+                  '_id',
+                  '-_id',
+                  'app',
+                  '-app',
+                  'bitrate',
+                  '-bitrate',
+                  'bytes',
+                  '-bytes',
+                  'channel',
+                  '-channel',
+                  'connectCreated',
+                  '-connectCreated',
+                  'connectId',
+                  '-connectId',
+                  'connectUpdated',
+                  '-connectUpdated',
+                  'createdAt',
+                  '-createdAt',
+                  'duration',
+                  '-duration',
+                  'ip',
+                  '-ip',
+                  'lastBitrate',
+                  '-lastBitrate',
+                  'peakViewersCount',
+                  '-peakViewersCount',
+                  'protocol',
+                  '-protocol',
+                  'server',
+                  '-server',
+                  'totalConnectionsCount',
+                  '-totalConnectionsCount',
+                  'updatedAt',
+                  '-updatedAt',
+                  'userId',
+                  '-userId',
+                ]
+        - name: app
+          in: query
+          schema: { type: string }
+        - name: channel
+          in: query
+          schema: { type: string }
+        - name: connectCreated
+          in: query
+          schema: { type: string }
+          description: Date/Unix convertible; filters connectCreated >= value
+        - name: connectUpdated
+          in: query
+          schema: { type: string }
+          description: Date/Unix convertible; filters connectUpdated >= value
+        - name: bytes
+          in: query
+          schema: { type: number }
+          description: Minimum MB
+        - name: protocol
+          in: query
+          schema: { type: string }
+        - name: duration
+          in: query
+          schema: { type: number }
+          description: Minimum minutes
+        - name: bitrate
+          in: query
+          schema: { type: number }
+          description: Minimum bitrate
+        - name: totalConnectionsCount
+          in: query
+          schema: { type: number }
+        - name: peakViewersCount
+          in: query
+          schema: { type: number }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Paginated'
+                  - type: object
+                    properties:
+                      streams:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Stream'
+                      options:
+                        type: object
+                        properties:
+                          apps: { type: array, items: { type: string } }
+                          channels: { type: array, items: { type: string } }
+                          countries: { type: array, items: { type: string } }
+                          protocols: { type: array, items: { type: string } }
+                      info:
+                        type: object
+                        properties:
+                          totalBytes: { type: number }
+                          totalDuration: { type: number }
+                          totalConnections: { type: number }
+                          totalPeakViewers: { type: number }
+                          totalIPs: { type: number }
+  /streams/{id}:
+    get:
+      summary: Get a stream with subscribers + related streams
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: protocol
+          in: query
+          schema: { type: string }
+        - name: connectCreated
+          in: query
+          schema: { type: string }
+          description: Date/Unix convertible; filters subscribers by connectCreated >= value
+        - name: connectUpdated
+          in: query
+          schema: { type: string }
+        - name: duration
+          in: query
+          schema: { type: number }
+          description: Subscriber duration minimum minutes
+        - name: bitrate
+          in: query
+          schema: { type: number }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stream: { $ref: '#/components/schemas/Stream' }
+                  subscribers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Subscriber'
+                  relatedStreams:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Stream'
+                  options:
+                    type: object
+                    properties:
+                      countries: { type: array, items: { type: string } }
+                      protocols: { type: array, items: { type: string } }
+                  info:
+                    type: object
+                    properties:
+                      totalBytes: { type: number }
+                      totalDuration: { type: number }
+                      totalPeakViewers: { type: number }
+                      totalIPs: { type: number }
+  /streams/{id}/graph:
+    get:
+      summary: Stream timeline events
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GraphEvent'
+  /subscribers:
+    get:
+      summary: List subscribers (public channels only for non-admins)
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: sort
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                [
+                  '_id',
+                  '-_id',
+                  'app',
+                  '-app',
+                  'bitrate',
+                  '-bitrate',
+                  'bytes',
+                  '-bytes',
+                  'channel',
+                  '-channel',
+                  'connectCreated',
+                  '-connectCreated',
+                  'connectId',
+                  '-connectId',
+                  'connectUpdated',
+                  '-connectUpdated',
+                  'createdAt',
+                  '-createdAt',
+                  'duration',
+                  '-duration',
+                  'ip',
+                  '-ip',
+                  'protocol',
+                  '-protocol',
+                  'server',
+                  '-server',
+                  'updatedAt',
+                  '-updatedAt',
+                  'userId',
+                  '-userId',
+                ]
+        - name: app
+          in: query
+          schema: { type: string }
+        - name: channel
+          in: query
+          schema: { type: string }
+        - name: connectCreated
+          in: query
+          schema: { type: string }
+        - name: connectUpdated
+          in: query
+          schema: { type: string }
+        - name: bytes
+          in: query
+          schema: { type: number }
+          description: Minimum MB
+        - name: protocol
+          in: query
+          schema: { type: string }
+        - name: duration
+          in: query
+          schema: { type: number }
+          description: Minimum minutes
+        - name: bitrate
+          in: query
+          schema: { type: number }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Paginated'
+                  - type: object
+                    properties:
+                      subscribers:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Subscriber'
+                      options:
+                        type: object
+                        properties:
+                          apps: { type: array, items: { type: string } }
+                          channels: { type: array, items: { type: string } }
+                          countries: { type: array, items: { type: string } }
+                          protocols: { type: array, items: { type: string } }
+                      info:
+                        type: object
+                        properties:
+                          totalBytes: { type: number }
+                          totalDuration: { type: number }
+                          totalIPs: { type: number }
+  /subscribers/{id}:
+    get:
+      summary: Get subscriber + related streams
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subscriber: { $ref: '#/components/schemas/Subscriber' }
+                  streams:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Stream'
+  /ips:
+    get:
+      summary: List IPs (admin only)
+      security:
+        - TokenAuth: []
+        - JwtAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: sort
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                [
+                  '_id',
+                  '-_id',
+                  'ip',
+                  '-ip',
+                  'apiUpdatedAt',
+                  '-apiUpdatedAt',
+                  'createdAt',
+                  '-createdAt',
+                  'updatedAt',
+                  '-updatedAt',
+                  'api.country',
+                  '-api.country',
+                  'api.city',
+                  '-api.city',
+                  'api.isp',
+                  '-api.isp',
+                ]
+        - name: createdAt
+          in: query
+          schema: { type: string }
+          description: Date/Unix convertible; filters createdAt >= value
+        - name: ip
+          in: query
+          schema: { type: string }
+          description: Regex match against ip
+        - name: api.country
+          in: query
+          schema: { type: string }
+        - name: api.city
+          in: query
+          schema: { type: string }
+        - name: api.isp
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Paginated'
+                  - type: object
+                    properties:
+                      ips:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/IP'
+                      options:
+                        type: object
+                        properties:
+                          countries: { type: array, items: { type: string } }
+                          cities: { type: array, items: { type: string } }
+                          ISPs: { type: array, items: { type: string } }
+                      info:
+                        type: object
+                        properties:
+                          totalCountries: { type: number }
+                          totalCities: { type: number }
+                          totalISPs: { type: number }
+  /ips/{id}:
+    get:
+      summary: Get IP by id (admin only)
+      security:
+        - TokenAuth: []
+        - JwtAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ip:
+                    $ref: '#/components/schemas/IP'
+  /users/validate:
+    get:
+      summary: Validate token/jwt-token (must be logged in)
+      security:
+        - TokenAuth: []
+        - JwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { type: object }
+  /users/refresh:
+    get:
+      summary: Issue a JWT for current user
+      security:
+        - TokenAuth: []
+        - JwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jwtToken: { type: string }
+  /users:
+    get:
+      summary: Return current user
+      security:
+        - TokenAuth: []
+        - JwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+  /users/{id}:
+    get:
+      summary: Get user by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+  /users/auth/google:
+    get:
+      summary: Start Google OAuth
+      parameters:
+        - name: redirectUri
+          in: query
+          required: true
+          schema: { type: string }
+        - name: scopes
+          in: query
+          schema: { type: string }
+          description: Comma-separated (include "youtube" to add YouTube scope)
+      responses:
+        '301':
+          description: Redirect to Google auth URL
+  /users/auth/google/callback:
+    get:
+      summary: Google OAuth callback
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '302':
+          description: Redirects to saved redirectUri with jwtToken appended
+  /admin/users:
+    get:
+      summary: List users (admin only)
+      security:
+        - TokenAuth: []
+        - JwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items: { $ref: '#/components/schemas/User' }
+  /admin/users/{id}:
+    put:
+      summary: Update user fields (admin only)
+      security:
+        - TokenAuth: []
+        - JwtAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Partial IUserModel; fields like isAdmin, isStreamer, email, name, token, streamKey, ipCreated, ipUpdated
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+  /admin/streamers:
+    get:
+      summary: List streamers (admin only)
+      security:
+        - TokenAuth: []
+        - JwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  streamers:
+                    type: array
+                    items: { type: object }
+  /admin/channels:
+    get:
+      summary: List channels (admin only)
+      security:
+        - TokenAuth: []
+        - JwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  channels:
+                    type: array
+                    items: { type: object }
+  /admin/channels/{id}:
+    put:
+      summary: Update channel type (admin only)
+      security:
+        - TokenAuth: []
+        - JwtAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [PUBLIC, PRIVATE]
+      responses:
+        '201':
+          description: Channel updated
+  /graphs:
+    get:
+      summary: Aggregate stats across streams/subscribers
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /graphs/{id}:
+    get:
+      summary: Aggregate stats for a specific userId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /push/kolpaque-encode:
+    post:
+      summary: Push ingest stats (Kolpaque encode)
+      security:
+        - PushAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stats:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      app: { type: string }
+                      channels:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            channel: { type: string }
+                            publisher:
+                              type: object
+                              properties:
+                                connectId: { type: string }
+                                connectCreated:
+                                  { type: string, format: date-time }
+                                connectUpdated:
+                                  { type: string, format: date-time }
+                                bytes: { type: number }
+                                protocol: { type: string }
+                            subscribers:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  connectId: { type: string }
+                                  connectCreated:
+                                    { type: string, format: date-time }
+                                  connectUpdated:
+                                    { type: string, format: date-time }
+                                  bytes: { type: number }
+                                  ip: { type: string }
+                                  protocol: { type: string }
+      responses:
+        '200':
+          description: Accepted; no response body set
