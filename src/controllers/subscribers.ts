@@ -10,6 +10,7 @@ import { IChannelServerStats } from './channels';
 import { userService } from '../services/user';
 import { ObjectId } from 'mongodb';
 import { IUserModel } from '../models/user';
+import { LIVE_STATS_CACHE } from '../workers';
 
 export async function findById(ctx: Router.RouterContext, next: Next) {
   const subscriber = await Subscriber.findOne({
@@ -23,6 +24,10 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
   const streams = await streamService.getBySubscriberIds(subscriber.streamIds, {
     sort: { connectCreated: 1 },
   });
+
+  const isLive = !!LIVE_STATS_CACHE[subscriber.server][subscriber.app][
+    subscriber.channel
+  ].subscribers.find((s) => s._id === subscriber._id);
 
   const subscriberResponse: IChannelServerStats['apps'][0]['channels'][0]['subscribers'][0] =
     {
@@ -41,7 +46,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
       bitrate: subscriber.bitrate,
       createdAt: subscriber.createdAt,
       updatedAt: subscriber.updatedAt,
-      isLive: true,
+      isLive,
       ip: null,
       countryCode: null,
       city: null,
@@ -59,6 +64,10 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
         if (stream.userId) {
           userRecord = userMap[stream.userId.toString()] || null;
         }
+
+        const isLive =
+          !!LIVE_STATS_CACHE[stream.server][stream.app][stream.channel]
+            .publisher;
 
         return {
           _id: stream._id.toString(),
@@ -78,7 +87,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
           bitrate: stream.bitrate,
           createdAt: stream.createdAt,
           updatedAt: stream.updatedAt,
-          isLive: true,
+          isLive,
           userName: userRecord?.name || null,
           ip: null,
           countryCode: null,
@@ -144,6 +153,10 @@ export async function find(ctx: Router.RouterContext, next: Next) {
 
   const subscribers: IChannelServerStats['apps'][0]['channels'][0]['subscribers'][0][] =
     paginatedSubscribers.docs.map((subscriber) => {
+      const isLive = !!LIVE_STATS_CACHE[subscriber.server][subscriber.app][
+        subscriber.channel
+      ].subscribers.find((s) => s._id === subscriber._id);
+
       return {
         _id: subscriber._id.toString(),
         server: subscriber.server,
@@ -160,7 +173,7 @@ export async function find(ctx: Router.RouterContext, next: Next) {
         bitrate: subscriber.bitrate,
         createdAt: subscriber.createdAt,
         updatedAt: subscriber.updatedAt,
-        isLive: true,
+        isLive,
         ip: null,
         countryCode: null,
         city: null,

@@ -80,6 +80,9 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
     userRecord = await userService.getById(stream.userId.toString());
   }
 
+  const isLive =
+    !!LIVE_STATS_CACHE[stream.server][stream.app][stream.channel].publisher;
+
   const streamResponse: IChannelServerStats['apps'][0]['channels'][0]['publisher'] =
     {
       _id: stream._id.toString(),
@@ -99,7 +102,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
       bitrate: stream.bitrate,
       createdAt: stream.createdAt,
       updatedAt: stream.updatedAt,
-      isLive: true,
+      isLive,
       userName: userRecord?.name || null,
       ip: null,
       countryCode: null,
@@ -108,6 +111,10 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
 
   const subscribersResponse: IChannelServerStats['apps'][0]['channels'][0]['subscribers'][0][] =
     subscribers.map((subscriber) => {
+      const isLive = !!LIVE_STATS_CACHE[subscriber.server][subscriber.app][
+        subscriber.channel
+      ].subscribers.find((s) => s._id === subscriber._id);
+
       return {
         _id: subscriber._id.toString(),
         server: subscriber.server,
@@ -125,7 +132,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
         bitrate: subscriber.bitrate,
         createdAt: subscriber.createdAt,
         updatedAt: subscriber.updatedAt,
-        isLive: true,
+        isLive,
         countryCode: null,
         city: null,
       };
@@ -146,6 +153,10 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
           userRecord = userMap[stream.userId.toString()] || null;
         }
 
+        const isLive =
+          !!LIVE_STATS_CACHE[stream.server][stream.app][stream.channel]
+            .publisher;
+
         return {
           _id: stream._id.toString(),
           server: stream.server,
@@ -164,7 +175,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
           bitrate: stream.bitrate,
           createdAt: stream.createdAt,
           updatedAt: stream.updatedAt,
-          isLive: true,
+          isLive,
           userName: userRecord?.name || null,
           ip: null,
           countryCode: null,
@@ -255,6 +266,10 @@ export async function find(ctx: Router.RouterContext, next: Next) {
           userRecord = userMap[stream.userId.toString()] || null;
         }
 
+        const isLive =
+          !!LIVE_STATS_CACHE[stream.server][stream.app][stream.channel]
+            .publisher;
+
         return {
           _id: stream._id.toString(),
           server: stream.server,
@@ -273,7 +288,7 @@ export async function find(ctx: Router.RouterContext, next: Next) {
           bitrate: stream.bitrate,
           createdAt: stream.createdAt,
           updatedAt: stream.updatedAt,
-          isLive: true,
+          isLive,
           userName: userRecord?.name || null,
           ip: null,
           countryCode: null,
