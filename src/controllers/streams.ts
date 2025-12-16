@@ -195,21 +195,15 @@ export async function find(ctx: Router.RouterContext, next: Next) {
 
     const channelNames = channels.map((c) => c.name);
 
-    if (ctx.state.query.$and) {
-      ctx.state.query.$and.push({
-        channel: {
-          $in: channelNames,
-        },
-      });
-    } else {
-      ctx.state.query.$and = [
-        {
-          channel: {
-            $in: channelNames,
-          },
-        },
-      ];
+    if (!ctx.state.query.$and) {
+      ctx.state.query.$and = [];
     }
+
+    ctx.state.query.$and.push({
+      channel: {
+        $in: channelNames,
+      },
+    });
   }
 
   const limit = parseInt(ctx.query.limit as string) || 20;

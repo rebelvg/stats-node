@@ -63,6 +63,7 @@ router.get('/', async (ctx) => {
               app,
               server,
               userId,
+              protocol,
             }) => {
               const userRecord = userId
                 ? await User.findOne({
@@ -90,6 +91,7 @@ router.get('/', async (ctx) => {
                 bitrate,
                 lastBitrate,
                 startTime: connectCreated,
+                protocol,
                 userName: userRecord?.name || null,
               };
             },
@@ -134,6 +136,7 @@ router.get('/:channel', async (ctx) => {
         app,
         server,
         userId,
+        protocol,
       }) => {
         const userRecord = userId
           ? await User.findOne({
@@ -160,6 +163,7 @@ router.get('/:channel', async (ctx) => {
           bitrate,
           lastBitrate,
           startTime: connectCreated,
+          protocol,
           userName: userRecord?.name || null,
         };
       },
