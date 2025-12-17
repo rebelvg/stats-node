@@ -156,6 +156,7 @@ router.get('/:channel', async (ctx) => {
         return {
           isLive: true,
           _id,
+          name: channel,
           app,
           server,
           viewers: subscribers.length,
