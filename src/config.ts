@@ -1,9 +1,4 @@
-import { env } from './env';
-
-export interface IWorkerConfig {
-  API_ORIGIN: string;
-  API_SECRET: string;
-}
+import { env, ServiceTypeEnum } from './env';
 
 export const API = {
   PORT: env.API.PORT,
@@ -17,13 +12,21 @@ export const GOOGLE_OAUTH = {
   CLIENT_SECRET: env.GOOGLE_OAUTH.CLIENT_SECRET,
 };
 
-export const KOLPAQUE_RTMP: IWorkerConfig[] = env.KOLPAQUE_RTMP;
+export const KOLPAQUE_RTMP = env.SERVICES.filter(
+  (s) => s.TYPE === ServiceTypeEnum.KOLPAQUE_RTMP,
+);
 
-export const KOLPAQUE_ENCODE: IWorkerConfig[] = env.KOLPAQUE_ENCODE;
+export const KOLPAQUE_ENCODE = env.SERVICES.filter(
+  (s) => s.TYPE === ServiceTypeEnum.KOLPAQUE_ENCODE,
+);
 
-export const NODE_MEDIA_SERVER: IWorkerConfig[] = env.NODE_MEDIA_SERVER;
+export const NODE_MEDIA_SERVER = env.SERVICES.filter(
+  (s) => s.TYPE === ServiceTypeEnum.NODE_MEDIA_SERVER,
+);
 
-export const ADOBE_MEDIA_SERVER: IWorkerConfig[] = env.ADOBE_MEDIA_SERVER;
+export const ADOBE_MEDIA_SERVER = env.SERVICES.filter(
+  (s) => s.TYPE === ServiceTypeEnum.ADOBE_MEDIA_SERVER,
+);
 
 export const JWT = {
   SECRET: env.JWT.SECRET,

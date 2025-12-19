@@ -2,13 +2,13 @@ import _ from 'lodash';
 import { ObjectId, WithId } from 'mongodb';
 import * as ip6addr from 'ip6addr';
 
-import { IWorkerConfig } from '../config';
 import { logger } from '../helpers/logger';
 import { Stream } from '../models/stream';
 import { ISubscriberModel, Subscriber } from '../models/subscriber';
 import { streamService } from '../services/stream';
 import { ipService } from '../services/ip';
 import { subscriberService } from '../services/subscriber';
+import { IWorkerConfig } from '../env';
 
 export interface IGenericStreamsResponse {
   app: string;
