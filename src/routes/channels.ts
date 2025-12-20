@@ -42,6 +42,28 @@ router.get('/', async (ctx) => {
     },
   );
 
+  const subscriberRecordAll = await Subscriber.find(
+    {
+      connectUpdated: {
+        $gt: lastTimestamp,
+      },
+      streamIds: {
+        $in: streamRecordsAll.map((s) => s._id),
+      },
+    },
+    {
+      sort: {
+        connectCreated: -1,
+      },
+    },
+  );
+
+  const userRecordsAll = await User.find({
+    _id: {
+      $in: streamRecordsAll.map((s) => s.userId!),
+    },
+  });
+
   const channelNames = _.chain(streamRecordsAll)
     .map((s) => s.channel)
     .uniq()
@@ -53,49 +75,24 @@ router.get('/', async (ctx) => {
 
       return {
         streams: await Promise.all(
-          streamRecords.map(
-            async ({
-              _id,
-              duration,
-              bitrate,
-              lastBitrate,
-              connectCreated,
-              app,
-              server,
-              userId,
-              protocol,
-            }) => {
-              const userRecord = userId
-                ? await User.findOne({
-                    _id: new ObjectId(userId),
-                  })
-                : null;
+          streamRecords.map((stream) => {
+            const userRecord = _.find(
+              userRecordsAll,
+              (u) => u._id.toString() === stream.userId?.toString(),
+            );
 
-              const subscribers = await Subscriber.find({
-                streamIds: {
-                  $in: [_id],
-                },
-                connectUpdated: {
-                  $gte: lastTimestamp,
-                },
-              });
+            const subscribers = _.filter(subscriberRecordAll, (s) =>
+              s.streamIds
+                .map((id) => id.toString())
+                .includes(stream._id.toString()),
+            );
 
-              return {
-                isLive: true,
-                _id,
-                name: channel,
-                app,
-                viewers: subscribers.length,
-                duration,
-                bitrate,
-                lastBitrate,
-                startTime: connectCreated,
-                protocol,
-                userName: userRecord?.name || null,
-                origin: server,
-              };
-            },
-          ),
+            return {
+              ...stream,
+              userName: userRecord?.name || null,
+              subscribers,
+            };
+          }),
         ),
       };
     }),

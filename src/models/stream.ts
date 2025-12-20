@@ -66,7 +66,7 @@ class StreamModel {
   }
 
   find(filter: Filter<IStreamModel>, options?: FindOptions) {
-    return this.collection.find<IStreamModel>(filter, options).toArray();
+    return this.collection.find(filter, options).toArray();
   }
 
   aggregate(query: any[]) {
