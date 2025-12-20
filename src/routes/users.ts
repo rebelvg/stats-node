@@ -10,6 +10,12 @@ import { API, GOOGLE_OAUTH } from '../config';
 import * as google from 'googleapis/build/src/apis/oauth2';
 import { v4 } from 'uuid';
 
+const client = new OAuth2Client({
+  clientId: GOOGLE_OAUTH.CLIENT_ID,
+  clientSecret: GOOGLE_OAUTH.CLIENT_SECRET,
+  redirectUri: `${API.GOOGLE_CALLBACK_HOST}/v1/users/auth/google/callback`,
+});
+
 export const router = new Router();
 
 router.get('/validate', isLoggedIn, (ctx: RouterContext, next: Next) => {
@@ -47,12 +53,6 @@ router.get('/auth/google', async (ctx, next) => {
 
   ctx.session.redirectUri = decodeURIComponent(redirectUri as string);
 
-  const client = new OAuth2Client({
-    clientId: GOOGLE_OAUTH.CLIENT_ID,
-    clientSecret: GOOGLE_OAUTH.CLIENT_SECRET,
-    redirectUri: `${API.GOOGLE_CALLBACK_HOST}/users/auth/google/callback`,
-  });
-
   const scope = ['https://www.googleapis.com/auth/userinfo.profile'];
 
   if (scopes?.split(',').includes('youtube')) {
@@ -73,12 +73,6 @@ router.get('/auth/google', async (ctx, next) => {
 router.get('/auth/google/callback', async (ctx, next) => {
   const { code } = ctx.query as Record<string, string>;
 
-  const client = new OAuth2Client({
-    clientId: GOOGLE_OAUTH.CLIENT_ID,
-    clientSecret: GOOGLE_OAUTH.CLIENT_SECRET,
-    redirectUri: `${API.GOOGLE_CALLBACK_HOST}/users/auth/google/callback`,
-  });
-
   const { tokens } = await client.getToken(code);
 
   if (!tokens.access_token) {
@@ -87,20 +81,14 @@ router.get('/auth/google/callback', async (ctx, next) => {
 
   const profile = await client.getTokenInfo(tokens.access_token);
 
-  const auth = new google.auth.OAuth2({
-    clientId: GOOGLE_OAUTH.CLIENT_ID,
-    clientSecret: GOOGLE_OAUTH.CLIENT_SECRET,
-    redirectUri: `${API.GOOGLE_CALLBACK_HOST}/users/auth/google/callback`,
-  });
-
-  auth.setCredentials({
+  client.setCredentials({
     access_token: tokens.access_token,
   });
 
   const {
     data: { name, email },
   } = await google.oauth2('v2').userinfo.get({
-    auth,
+    auth: client,
   });
 
   const firstName = name?.split(' ')[0];
@@ -111,10 +99,8 @@ router.get('/auth/google/callback', async (ctx, next) => {
 
   let userId: string | null = null;
 
-  profile.email;
-
   if (!userRecord) {
-    const newUserId = await User.create({
+    const { insertedId } = await User.create({
       googleId: profile.sub || null,
       ipCreated: ctx.ip,
       isAdmin: false,
@@ -127,7 +113,7 @@ router.get('/auth/google/callback', async (ctx, next) => {
       ipUpdated: ctx.ip,
     });
 
-    userId = newUserId.toString();
+    userId = insertedId.toString();
   } else {
     userId = userRecord._id.toString();
 

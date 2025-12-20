@@ -62,6 +62,8 @@ export default [
       '@typescript-eslint/return-await': 'error',
       'object-shorthand': 'error',
       'no-useless-rename': 'error',
+      '@typescript-eslint/no-base-to-string': 'error',
+      '@typescript-eslint/no-unused-expressions': 'error',
     },
   },
 ];

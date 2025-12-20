@@ -4,7 +4,6 @@ import _ from 'lodash';
 
 import { IUserModel, User } from '../../models/user';
 import { ObjectId } from 'mongodb';
-import { Stream } from '../../models/stream';
 
 export async function find(ctx: Router.RouterContext, next: Next) {
   const users = await User.find(
@@ -34,7 +33,7 @@ export async function update(ctx: Router.RouterContext, next: Next) {
   );
 
   ctx.body = {
-    user: await Stream.findOne({
+    user: await User.findOne({
       _id: new ObjectId(ctx.params.id),
     }),
   };
