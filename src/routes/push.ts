@@ -4,6 +4,7 @@ import _ from 'lodash';
 
 import { KolpaqueEncodeServiceWorker } from '../workers/kolpaque-encode';
 import { KOLPAQUE_ENCODE } from '../config';
+import { ServiceTypeEnum } from '../env';
 
 export const router = new Router();
 
@@ -41,9 +42,14 @@ export type IKolpaqueEncodePush = z.infer<typeof KolpaqueEncodePushSchema>;
 
 router.post('/kolpaque-encode', async (ctx, next) => {
   const { body } = ctx.request;
-  const { authorization } = ctx.headers;
+  const { ['push-token']: pushToken } = ctx.headers as {
+    ['push-token']: string;
+  };
 
-  const service = _.find(KOLPAQUE_ENCODE, { API_SECRET: authorization });
+  const service = _.find(KOLPAQUE_ENCODE, {
+    TYPE: ServiceTypeEnum.KOLPAQUE_ENCODE,
+    API_SECRET: pushToken,
+  });
 
   if (!service) {
     throw new Error('bad_token');
@@ -56,4 +62,6 @@ router.post('/kolpaque-encode', async (ctx, next) => {
   const mappedStats = worker.map(stats, ctx.request.ip);
 
   await worker.processStats(mappedStats, service);
+
+  ctx.status = 201;
 });
