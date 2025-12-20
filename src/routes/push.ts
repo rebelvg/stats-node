@@ -55,7 +55,5 @@ router.post('/kolpaque-encode', async (ctx, next) => {
 
   const mappedStats = worker.map(stats, ctx.request.ip);
 
-  const { host } = new URL(service.API_ORIGIN);
-
-  await worker.processStats(mappedStats, host);
+  await worker.processStats(mappedStats, service);
 });

@@ -8,7 +8,6 @@ import { ObjectId } from 'mongodb';
 
 import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';
-import { env } from '../env';
 
 export const router = new Router();
 
@@ -81,18 +80,6 @@ router.get('/', async (ctx) => {
                 },
               });
 
-              const protocols: { name: string; origin: string }[] = [];
-
-              for (const { API_ORIGIN, PROTOCOLS } of env.SERVICES) {
-                if (new URL(API_ORIGIN).host === server) {
-                  for (const { apps, ...rest } of PROTOCOLS) {
-                    if (apps.includes(app)) {
-                      protocols.push(rest);
-                    }
-                  }
-                }
-              }
-
               return {
                 isLive: true,
                 _id,
@@ -105,7 +92,7 @@ router.get('/', async (ctx) => {
                 startTime: connectCreated,
                 protocol,
                 userName: userRecord?.name || null,
-                protocols,
+                origin: server,
               };
             },
           ),
@@ -157,18 +144,6 @@ router.get('/:channel', async (ctx) => {
             })
           : null;
 
-        const protocols: { name: string; origin: string }[] = [];
-
-        for (const { API_ORIGIN, PROTOCOLS } of env.SERVICES) {
-          if (new URL(API_ORIGIN).host === server) {
-            for (const { apps, ...rest } of PROTOCOLS) {
-              if (apps.includes(app)) {
-                protocols.push(rest);
-              }
-            }
-          }
-        }
-
         const subscribers = await Subscriber.find({
           streamIds: {
             $in: [_id],
@@ -190,7 +165,7 @@ router.get('/:channel', async (ctx) => {
           startTime: connectCreated,
           protocol,
           userName: userRecord?.name || null,
-          protocols,
+          origin: server,
         };
       },
     ),

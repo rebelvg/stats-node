@@ -37,11 +37,11 @@ export interface IGenericStreamsResponse {
 }
 
 export abstract class BaseWorker {
-  private apiSource: string;
+  private className: string;
   private requestCount = 0;
 
   constructor() {
-    this.apiSource = this.constructor.name;
+    this.className = this.constructor.name;
   }
 
   abstract getStats(
@@ -53,14 +53,12 @@ export abstract class BaseWorker {
     await Promise.all(
       servers.map(async (config) => {
         try {
-          const { host } = new URL(config.API_ORIGIN);
-
-          await this.readStats(config.API_ORIGIN, config.API_SECRET, host);
+          await this.readStats(config);
         } catch (error) {
           if (error.code === 'ECONNREFUSED') {
             logger.error('update_econnrefused', {
               error,
-              source: this.apiSource,
+              source: this.className,
             });
 
             return;
@@ -68,7 +66,7 @@ export abstract class BaseWorker {
 
           logger.error('update_error', {
             error,
-            source: this.apiSource,
+            source: this.className,
           });
         }
       }),
@@ -77,7 +75,7 @@ export abstract class BaseWorker {
 
   public async run(WORKER_CONFIG: IWorkerConfig[]) {
     logger.info('worker_running', {
-      source: this.apiSource,
+      source: this.className,
     });
 
     while (true) {
@@ -87,7 +85,10 @@ export abstract class BaseWorker {
     }
   }
 
-  public async processStats(streams: IGenericStreamsResponse[], host: string) {
+  public async processStats(
+    streams: IGenericStreamsResponse[],
+    service: IWorkerConfig,
+  ) {
     _.forEach(streams, (stream) => {
       stream.app = stream.app.toLowerCase();
 
@@ -101,6 +102,8 @@ export abstract class BaseWorker {
         let streamId: ObjectId | null = null;
 
         if (publisher) {
+          const host = service.PROTOCOLS[publisher.protocol].origin;
+
           const {
             connectId,
             connectCreated,
@@ -188,6 +191,8 @@ export abstract class BaseWorker {
         const newSubscribers: WithId<ISubscriberModel>[] = [];
 
         for (const subscriber of subscribers) {
+          const host = service.PROTOCOLS[subscriber.protocol].origin;
+
           const {
             connectId,
             connectCreated,
@@ -299,11 +304,11 @@ export abstract class BaseWorker {
     return;
   }
 
-  private async readStats(origin: string, secret: string, host: string) {
+  private async readStats(service: IWorkerConfig) {
     let data: IGenericStreamsResponse[] = [];
 
     try {
-      data = await this.getStats(origin, secret);
+      data = await this.getStats(service.API_ORIGIN, service.API_SECRET);
     } catch (error) {
       this.requestCount++;
 
@@ -316,6 +321,6 @@ export abstract class BaseWorker {
       throw error;
     }
 
-    return this.processStats(data, host);
+    return this.processStats(data, service);
   }
 }

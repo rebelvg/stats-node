@@ -4,13 +4,7 @@ import { Buffer } from 'buffer';
 import * as path from 'path';
 
 import { z } from 'zod';
-
-export enum ProtocolsEnum {
-  RTMP = 'rtmp',
-  FLV = 'flv',
-  HLS = 'hls',
-  MPD = 'mpd',
-}
+import { EnumProtocols } from './helpers/interfaces';
 
 export enum ServiceTypeEnum {
   KOLPAQUE_RTMP = 'KOLPAQUE_RTMP',
@@ -19,17 +13,20 @@ export enum ServiceTypeEnum {
   ADOBE_MEDIA_SERVER = 'ADOBE_MEDIA_SERVER',
 }
 
+const ProtocolKey = z.enum(EnumProtocols);
+
+const ProtocolConfig = z.object({
+  apps: z.array(z.string()).nonempty(),
+  origin: z.string(),
+});
+
+const ProtocolsSchema = z.record(ProtocolKey, ProtocolConfig);
+
 const ServiceSchema = z.object({
   TYPE: z.enum(ServiceTypeEnum),
   API_ORIGIN: z.url(),
   API_SECRET: z.string(),
-  PROTOCOLS: z.array(
-    z.object({
-      apps: z.array(z.string()),
-      name: z.enum(ProtocolsEnum),
-      origin: z.string(),
-    }),
-  ),
+  PROTOCOLS: ProtocolsSchema,
 });
 
 export type IWorkerConfig = z.infer<typeof ServiceSchema>;
