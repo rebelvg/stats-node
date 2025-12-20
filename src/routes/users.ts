@@ -53,7 +53,10 @@ router.get('/auth/google', async (ctx, next) => {
 
   ctx.session.redirectUri = decodeURIComponent(redirectUri as string);
 
-  const scope = ['https://www.googleapis.com/auth/userinfo.profile'];
+  const scope = [
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+  ];
 
   if (scopes?.split(',').includes('youtube')) {
     scope.push('https://www.googleapis.com/auth/youtube.readonly');
@@ -79,14 +82,14 @@ router.get('/auth/google/callback', async (ctx, next) => {
     throw new Error();
   }
 
-  const profile = await client.getTokenInfo(tokens.access_token);
+  const { sub, email } = await client.getTokenInfo(tokens.access_token);
 
   client.setCredentials({
     access_token: tokens.access_token,
   });
 
   const {
-    data: { name, email },
+    data: { name },
   } = await google.oauth2('v2').userinfo.get({
     auth: client,
   });
@@ -94,21 +97,21 @@ router.get('/auth/google/callback', async (ctx, next) => {
   const firstName = name?.split(' ')[0];
 
   const userRecord = await User.findOne({
-    googleId: profile.sub,
+    googleId: sub,
   });
 
   let userId: string | null = null;
 
   if (!userRecord) {
     const { insertedId } = await User.create({
-      googleId: profile.sub || null,
+      googleId: sub || null,
       ipCreated: ctx.ip,
       isAdmin: false,
       isStreamer: false,
       token: v4(),
       streamKey: v4(),
-
       email: email || null,
+
       name: firstName || null,
       ipUpdated: ctx.ip,
     });
@@ -120,7 +123,6 @@ router.get('/auth/google/callback', async (ctx, next) => {
     await User.updateOne(
       { _id: userRecord._id },
       {
-        email,
         name: firstName,
         ipUpdated: ctx.ip,
       },
