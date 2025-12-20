@@ -26,15 +26,14 @@
     },
     {
       "TYPE": "KOLPAQUE_ENCODE",
-      "API_ORIGIN": "https://encode.klpq.io",
-      "API_SECRET": "token",
+      "PUSH_SECRET": "token",
       "PROTOCOLS": {
         "hls": {
-          "apps": ["hls"],
+          "apps": ["live", "encode"],
           "origin": "https://encode.klpq.io"
         },
         "mpd": {
-          "apps": ["mpd"],
+          "apps": ["live", "encode"],
           "origin": "https://encode.klpq.io"
         }
       }

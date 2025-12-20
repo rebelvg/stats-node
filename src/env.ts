@@ -24,12 +24,44 @@ const ProtocolConfig = z
 
 const ProtocolsSchema = z.record(ProtocolKey, ProtocolConfig);
 
-const ServiceSchema = z.object({
+const BaseApiServiceSchema = z.object({
   TYPE: z.enum(ServiceTypeEnum),
-  API_ORIGIN: z.url(),
+  API_ORIGIN: z.string(),
   API_SECRET: z.string(),
   PROTOCOLS: ProtocolsSchema,
 });
+
+export type IWorkerApiBase = z.infer<typeof BaseApiServiceSchema>;
+
+const BasePushServiceSchema = z.object({
+  TYPE: z.enum(ServiceTypeEnum),
+  PUSH_SECRET: z.string(),
+  PROTOCOLS: ProtocolsSchema,
+});
+
+const RtmpServiceSchema = BaseApiServiceSchema.extend({
+  TYPE: z.enum([ServiceTypeEnum.KOLPAQUE_RTMP]),
+}).strict();
+
+const NodeMediaServerSchema = BaseApiServiceSchema.extend({
+  TYPE: z.enum([ServiceTypeEnum.NODE_MEDIA_SERVER]),
+}).strict();
+
+const AdobeMediaServerSchema = BaseApiServiceSchema.extend({
+  TYPE: z.enum([ServiceTypeEnum.ADOBE_MEDIA_SERVER]),
+}).strict();
+
+const EncodeServiceSchema = BasePushServiceSchema.extend({
+  TYPE: z.enum([ServiceTypeEnum.KOLPAQUE_ENCODE]),
+  PUSH_SECRET: z.string(),
+}).strict();
+
+const ServiceSchema = z.discriminatedUnion('TYPE', [
+  RtmpServiceSchema,
+  EncodeServiceSchema,
+  NodeMediaServerSchema,
+  AdobeMediaServerSchema,
+]);
 
 export type IWorkerConfig = z.infer<typeof ServiceSchema>;
 

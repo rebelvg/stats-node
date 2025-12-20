@@ -8,6 +8,7 @@ import { ObjectId } from 'mongodb';
 
 import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';
+import { generateURLs } from '../helpers/functions';
 
 export const router = new Router();
 
@@ -165,6 +166,12 @@ router.get('/:channel', async (ctx) => {
           protocol,
           userName: userRecord?.name || null,
           origin: server,
+          urls: generateURLs({
+            channel,
+            app,
+            protocol,
+            origin: server,
+          }),
         };
       },
     ),

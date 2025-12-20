@@ -8,7 +8,7 @@ import { ISubscriberModel, Subscriber } from '../models/subscriber';
 import { streamService } from '../services/stream';
 import { ipService } from '../services/ip';
 import { subscriberService } from '../services/subscriber';
-import { IWorkerConfig } from '../env';
+import { IWorkerApiBase } from '../env';
 import { EnumProtocols } from '../helpers/interfaces';
 
 export interface IGenericStreamsResponse {
@@ -49,7 +49,7 @@ export abstract class BaseWorker {
     secret: string,
   ): Promise<IGenericStreamsResponse[]>;
 
-  public async runUpdate(servers: IWorkerConfig[]) {
+  public async runUpdate(servers: IWorkerApiBase[]) {
     await Promise.all(
       servers.map(async (config) => {
         try {
@@ -73,7 +73,7 @@ export abstract class BaseWorker {
     );
   }
 
-  public async run(WORKER_CONFIG: IWorkerConfig[]) {
+  public async run(WORKER_CONFIG: IWorkerApiBase[]) {
     logger.info('worker_running', {
       source: this.className,
     });
@@ -87,7 +87,7 @@ export abstract class BaseWorker {
 
   public async processStats(
     streams: IGenericStreamsResponse[],
-    service: IWorkerConfig,
+    protocols: IWorkerApiBase['PROTOCOLS'],
   ) {
     _.forEach(streams, (stream) => {
       stream.app = stream.app.toLowerCase();
@@ -102,10 +102,10 @@ export abstract class BaseWorker {
         let streamId: ObjectId | null = null;
 
         if (publisher) {
-          const server = service.PROTOCOLS[publisher.protocol]?.origin;
+          const server = protocols[publisher.protocol]?.origin;
 
           if (!server) {
-            logger.warn('no_server', [service, publisher.protocol]);
+            logger.warn('no_server', [protocols, publisher.protocol]);
 
             continue;
           }
@@ -197,10 +197,10 @@ export abstract class BaseWorker {
         const newSubscribers: WithId<ISubscriberModel>[] = [];
 
         for (const subscriber of subscribers) {
-          const server = service.PROTOCOLS[subscriber.protocol]?.origin;
+          const server = protocols[subscriber.protocol]?.origin;
 
           if (!server) {
-            logger.warn('no_server', [service, subscriber.protocol]);
+            logger.warn('no_server', [protocols, subscriber.protocol]);
 
             continue;
           }
@@ -316,7 +316,7 @@ export abstract class BaseWorker {
     return;
   }
 
-  private async readStats(service: IWorkerConfig) {
+  private async readStats(service: IWorkerApiBase) {
     let data: IGenericStreamsResponse[] = [];
 
     try {
@@ -333,6 +333,6 @@ export abstract class BaseWorker {
       throw error;
     }
 
-    return this.processStats(data, service);
+    return this.processStats(data, service.PROTOCOLS);
   }
 }

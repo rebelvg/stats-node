@@ -48,7 +48,7 @@ router.post('/kolpaque-encode', async (ctx, next) => {
 
   const service = _.find(KOLPAQUE_ENCODE, {
     TYPE: ServiceTypeEnum.KOLPAQUE_ENCODE,
-    API_SECRET: pushToken,
+    PUSH_SECRET: pushToken,
   });
 
   if (!service) {
@@ -61,7 +61,7 @@ router.post('/kolpaque-encode', async (ctx, next) => {
 
   const mappedStats = worker.map(stats, ctx.request.ip);
 
-  await worker.processStats(mappedStats, service);
+  await worker.processStats(mappedStats, service.PROTOCOLS);
 
   ctx.status = 201;
 });

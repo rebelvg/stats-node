@@ -1,4 +1,5 @@
 import { env, ServiceTypeEnum } from './env';
+import { EnumProtocols } from './helpers/interfaces';
 
 export const API = {
   PORT: env.API.PORT,
@@ -31,3 +32,7 @@ export const ADOBE_MEDIA_SERVER = env.SERVICES.filter(
 export const JWT = {
   SECRET: env.JWT.SECRET,
 };
+
+export const WEB_URL = `https://stream.klpq.io`;
+export const WEB_DEFAULT_PROTOCOL = EnumProtocols.FLV;
+export const WEB_DEFAULT_APP = 'live';
