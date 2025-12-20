@@ -2,7 +2,7 @@ export interface IChannel {
   channel: string;
   publisher: {
     _id: string;
-    server: string;
+    server: string | null;
     app: string;
     channel: string;
     connectId: string;
@@ -23,7 +23,7 @@ export interface IChannel {
   } | null;
   subscribers: {
     _id: string;
-    server: string;
+    server: string | null;
     app: string;
     channel: string;
     connectId: string;
@@ -50,7 +50,7 @@ export interface IChannelServerStats {
 }
 
 export enum EnumProtocols {
-  RTMP = 'rmtp',
+  RTMP = 'rtmp',
   FLV = 'flv',
   HLS = 'hls',
   MPD = 'mpd',

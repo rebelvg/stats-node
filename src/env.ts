@@ -15,10 +15,12 @@ export enum ServiceTypeEnum {
 
 const ProtocolKey = z.enum(EnumProtocols);
 
-const ProtocolConfig = z.object({
-  apps: z.array(z.string()).nonempty(),
-  origin: z.string(),
-});
+const ProtocolConfig = z
+  .object({
+    apps: z.array(z.string()).nonempty(),
+    origin: z.string(),
+  })
+  .optional();
 
 const ProtocolsSchema = z.record(ProtocolKey, ProtocolConfig);
 

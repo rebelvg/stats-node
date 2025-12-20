@@ -10,7 +10,7 @@ import { EnumProtocols } from '../helpers/interfaces';
 
 export interface ISubscriberModel {
   _id?: ObjectId;
-  server: string;
+  server: string | null;
   app: string;
   channel: string;
   connectId: string;

@@ -102,7 +102,7 @@ export abstract class BaseWorker {
         let streamId: ObjectId | null = null;
 
         if (publisher) {
-          const host = service.PROTOCOLS[publisher.protocol].origin;
+          const host = service.PROTOCOLS[publisher.protocol]?.origin || null;
 
           const {
             connectId,
@@ -191,7 +191,7 @@ export abstract class BaseWorker {
         const newSubscribers: WithId<ISubscriberModel>[] = [];
 
         for (const subscriber of subscribers) {
-          const host = service.PROTOCOLS[subscriber.protocol].origin;
+          const host = service.PROTOCOLS[subscriber.protocol]?.origin || null;
 
           const {
             connectId,
