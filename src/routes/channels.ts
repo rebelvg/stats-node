@@ -38,6 +38,7 @@ router.get('/', async (ctx) => {
     {
       sort: {
         connectCreated: 1,
+        protocol: -1,
       },
     },
   );
@@ -118,6 +119,7 @@ router.get('/:channel', async (ctx) => {
     {
       sort: {
         connectCreated: 1,
+        protocol: -1,
       },
     },
   );
