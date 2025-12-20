@@ -2,7 +2,7 @@ export interface IChannel {
   channel: string;
   publisher: {
     _id: string;
-    server: string | null;
+    server: string;
     app: string;
     channel: string;
     connectId: string;
@@ -23,7 +23,7 @@ export interface IChannel {
   } | null;
   subscribers: {
     _id: string;
-    server: string | null;
+    server: string;
     app: string;
     channel: string;
     connectId: string;

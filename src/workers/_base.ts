@@ -102,7 +102,13 @@ export abstract class BaseWorker {
         let streamId: ObjectId | null = null;
 
         if (publisher) {
-          const host = service.PROTOCOLS[publisher.protocol]?.origin || null;
+          const server = service.PROTOCOLS[publisher.protocol]?.origin;
+
+          if (!server) {
+            logger.warn('no_server', [service, publisher.protocol]);
+
+            continue;
+          }
 
           const {
             connectId,
@@ -121,11 +127,12 @@ export abstract class BaseWorker {
             duration > 0 ? Math.ceil((bytes * 8) / duration / 1024) : 0;
 
           const streamQuery = {
-            server: host,
+            server,
             app,
             channel,
             connectId,
             connectCreated,
+            protocol,
           };
 
           const streamRecord = await Stream.findOne(streamQuery);
@@ -140,7 +147,6 @@ export abstract class BaseWorker {
 
             const { insertedId } = await Stream.create({
               ...streamQuery,
-              protocol,
               userId: userId ? new ObjectId(userId) : null,
               ip: sanitizedIp,
 
@@ -191,7 +197,13 @@ export abstract class BaseWorker {
         const newSubscribers: WithId<ISubscriberModel>[] = [];
 
         for (const subscriber of subscribers) {
-          const host = service.PROTOCOLS[subscriber.protocol]?.origin || null;
+          const server = service.PROTOCOLS[subscriber.protocol]?.origin;
+
+          if (!server) {
+            logger.warn('no_server', [service, subscriber.protocol]);
+
+            continue;
+          }
 
           const {
             connectId,
@@ -210,11 +222,12 @@ export abstract class BaseWorker {
             duration > 0 ? Math.ceil((bytes * 8) / duration / 1024) : 0;
 
           const subscriberQuery = {
-            server: host,
+            server,
             app,
             channel,
             connectId,
             connectCreated,
+            protocol,
           };
 
           const subscriberRecord = await Subscriber.findOne(subscriberQuery);
@@ -229,7 +242,6 @@ export abstract class BaseWorker {
 
             const newSubscriber = await Subscriber.create({
               ...subscriberQuery,
-              protocol,
               userId: userId ? new ObjectId(userId) : null,
               ip: sanitizedIp,
 

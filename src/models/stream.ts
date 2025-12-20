@@ -18,7 +18,7 @@ export enum ApiSourceEnum {
 
 export interface IStreamModel {
   _id: ObjectId;
-  server: string | null;
+  server: string;
   app: string;
   channel: string;
   connectId: string;
