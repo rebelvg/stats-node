@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { KOLPAQUE_RTMP } from '../config';
 
 import { BaseWorker, IGenericStreamsResponse } from './_base';
+import { mapProtocol } from '../helpers/functions';
 
 interface IApiResponse {
   stats: {
@@ -72,32 +73,30 @@ class KolpaqueRtmpServiceWorker extends BaseWorker {
         channels: [],
       };
 
-      _.forEach(appStats.channels, (channelStats) => {
-        const { channel } = channelStats;
-
+      _.forEach(appStats.channels, ({ channel, publisher, subscribers }) => {
         const statsChannel: IGenericStreamsResponse['channels'][0] = {
           channel,
           publisher: null,
           subscribers: [],
         };
 
-        if (channelStats.publisher) {
+        if (publisher) {
           statsChannel.publisher = {
-            ...channelStats.publisher,
-            userId: channelStats.publisher.meta.userId,
-            connectCreated: new Date(channelStats.publisher.connectCreated),
+            ...publisher,
+            userId: publisher.meta.userId,
+            connectCreated: new Date(publisher.connectCreated),
             connectUpdated: timestamp,
+            protocol: mapProtocol(publisher.protocol),
           };
         }
 
-        statsChannel.subscribers = channelStats.subscribers.map(
-          (subscriber) => ({
-            ...subscriber,
-            userId: subscriber.meta.userId,
-            connectCreated: new Date(subscriber.connectCreated),
-            connectUpdated: timestamp,
-          }),
-        );
+        statsChannel.subscribers = subscribers.map((subscriber) => ({
+          ...subscriber,
+          userId: subscriber.meta.userId,
+          connectCreated: new Date(subscriber.connectCreated),
+          connectUpdated: timestamp,
+          protocol: mapProtocol(subscriber.protocol),
+        }));
 
         statsApp.channels.push(statsChannel);
       });

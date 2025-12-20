@@ -3,6 +3,7 @@ import _ from 'lodash';
 
 import { ADOBE_MEDIA_SERVER } from '../config';
 import { BaseWorker, IGenericStreamsResponse } from './_base';
+import { mapProtocol } from '../helpers/functions';
 
 interface IApiResponse {
   stats: {
@@ -63,6 +64,7 @@ class AdobeMediaServerWorker extends BaseWorker {
             userId: null,
             connectCreated: new Date(publisher.connectCreated),
             connectUpdated: new Date(publisher.connectUpdated),
+            protocol: mapProtocol(publisher.protocol),
           };
         }
 
@@ -71,6 +73,7 @@ class AdobeMediaServerWorker extends BaseWorker {
           userId: null,
           connectCreated: new Date(subscriber.connectCreated),
           connectUpdated: new Date(subscriber.connectUpdated),
+          protocol: mapProtocol(subscriber.protocol),
         }));
 
         statsApp.channels.push(statsChannel);

@@ -2,6 +2,7 @@ import _ from 'lodash';
 
 import { BaseWorker, IGenericStreamsResponse } from './_base';
 import { IKolpaqueEncodePush } from '../routes/push';
+import { mapProtocol } from '../helpers/functions';
 
 export class KolpaqueEncodeServiceWorker extends BaseWorker {
   public map(data: IKolpaqueEncodePush['stats'], ip: string) {
@@ -25,12 +26,14 @@ export class KolpaqueEncodeServiceWorker extends BaseWorker {
             ...publisher,
             ip,
             userId: null,
+            protocol: mapProtocol(publisher.protocol),
           };
         }
 
         statsChannel.subscribers = subscribers.map((subscriber) => ({
           ...subscriber,
           userId: null,
+          protocol: mapProtocol(subscriber.protocol),
         }));
 
         statsApp.channels.push(statsChannel);

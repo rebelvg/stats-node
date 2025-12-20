@@ -6,6 +6,7 @@ import {
   FindOptions,
 } from 'mongodb';
 import { MongoCollections } from '../mongo';
+import { EnumProtocols } from '../helpers/interfaces';
 
 export interface ISubscriberModel {
   _id?: ObjectId;
@@ -17,7 +18,7 @@ export interface ISubscriberModel {
   connectUpdated: Date;
   bytes: number;
   ip: string;
-  protocol: string;
+  protocol: EnumProtocols;
   duration: number;
   bitrate: number;
   userId: ObjectId | null;

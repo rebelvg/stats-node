@@ -7,6 +7,7 @@ import {
 } from 'mongodb';
 
 import { MongoCollections } from '../mongo';
+import { EnumProtocols } from '../helpers/interfaces';
 
 export enum ApiSourceEnum {
   KOLPAQUE_RTMP = 'KOLPAQUE_RTMP',
@@ -25,7 +26,7 @@ export interface IStreamModel {
   connectUpdated: Date;
   bytes: number;
   ip: string;
-  protocol: string;
+  protocol: EnumProtocols;
   duration: number;
   bitrate: number;
   lastBitrate: number;

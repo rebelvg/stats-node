@@ -9,7 +9,7 @@ export interface IChannel {
     connectCreated: Date;
     connectUpdated: Date;
     bytes: number;
-    protocol: string;
+    protocol: EnumProtocols;
     lastBitrate: number;
     userId: string | null;
     totalConnectionsCount: number;
@@ -30,7 +30,7 @@ export interface IChannel {
     connectCreated: Date;
     connectUpdated: Date;
     bytes: number;
-    protocol: string;
+    protocol: EnumProtocols;
     userId: string | null;
     streamIds: string[];
     duration: number;
@@ -47,4 +47,12 @@ export interface IChannelServerStats {
     app: string;
     channels: IChannel[];
   }[];
+}
+
+export enum EnumProtocols {
+  RTMP = 'rmtp',
+  FLV = 'flv',
+  HLS = 'hls',
+  MPD = 'mpd',
+  UNKNOWN = 'unknown',
 }

@@ -4,6 +4,8 @@ import _ from 'lodash';
 import { NODE_MEDIA_SERVER } from '../config';
 
 import { BaseWorker, IGenericStreamsResponse } from './_base';
+import { EnumProtocols } from '../helpers/interfaces';
+import { mapProtocol } from '../helpers/functions';
 
 interface IApiResponse {
   [app: string]: {
@@ -73,7 +75,7 @@ class NodeMediaServerWorker extends BaseWorker {
           statsChannel.publisher = {
             ...rest,
             connectId: clientId,
-            protocol: 'rtmp',
+            protocol: EnumProtocols.RTMP,
             connectCreated: new Date(publisher.connectCreated),
             connectUpdated,
             userId: null,
@@ -89,6 +91,7 @@ class NodeMediaServerWorker extends BaseWorker {
               connectCreated: new Date(subscriber.connectCreated),
               connectUpdated,
               userId: null,
+              protocol: mapProtocol(subscriber.protocol),
             };
           },
         );

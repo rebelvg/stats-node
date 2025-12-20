@@ -9,6 +9,7 @@ import { streamService } from '../services/stream';
 import { ipService } from '../services/ip';
 import { subscriberService } from '../services/subscriber';
 import { IWorkerConfig } from '../env';
+import { EnumProtocols } from '../helpers/interfaces';
 
 export interface IGenericStreamsResponse {
   app: string;
@@ -20,7 +21,7 @@ export interface IGenericStreamsResponse {
       connectUpdated: Date;
       bytes: number;
       ip: string;
-      protocol: string;
+      protocol: EnumProtocols;
       userId: string | null;
     } | null;
     subscribers: {
@@ -29,7 +30,7 @@ export interface IGenericStreamsResponse {
       connectUpdated: Date;
       bytes: number;
       ip: string;
-      protocol: string;
+      protocol: EnumProtocols;
       userId: string | null;
     }[];
   }[];
