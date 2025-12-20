@@ -92,14 +92,18 @@ app.use(readToken);
 
 const router = new Router();
 
-router.use('/channels', channels.routes());
-router.use('/streams', streams.routes());
-router.use('/subscribers', subscribers.routes());
-router.use('/ips', ips.routes());
-router.use('/users', users.routes());
-router.use('/admin', admin.routes());
-router.use('/graphs', graphs.routes());
-router.use('/push', push.routes());
+const v1 = new Router();
+
+v1.use('/channels', channels.routes());
+v1.use('/streams', streams.routes());
+v1.use('/subscribers', subscribers.routes());
+v1.use('/ips', ips.routes());
+v1.use('/users', users.routes());
+v1.use('/admin', admin.routes());
+v1.use('/graphs', graphs.routes());
+v1.use('/push', push.routes());
+
+router.use('/v1', v1.routes());
 
 app.use(router.routes());
 

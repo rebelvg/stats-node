@@ -9,6 +9,8 @@ import { ObjectId } from 'mongodb';
 import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';
 import { generateURLs } from '../helpers/functions';
+import { EnumProtocols } from '../helpers/interfaces';
+import { WEB_DEFAULT_APP } from '../config';
 
 export const router = new Router();
 
@@ -153,12 +155,27 @@ router.get('/:channel', async (ctx) => {
           },
         });
 
+        const encodeClients = _.filter(streamRecords, (s) => {
+          return (
+            s.app === app &&
+            s.channel === channel &&
+            ([EnumProtocols.HLS, EnumProtocols.MPD].includes(s.protocol) ||
+              s.channel !== WEB_DEFAULT_APP)
+          );
+        });
+
+        let viewers = subscribers.length;
+
+        if (protocol === EnumProtocols.RTMP && encodeClients.length > 0) {
+          viewers -= 1;
+        }
+
         return {
           isLive: true,
           _id,
           name: channel,
           app,
-          viewers: subscribers.length,
+          viewers: Math.max(viewers, 0),
           duration,
           bitrate,
           lastBitrate,
