@@ -4,10 +4,7 @@ info:
   version: 1.0.0
   description: Endpoints exposed by src/app.ts (Koa).
 servers:
-  - url: http://localhost:8000
-security:
-  - TokenAuth: []
-  - JwtAuth: []
+  - url: http://localhost:8000/v1
 components:
   securitySchemes:
     TokenAuth:
@@ -21,7 +18,7 @@ components:
     PushAuth:
       type: apiKey
       in: header
-      name: authorization
+      name: push-token
   schemas:
     Stream:
       type: object
@@ -46,6 +43,16 @@ components:
         updatedAt: { type: string, format: date-time }
         isLive: { type: boolean }
         userName: { type: string, nullable: true }
+    StreamWithSubs:
+      allOf:
+        - $ref: '#/components/schemas/Stream'
+        - type: object
+          properties:
+            userName: { type: string, nullable: true }
+            subscribers:
+              type: array
+              items:
+                $ref: '#/components/schemas/Subscriber'
     Subscriber:
       type: object
       properties:
@@ -108,6 +115,27 @@ components:
         lastBitrate: { type: number }
         startTime: { type: string, format: date-time }
         name: { type: string, nullable: true }
+    LiveStreamSummary:
+      type: object
+      properties:
+        isLive: { type: boolean }
+        _id: { type: string }
+        name: { type: string }
+        app: { type: string }
+        viewers: { type: integer }
+        duration: { type: number }
+        bitrate: { type: number }
+        lastBitrate: { type: number }
+        startTime: { type: string, format: date-time }
+        protocol: { type: string }
+        userName: { type: string, nullable: true }
+        origin: { type: string }
+        urls:
+          type: object
+          nullable: true
+          properties:
+            web: { type: string }
+            edge: { type: string }
     Paginated:
       type: object
       properties:
@@ -126,10 +154,7 @@ components:
 paths:
   /channels:
     get:
-      summary: List all channels with live streams (admin only)
-      security:
-        - TokenAuth: []
-        - JwtAuth: []
+      summary: List channels with live streams (non-admins see public channels only)
       responses:
         '200':
           description: Channel + live stream snapshot
@@ -146,7 +171,7 @@ paths:
                         streams:
                           type: array
                           items:
-                            $ref: '#/components/schemas/ChannelStreamSummary'
+                            $ref: '#/components/schemas/StreamWithSubs'
   /channels/{channel}:
     get:
       summary: List live streams in a channel
@@ -165,7 +190,7 @@ paths:
                   streams:
                     type: array
                     items:
-                      $ref: '#/components/schemas/ChannelStreamSummary'
+                      $ref: '#/components/schemas/LiveStreamSummary'
   /streams:
     get:
       summary: List streams (public channels only for non-admins)
@@ -294,6 +319,16 @@ paths:
           in: path
           required: true
           schema: { type: string }
+        - name: app
+          in: query
+          schema: { type: string }
+        - name: channel
+          in: query
+          schema: { type: string }
+        - name: bytes
+          in: query
+          schema: { type: number }
+          description: Minimum MB
         - name: protocol
           in: query
           schema: { type: string }
@@ -309,6 +344,12 @@ paths:
           schema: { type: number }
           description: Subscriber duration minimum minutes
         - name: bitrate
+          in: query
+          schema: { type: number }
+        - name: totalConnectionsCount
+          in: query
+          schema: { type: number }
+        - name: peakViewersCount
           in: query
           schema: { type: number }
       responses:
@@ -347,6 +388,39 @@ paths:
           in: path
           required: true
           schema: { type: string }
+        - name: app
+          in: query
+          schema: { type: string }
+        - name: channel
+          in: query
+          schema: { type: string }
+        - name: bytes
+          in: query
+          schema: { type: number }
+          description: Minimum MB
+        - name: protocol
+          in: query
+          schema: { type: string }
+        - name: connectCreated
+          in: query
+          schema: { type: string }
+          description: Date/Unix convertible; filters events by subscriber connectCreated >= value
+        - name: connectUpdated
+          in: query
+          schema: { type: string }
+        - name: duration
+          in: query
+          schema: { type: number }
+          description: Subscriber duration minimum minutes
+        - name: bitrate
+          in: query
+          schema: { type: number }
+        - name: totalConnectionsCount
+          in: query
+          schema: { type: number }
+        - name: peakViewersCount
+          in: query
+          schema: { type: number }
       responses:
         '200':
           content:
@@ -838,5 +912,5 @@ paths:
                                   ip: { type: string }
                                   protocol: { type: string }
       responses:
-        '200':
+        '201':
           description: Accepted; no response body set
