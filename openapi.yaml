@@ -105,7 +105,6 @@ components:
     ChannelStreamSummary:
       type: object
       properties:
-        isLive: { type: boolean }
         _id: { type: string }
         app: { type: string }
         server: { type: string }
@@ -118,7 +117,6 @@ components:
     LiveStreamSummary:
       type: object
       properties:
-        isLive: { type: boolean }
         _id: { type: string }
         name: { type: string }
         app: { type: string }
