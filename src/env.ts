@@ -17,7 +17,6 @@ const ProtocolKey = z.enum(EnumProtocols);
 
 const ProtocolConfig = z
   .object({
-    apps: z.array(z.string()).nonempty(),
     origin: z.string(),
   })
   .optional();

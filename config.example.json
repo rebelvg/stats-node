@@ -15,11 +15,9 @@
       "API_SECRET": "token",
       "PROTOCOLS": {
         "rtmp": {
-          "apps": ["live", "encode"],
           "origin": "rtmps://mediaserver.klpq.io:1936"
         },
         "flv": {
-          "apps": ["live", "encode"],
           "origin": "wss://mediaserver.klpq.io"
         }
       }
@@ -29,11 +27,9 @@
       "PUSH_SECRET": "token",
       "PROTOCOLS": {
         "hls": {
-          "apps": ["live", "encode"],
           "origin": "https://encode.klpq.io"
         },
         "mpd": {
-          "apps": ["live", "encode"],
           "origin": "https://encode.klpq.io"
         }
       }
@@ -44,11 +40,9 @@
       "API_SECRET": "username:password",
       "PROTOCOLS": {
         "rtmp": {
-          "apps": ["live"],
           "origin": "rtmp://node-media-server"
         },
         "flv": {
-          "apps": ["live"],
           "origin": "ws://node-media-server:80"
         }
       }
@@ -59,7 +53,6 @@
       "API_SECRET": "token",
       "PROTOCOLS": {
         "rtmp": {
-          "apps": ["live"],
           "origin": "rtmp://adobe-media-server"
         }
       }
