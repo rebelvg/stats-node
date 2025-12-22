@@ -43,7 +43,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
   });
 
   const isLive = !!serviceRecord
-    ? serviceRecord.originUpdatedAt >= subscriberRecord.originUpdatedAt
+    ? serviceRecord.originUpdatedAt <= subscriberRecord.originUpdatedAt
     : false;
 
   const subscriber: IChannelServerStats['apps'][0]['channels'][0]['subscribers'] =
@@ -87,7 +87,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
         });
 
         const isLive = !!serviceRecord
-          ? serviceRecord.originUpdatedAt >= stream.originUpdatedAt
+          ? serviceRecord.originUpdatedAt <= stream.originUpdatedAt
           : false;
 
         return {
@@ -182,7 +182,7 @@ export async function find(ctx: Router.RouterContext, next: Next) {
       });
 
       const isLive = !!serviceRecord
-        ? serviceRecord.originUpdatedAt >= subscriber.originUpdatedAt
+        ? serviceRecord.originUpdatedAt <= subscriber.originUpdatedAt
         : false;
 
       return {

@@ -95,7 +95,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
   }
 
   const isLive = !!serviceRecord
-    ? serviceRecord.originUpdatedAt >= streamRecord.originUpdatedAt
+    ? serviceRecord.originUpdatedAt <= streamRecord.originUpdatedAt
     : false;
 
   const stream: IChannelServerStats['apps'][0]['channels'][0]['publisher'] = {
@@ -125,7 +125,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
       subscriber,
     ): IChannelServerStats['apps'][0]['channels'][0]['subscribers'] => {
       const isLive = !!serviceRecord
-        ? serviceRecord.originUpdatedAt >= subscriber.originUpdatedAt
+        ? serviceRecord.originUpdatedAt <= subscriber.originUpdatedAt
         : false;
 
       return {
@@ -165,7 +165,7 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
         }
 
         const isLive = !!serviceRecord
-          ? serviceRecord.originUpdatedAt >= stream.originUpdatedAt
+          ? serviceRecord.originUpdatedAt <= stream.originUpdatedAt
           : false;
 
         return {
@@ -283,7 +283,7 @@ export async function find(ctx: Router.RouterContext, next: Next) {
         });
 
         const isLive = !!serviceRecord
-          ? serviceRecord.originUpdatedAt >= stream.originUpdatedAt
+          ? serviceRecord.originUpdatedAt <= stream.originUpdatedAt
           : false;
 
         return {
@@ -397,7 +397,7 @@ export async function graph(ctx: Router.RouterContext, next: Next) {
     }
 
     const isLive = !!serviceRecord
-      ? serviceRecord.originUpdatedAt >= subscriber.originUpdatedAt
+      ? serviceRecord.originUpdatedAt <= subscriber.originUpdatedAt
       : false;
 
     if (isLive) {
@@ -412,7 +412,7 @@ export async function graph(ctx: Router.RouterContext, next: Next) {
   });
 
   const isLive = !!serviceRecord
-    ? serviceRecord.originUpdatedAt >= stream.originUpdatedAt
+    ? serviceRecord.originUpdatedAt <= stream.originUpdatedAt
     : false;
 
   if (isLive) {
