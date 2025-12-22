@@ -15,13 +15,15 @@ export const KolpaqueEncodePushSchema = z.object({
       channels: z.array(
         z.object({
           channel: z.string(),
-          publisher: z.object({
-            connectId: z.string(),
-            connectCreated: z.coerce.date(),
-            connectUpdated: z.coerce.date(),
-            bytes: z.number(),
-            protocol: z.string(),
-          }),
+          publisher: z
+            .object({
+              connectId: z.string(),
+              connectCreated: z.coerce.date(),
+              connectUpdated: z.coerce.date(),
+              bytes: z.number(),
+              protocol: z.string(),
+            })
+            .nullable(),
           subscribers: z.array(
             z.object({
               connectId: z.string(),
