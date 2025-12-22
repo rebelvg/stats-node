@@ -8,10 +8,10 @@ export enum ChannelTypeEnum {
 
 export interface IChannelModel {
   _id?: ObjectId;
-  name: string;
-  type: ChannelTypeEnum;
   createdAt: Date;
   updatedAt: Date;
+  name: string;
+  type: ChannelTypeEnum;
   channelCreatedAt: Date;
 }
 

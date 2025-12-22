@@ -9,6 +9,8 @@ import { MongoCollections } from '../mongo';
 
 export interface IIPModel {
   _id?: ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
   ip: string;
   api: {
     as: string;
@@ -27,8 +29,6 @@ export interface IIPModel {
     zip: string;
     message: string;
   } | null;
-  createdAt: Date;
-  updatedAt: Date;
   apiUpdatedAt: Date;
   isLocked: boolean;
 }

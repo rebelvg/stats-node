@@ -36,3 +36,4 @@ export const JWT = {
 export const WEB_URL = `https://stream.klpq.io`;
 export const WEB_DEFAULT_PROTOCOL = EnumProtocols.FLV;
 export const WEB_DEFAULT_APP = 'live';
+export const DEFAULT_LIVE_DELAY_IN_MS = 30 * 1000;

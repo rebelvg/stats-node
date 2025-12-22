@@ -10,6 +10,8 @@ import { EnumProtocols } from '../helpers/interfaces';
 
 export interface ISubscriberModel {
   _id?: ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
   server: string;
   app: string;
   channel: string;
@@ -23,8 +25,7 @@ export interface ISubscriberModel {
   bitrate: number;
   userId: ObjectId | null;
   streamIds: ObjectId[];
-  createdAt: Date;
-  updatedAt: Date;
+  originUpdatedAt: Date;
 }
 
 class SubscriberModel {

@@ -10,12 +10,21 @@ import { channelService } from '../services/channel';
 import { ChannelTypeEnum } from '../models/channel';
 import { generateURLs } from '../helpers/functions';
 import { EnumProtocols } from '../helpers/interfaces';
-import { WEB_DEFAULT_APP } from '../config';
+import { DEFAULT_LIVE_DELAY_IN_MS, WEB_DEFAULT_APP } from '../config';
+import { Service } from '../models/service';
 
 export const router = new Router();
 
 router.get('/', async (ctx) => {
   const isAdmin = !!ctx.state.user?.isAdmin;
+
+  const lastTimestamp = new Date(Date.now() - DEFAULT_LIVE_DELAY_IN_MS);
+
+  const serviceRecords = await Service.find({
+    originUpdatedAt: {
+      $gte: lastTimestamp,
+    },
+  });
 
   const channelsPublic = await channelService.getChannelsByType(
     ChannelTypeEnum.PUBLIC,
@@ -23,37 +32,54 @@ router.get('/', async (ctx) => {
 
   const channelNamesPublic = channelsPublic.map((c) => c.name);
 
-  const lastTimestamp = new Date(Date.now() - 30 * 1000);
-
-  const streamRecordsAll = await Stream.find(
-    {
-      connectUpdated: {
-        $gt: lastTimestamp,
-      },
-      channel: !isAdmin
-        ? {
-            $in: channelNamesPublic,
-          }
-        : {
-            $exists: true,
+  const streamRecordsAll =
+    serviceRecords.length > 0
+      ? await Stream.find(
+          {
+            channel: !isAdmin
+              ? {
+                  $in: channelNamesPublic,
+                }
+              : {
+                  $exists: true,
+                },
+            $or: [
+              ...serviceRecords.map((s) => {
+                return {
+                  protocol: s.protocol,
+                  server: s.origin,
+                  originUpdatedAt: {
+                    $gte: s.originUpdatedAt,
+                  },
+                };
+              }),
+            ],
           },
-    },
-    {
-      sort: {
-        connectCreated: 1,
-        protocol: -1,
-      },
-    },
-  );
+          {
+            sort: {
+              connectCreated: 1,
+              protocol: -1,
+            },
+          },
+        )
+      : [];
 
   const subscriberRecordAll = await Subscriber.find(
     {
-      connectUpdated: {
-        $gt: lastTimestamp,
-      },
       streamIds: {
         $in: streamRecordsAll.map((s) => s._id),
       },
+      $or: [
+        ...serviceRecords.map((s) => {
+          return {
+            protocol: s.protocol,
+            server: s.origin,
+            originUpdatedAt: {
+              $gte: s.originUpdatedAt,
+            },
+          };
+        }),
+      ],
     },
     {
       sort: {
@@ -110,22 +136,39 @@ router.get('/', async (ctx) => {
 router.get('/:channel', async (ctx) => {
   const { channel } = ctx.params;
 
-  const lastTimestamp = new Date(Date.now() - 30 * 1000);
+  const lastTimestamp = new Date(Date.now() - DEFAULT_LIVE_DELAY_IN_MS);
 
-  const streamRecords = await Stream.find(
-    {
-      channel,
-      connectUpdated: {
-        $gt: lastTimestamp,
-      },
+  const serviceRecords = await Service.find({
+    originUpdatedAt: {
+      $gte: lastTimestamp,
     },
-    {
-      sort: {
-        connectCreated: 1,
-        protocol: -1,
-      },
-    },
-  );
+  });
+
+  const streamRecords =
+    serviceRecords.length > 0
+      ? await Stream.find(
+          {
+            channel,
+            $or: [
+              ...serviceRecords.map((s) => {
+                return {
+                  protocol: s.protocol,
+                  server: s.origin,
+                  originUpdatedAt: {
+                    $gte: s.originUpdatedAt,
+                  },
+                };
+              }),
+            ],
+          },
+          {
+            sort: {
+              connectCreated: 1,
+              protocol: -1,
+            },
+          },
+        )
+      : [];
 
   const streams = await Promise.all(
     streamRecords.map(
@@ -150,9 +193,15 @@ router.get('/:channel', async (ctx) => {
           streamIds: {
             $in: [_id],
           },
-          connectUpdated: {
-            $gte: lastTimestamp,
-          },
+          $or: serviceRecords.map((s) => {
+            return {
+              protocol: s.protocol,
+              server: s.origin,
+              originUpdatedAt: {
+                $gte: s.originUpdatedAt,
+              },
+            };
+          }),
         });
 
         const encodeClients = _.filter(streamRecords, (s) => {

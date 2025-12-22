@@ -12,6 +12,8 @@ import { userService } from '../services/user';
 import { ObjectId } from 'mongodb';
 import { IUserModel } from '../models/user';
 import { IChannelServerStats } from '../helpers/interfaces';
+import { DEFAULT_LIVE_DELAY_IN_MS } from '../config';
+import { Service } from '../models/service';
 
 export async function findById(ctx: Router.RouterContext, next: Next) {
   const streamRecord = await Stream.findOne({
@@ -21,6 +23,16 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
   if (!streamRecord) {
     throw new Error('stream_not_found');
   }
+
+  const lastTimestamp = new Date(Date.now() - DEFAULT_LIVE_DELAY_IN_MS);
+
+  const serviceRecord = await Service.findOne({
+    protocol: streamRecord.protocol,
+    origin: streamRecord.server,
+    originUpdatedAt: {
+      $gte: lastTimestamp,
+    },
+  });
 
   const subscriberRecords = await subscriberService.getByStreamId(
     streamRecord._id,
@@ -82,7 +94,9 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
     userRecord = await userService.getById(streamRecord.userId.toString());
   }
 
-  const isLive = streamRecord.connectUpdated > new Date(Date.now() - 30 * 1000);
+  const isLive = !!serviceRecord
+    ? serviceRecord.originUpdatedAt >= streamRecord.originUpdatedAt
+    : false;
 
   const stream: IChannelServerStats['apps'][0]['channels'][0]['publisher'] = {
     _id: streamRecord._id.toString(),
@@ -110,8 +124,9 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
     (
       subscriber,
     ): IChannelServerStats['apps'][0]['channels'][0]['subscribers'] => {
-      const isLive =
-        subscriber.connectUpdated > new Date(Date.now() - 30 * 1000);
+      const isLive = !!serviceRecord
+        ? serviceRecord.originUpdatedAt >= subscriber.originUpdatedAt
+        : false;
 
       return {
         _id: subscriber._id.toString(),
@@ -149,7 +164,9 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
           userRecord = userMap[stream.userId.toString()] || null;
         }
 
-        const isLive = stream.connectUpdated > new Date(Date.now() - 30 * 1000);
+        const isLive = !!serviceRecord
+          ? serviceRecord.originUpdatedAt >= stream.originUpdatedAt
+          : false;
 
         return {
           _id: stream._id.toString(),
@@ -187,6 +204,14 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
 
 export async function find(ctx: Router.RouterContext, next: Next) {
   const isAdmin = !!ctx.state.user?.isAdmin;
+
+  const lastTimestamp = new Date(Date.now() - DEFAULT_LIVE_DELAY_IN_MS);
+
+  const serviceRecords = await Service.find({
+    originUpdatedAt: {
+      $gte: lastTimestamp,
+    },
+  });
 
   if (!isAdmin) {
     const channels = await channelService.getChannelsByType(
@@ -237,8 +262,6 @@ export async function find(ctx: Router.RouterContext, next: Next) {
     },
   ]);
 
-  const uniqueIPs = await Stream.distinct('ip', ctx.state.query);
-
   const userMap = await userService.getMapByIds(
     paginatedStreams.docs
       .filter((s) => s.userId)
@@ -254,7 +277,14 @@ export async function find(ctx: Router.RouterContext, next: Next) {
           userRecord = userMap[stream.userId.toString()] || null;
         }
 
-        const isLive = stream.connectUpdated > new Date(Date.now() - 30 * 1000);
+        const serviceRecord = _.find(serviceRecords, {
+          protocol: stream.protocol,
+          origin: stream.server,
+        });
+
+        const isLive = !!serviceRecord
+          ? serviceRecord.originUpdatedAt >= stream.originUpdatedAt
+          : false;
 
         return {
           _id: stream._id.toString(),
@@ -280,6 +310,8 @@ export async function find(ctx: Router.RouterContext, next: Next) {
       },
     ),
   );
+
+  const uniqueIPs = await Stream.distinct('ip', ctx.state.query);
 
   ctx.body = {
     streams,
@@ -312,6 +344,16 @@ export async function graph(ctx: Router.RouterContext, next: Next) {
     throw new Error('stream_not_found');
   }
 
+  const lastTimestamp = new Date(Date.now() - DEFAULT_LIVE_DELAY_IN_MS);
+
+  const serviceRecord = await Service.findOne({
+    protocol: stream.protocol,
+    origin: stream.server,
+    originUpdatedAt: {
+      $gte: lastTimestamp,
+    },
+  });
+
   const subscribers = await subscriberService.getByStreamId(
     stream._id,
     ctx.state.query,
@@ -321,7 +363,12 @@ export async function graph(ctx: Router.RouterContext, next: Next) {
   );
 
   let graph: {
-    eventName: string;
+    eventName:
+      | 'streamStarted'
+      | 'subscriberConnected'
+      | 'subscriberDisconnected'
+      | 'streamIsLive'
+      | 'streamEnded';
     time: Date;
     subscribers: ObjectId[];
   }[] = [];
@@ -349,7 +396,11 @@ export async function graph(ctx: Router.RouterContext, next: Next) {
       return;
     }
 
-    if (subscriber.connectUpdated > new Date(Date.now() - 30 * 1000)) {
+    const isLive = !!serviceRecord
+      ? serviceRecord.originUpdatedAt >= subscriber.originUpdatedAt
+      : false;
+
+    if (isLive) {
       return;
     }
 
@@ -360,7 +411,11 @@ export async function graph(ctx: Router.RouterContext, next: Next) {
     });
   });
 
-  if (stream.connectUpdated > new Date(Date.now() - 30 * 1000)) {
+  const isLive = !!serviceRecord
+    ? serviceRecord.originUpdatedAt >= stream.originUpdatedAt
+    : false;
+
+  if (isLive) {
     graph.push({
       eventName: 'streamIsLive',
       time: stream.connectUpdated,

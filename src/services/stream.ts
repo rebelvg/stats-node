@@ -12,7 +12,6 @@ class StreamService {
         $and: [
           {
             _id: { $ne: streamRecord._id },
-            server: streamRecord.server,
             channel: streamRecord.channel,
             connectUpdated: { $gte: streamRecord.connectCreated },
             connectCreated: { $lte: streamRecord.connectUpdated },

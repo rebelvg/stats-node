@@ -9,6 +9,8 @@ import { MongoCollections } from '../mongo';
 
 export interface IUserModel {
   _id?: ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
   googleId: string | null;
   email: string | null;
   name: string | null;
@@ -18,8 +20,6 @@ export interface IUserModel {
   isStreamer: boolean;
   token: string;
   streamKey: string;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 class UserModel {

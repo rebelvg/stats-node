@@ -10,6 +10,7 @@ import { ipService } from '../services/ip';
 import { subscriberService } from '../services/subscriber';
 import { IWorkerApiBase } from '../env';
 import { EnumProtocols } from '../helpers/interfaces';
+import { Service } from '../models/service';
 
 export interface IGenericStreamsResponse {
   app: string;
@@ -97,6 +98,8 @@ export abstract class BaseWorker {
       });
     });
 
+    const originUpdatedAt = new Date();
+
     for (const { channels, app } of streams) {
       for (const { channel, publisher, subscribers } of channels) {
         let streamId: ObjectId | null = null;
@@ -154,6 +157,7 @@ export abstract class BaseWorker {
               bytes,
               duration,
               bitrate,
+              originUpdatedAt,
 
               lastBitrate: bitrate,
               totalConnectionsCount: 0,
@@ -184,6 +188,7 @@ export abstract class BaseWorker {
                 bytes,
                 duration,
                 bitrate,
+                originUpdatedAt,
 
                 lastBitrate,
               },
@@ -249,6 +254,7 @@ export abstract class BaseWorker {
               bytes,
               duration,
               bitrate,
+              originUpdatedAt,
 
               streamIds: [],
             });
@@ -270,6 +276,7 @@ export abstract class BaseWorker {
                 bytes,
                 duration,
                 bitrate,
+                originUpdatedAt,
               },
             );
           }
@@ -312,6 +319,22 @@ export abstract class BaseWorker {
         }
       }
     }
+
+    await Promise.all(
+      _.map(protocols, async (protocolConfig, protocol: EnumProtocols) => {
+        if (protocolConfig) {
+          await Service.upsert(
+            {
+              protocol,
+              origin: protocolConfig.origin,
+            },
+            {
+              originUpdatedAt,
+            },
+          );
+        }
+      }),
+    );
 
     return;
   }

@@ -18,6 +18,8 @@ export enum ApiSourceEnum {
 
 export interface IStreamModel {
   _id: ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
   server: string;
   app: string;
   channel: string;
@@ -33,8 +35,7 @@ export interface IStreamModel {
   totalConnectionsCount: number;
   peakViewersCount: number;
   userId: ObjectId | null;
-  createdAt: Date;
-  updatedAt: Date;
+  originUpdatedAt: Date;
 }
 
 class StreamModel {

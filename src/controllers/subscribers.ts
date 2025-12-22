@@ -10,6 +10,8 @@ import { userService } from '../services/user';
 import { ObjectId } from 'mongodb';
 import { IUserModel } from '../models/user';
 import { IChannelServerStats } from '../helpers/interfaces';
+import { DEFAULT_LIVE_DELAY_IN_MS } from '../config';
+import { Service } from '../models/service';
 
 export async function findById(ctx: Router.RouterContext, next: Next) {
   const subscriberRecord = await Subscriber.findOne({
@@ -20,6 +22,14 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
     throw new Error('subscriber_not_found');
   }
 
+  const lastTimestamp = new Date(Date.now() - DEFAULT_LIVE_DELAY_IN_MS);
+
+  const serviceRecords = await Service.find({
+    originUpdatedAt: {
+      $gte: lastTimestamp,
+    },
+  });
+
   const streamRecords = await streamService.getBySubscriberIds(
     subscriberRecord.streamIds,
     {
@@ -27,8 +37,14 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
     },
   );
 
-  const isLive =
-    subscriberRecord.connectUpdated > new Date(Date.now() - 30 * 1000);
+  const serviceRecord = _.find(serviceRecords, {
+    protocol: subscriberRecord.protocol,
+    origin: subscriberRecord.server,
+  });
+
+  const isLive = !!serviceRecord
+    ? serviceRecord.originUpdatedAt >= subscriberRecord.originUpdatedAt
+    : false;
 
   const subscriber: IChannelServerStats['apps'][0]['channels'][0]['subscribers'] =
     {
@@ -65,7 +81,14 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
           userRecord = userMap[stream.userId.toString()] || null;
         }
 
-        const isLive = stream.connectUpdated > new Date(Date.now() - 30 * 1000);
+        const serviceRecord = _.find(serviceRecords, {
+          protocol: stream.protocol,
+          origin: stream.server,
+        });
+
+        const isLive = !!serviceRecord
+          ? serviceRecord.originUpdatedAt >= stream.originUpdatedAt
+          : false;
 
         return {
           _id: stream._id.toString(),
@@ -97,6 +120,14 @@ export async function findById(ctx: Router.RouterContext, next: Next) {
 
 export async function find(ctx: Router.RouterContext, next: Next) {
   const isAdmin = !!ctx.state.user?.isAdmin;
+
+  const lastTimestamp = new Date(Date.now() - DEFAULT_LIVE_DELAY_IN_MS);
+
+  const serviceRecords = await Service.find({
+    originUpdatedAt: {
+      $gte: lastTimestamp,
+    },
+  });
 
   if (!isAdmin) {
     const channels = await channelService.getChannelsByType(
@@ -141,14 +172,18 @@ export async function find(ctx: Router.RouterContext, next: Next) {
     },
   ]);
 
-  const uniqueIPs = await Subscriber.distinct('ip', ctx.state.query);
-
   const subscribers = paginatedSubscribers.docs.map(
     (
       subscriber,
     ): IChannelServerStats['apps'][0]['channels'][0]['subscribers'] => {
-      const isLive =
-        subscriber.connectUpdated > new Date(Date.now() - 30 * 1000);
+      const serviceRecord = _.find(serviceRecords, {
+        protocol: subscriber.protocol,
+        origin: subscriber.server,
+      });
+
+      const isLive = !!serviceRecord
+        ? serviceRecord.originUpdatedAt >= subscriber.originUpdatedAt
+        : false;
 
       return {
         _id: subscriber._id.toString(),
@@ -170,6 +205,8 @@ export async function find(ctx: Router.RouterContext, next: Next) {
       };
     },
   );
+
+  const uniqueIPs = await Subscriber.distinct('ip', ctx.state.query);
 
   ctx.body = {
     subscribers,
