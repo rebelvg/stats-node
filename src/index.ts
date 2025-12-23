@@ -1,4 +1,3 @@
-import 'source-map-support/register';
 import * as fs from 'fs';
 
 import { app } from './app';

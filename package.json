@@ -9,7 +9,7 @@
     "lint": "eslint . && yarn run prettier && yarn tsc --project tsconfig.eslint.json",
     "lint:fix": "eslint . --fix && yarn run prettier:fix",
     "migrate": "tsx ./src/migrate.ts",
-    "start:prod": "yarn run migrate && node dist/index.js",
+    "start:prod": "yarn run migrate && node --enable-source-maps dist/index.js",
     "start": "tsx watch src/index.ts",
     "docker:import": "docker exec stats_node_db mongorestore",
     "pre:deploy": "yarn install && yarn run build && yarn run migrate",
@@ -55,7 +55,6 @@
     "eslint": "^9.39.2",
     "husky": "^9.1.7",
     "prettier": "^3.4.1",
-    "source-map-support": "^0.5.21",
     "tsx": "^4.21.0",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.49.0"
