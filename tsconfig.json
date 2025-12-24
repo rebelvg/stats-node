@@ -8,6 +8,7 @@
     "noImplicitThis": true,
     "noUnusedLocals": false,
     "sourceMap": true,
+    "inlineSources": true,
     "declaration": true,
     "incremental": false,
     "diagnostics": true,
