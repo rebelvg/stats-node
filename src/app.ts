@@ -1,4 +1,4 @@
-import Koa from 'koa';
+import Koa, { Context } from 'koa';
 import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
 import koaQs from 'koa-qs';
@@ -55,9 +55,7 @@ app.use(async (ctx, next) => {
 
   try {
     await next();
-  } catch (err) {
-    const error = err as any;
-
+  } catch (error) {
     const logBody = {
       method: ctx.method,
       href: ctx.href,
@@ -81,6 +79,16 @@ app.use(async (ctx, next) => {
 app.keys = [uuid.v4()];
 
 app.use(koaSession({ signed: true }, app));
+
+declare module 'http' {
+  interface IncomingMessage {
+    ctx?: Context;
+  }
+}
+
+koaMorgan.token('remote-addr', (req) => {
+  return req.ctx?.ip || req.socket.remoteAddress || 'N/A';
+});
 
 app.use(koaMorgan('short', { stream: process.stdout }));
 app.use(cors());
