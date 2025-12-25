@@ -12,17 +12,10 @@ enum LogLevel {
 }
 
 class Logger {
-  private data: Record<string, any> = {};
-
   public log(level: LogLevel, message: string, data?: Record<string, any>) {
-    const logData = {
-      ...this.data,
-      ...data,
-    };
-
-    _.forEach(logData, (value, key) => {
+    _.forEach(data, (value, key) => {
       if (value instanceof Error) {
-        logData[key] = {
+        data![key] = {
           name: value.name,
           message: value.message,
           stack: value.stack,
@@ -31,7 +24,7 @@ class Logger {
     });
 
     process.stdout.write(
-      `${level} ${message} ${new Date()} ${JSON.stringify(data)}${os.EOL}`,
+      `${level} ${message} ${data ? JSON.stringify(data) : '-'}${os.EOL}`,
     );
   }
 }

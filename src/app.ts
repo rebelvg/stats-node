@@ -1,9 +1,8 @@
-import Koa, { Context } from 'koa';
+import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
 import koaQs from 'koa-qs';
 import cors from '@koa/cors';
-import koaMorgan from 'koa-morgan';
 import koaSession from 'koa-session';
 import * as uuid from 'uuid';
 
@@ -53,26 +52,33 @@ app.use(async (ctx, next) => {
     sort: {},
   };
 
+  const startTime = Date.now();
+
   try {
     await next();
-  } catch (error) {
-    const logBody = {
-      method: ctx.method,
-      href: ctx.href,
-      headers: JSON.stringify(ctx.headers),
-      body: ctx.request.body,
-      status: error.status,
-      error,
-    };
 
-    if (error.status) {
-      logger.warn('http_warn', logBody);
-    } else {
-      logger.error('http_error', logBody);
-    }
+    logger.info('http', [
+      ctx.ip,
+      ctx.method,
+      ctx.status,
+      ctx.url,
+      `${Date.now() - startTime}ms`,
+    ]);
+  } catch (error) {
+    logger.error('http', { error });
 
     ctx.status = error.status || 500;
     ctx.body = { error: error.message };
+
+    logger.error('http', [
+      ctx.ip,
+      ctx.method,
+      ctx.status,
+      ctx.url,
+      `${Date.now() - startTime}ms`,
+      ctx.query,
+      ctx.request.body,
+    ]);
   }
 });
 
@@ -80,17 +86,6 @@ app.keys = [uuid.v4()];
 
 app.use(koaSession({ signed: true }, app));
 
-declare module 'http' {
-  interface IncomingMessage {
-    ctx?: Context;
-  }
-}
-
-koaMorgan.token('remote-addr', (req) => {
-  return req.ctx?.ip || req.socket.remoteAddress || 'N/A';
-});
-
-app.use(koaMorgan('short', { stream: process.stdout }));
 app.use(cors());
 
 koaQs(app);
