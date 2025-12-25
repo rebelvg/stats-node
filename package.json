@@ -14,7 +14,7 @@
     "docker:import": "docker exec stats_node_db mongorestore",
     "pre:deploy": "yarn install && yarn run build && yarn run migrate",
     "pm2:setup": "yarn run pre:deploy && pm2 start pm2.json",
-    "pm2": "yarn run pre:deploy && pm2 restart stats-node",
+    "pm2": "yarn run pre:deploy && pm2 reload pm2.json && pm2 restart stats-node",
     "build": "tsc",
     "prepare": "husky"
   },
