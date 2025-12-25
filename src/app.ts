@@ -108,12 +108,5 @@ router.use('/v1', v1.routes());
 app.use(router.routes());
 
 app.use((ctx) => {
-  logger.info('http_not_found', {
-    method: ctx.method,
-    href: ctx.href,
-    ips: ctx.ips,
-    ip: ctx.ip,
-  });
-
   ctx.status = 404;
 });

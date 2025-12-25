@@ -14,18 +14,6 @@ enum LogLevel {
 class Logger {
   private data: Record<string, any> = {};
 
-  constructor(
-    private config: {
-      requestId: string | null;
-      externalRequestId: string | null;
-      ips?: string[];
-    } = {
-      requestId: null,
-      externalRequestId: null,
-      ips: [],
-    },
-  ) {}
-
   public log(level: LogLevel, message: string, data?: Record<string, any>) {
     const logData = {
       ...this.data,
@@ -42,24 +30,9 @@ class Logger {
       }
     });
 
-    const logLine = JSON.stringify({
-      level,
-      requestId: this.config.requestId,
-      externalRequestId: this.config.externalRequestId,
-      ips: this.config.ips,
-      message,
-      date: new Date(),
-      data: logData,
-    });
-
-    process.stdout.write(`${logLine}${os.EOL}`);
-  }
-
-  public child(data: Record<string, any>) {
-    this.data = {
-      ...this.data,
-      ...data,
-    };
+    process.stdout.write(
+      `${level} ${message} ${new Date()} ${JSON.stringify(data)}${os.EOL}`,
+    );
   }
 }
 
@@ -92,10 +65,6 @@ class ClsLogger {
 
   public trace(message: string, data?: Record<string, any>) {
     this.log(LogLevel.TRACE, message, data);
-  }
-
-  public child(data: Record<string, any>) {
-    this.logger.log(LogLevel.CHILD, 'child_log', data);
   }
 }
 

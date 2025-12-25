@@ -11,21 +11,12 @@ export async function readToken(ctx: Router.RouterContext, next: Next) {
   const token = ctx.get('token');
   const jwtToken = ctx.get('jwt-token');
 
-  logger.child({
-    token,
-    jwtToken,
-  });
-
   if (token) {
     const user = await User.findOne({
       token,
     });
 
     ctx.state.user = user;
-
-    logger.child({
-      user: user?._id,
-    });
   }
 
   if (jwtToken) {
@@ -37,10 +28,6 @@ export async function readToken(ctx: Router.RouterContext, next: Next) {
       });
 
       ctx.state.user = user;
-
-      logger.child({
-        user: user?._id,
-      });
     } catch (error) {
       logger.warn('jwt_token_warn', { href: ctx.href, jwtToken, error });
     }
