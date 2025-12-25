@@ -65,11 +65,10 @@ app.use(async (ctx, next) => {
       `${Date.now() - startTime}ms`,
     ]);
   } catch (error) {
-    logger.error('http', { error });
-
     ctx.status = error.status || 500;
     ctx.body = { error: error.message };
 
+    logger.error('error', { error });
     logger.error('http', [
       ctx.ip,
       ctx.method,
