@@ -18,7 +18,8 @@
     "noEmitOnError": true,
     "strictNullChecks": true,
     "noImplicitAny": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "rootDir": "./src"
   },
   "exclude": ["./dist", "./.scripts"],
   "include": ["./src/**/*"]
